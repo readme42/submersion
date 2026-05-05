@@ -266,43 +266,46 @@ void main() {
         expect(result.tanks[0].startPressure, equals(210));
       });
 
-      test('should throw error when updating dive with empty tank IDs', () async {
-        final dive = await repository.createDive(
-          createTestDive(
+      test(
+        'should throw error when updating dive with empty tank IDs',
+        () async {
+          final dive = await repository.createDive(
+            createTestDive(
+              tanks: [
+                const DiveTank(
+                  id: '',
+                  volume: 12.0,
+                  startPressure: 200,
+                  endPressure: 50,
+                ),
+              ],
+            ),
+          );
+
+          // Try to update with tanks that have empty IDs (which should fail)
+          final updatedDive = dive.copyWith(
             tanks: [
               const DiveTank(
-                id: '',
-                volume: 12.0,
-                startPressure: 200,
-                endPressure: 50,
+                id: '', // Empty ID - this should trigger validation error
+                volume: 15.0,
+                startPressure: 210,
+                endPressure: 40,
               ),
             ],
-          ),
-        );
+          );
 
-        // Try to update with tanks that have empty IDs (which should fail)
-        final updatedDive = dive.copyWith(
-          tanks: [
-            const DiveTank(
-              id: '', // Empty ID - this should trigger validation error
-              volume: 15.0,
-              startPressure: 210,
-              endPressure: 40,
+          expect(
+            () => repository.updateDive(updatedDive),
+            throwsA(
+              isA<ArgumentError>().having(
+                (e) => e.message,
+                'message',
+                contains('tank(s) at index(es) 0 have empty IDs'),
+              ),
             ),
-          ],
-        );
-
-        expect(
-          () => repository.updateDive(updatedDive),
-          throwsA(
-            isA<ArgumentError>().having(
-              (e) => e.message,
-              'message',
-              contains('tank(s) at index(es) 0 have empty IDs'),
-            ),
-          ),
-        );
-      });
+          );
+        },
+      );
 
       test('should preserve tank_pressure_profiles and gas_switches', () async {
         final database = DatabaseService.instance.database;
