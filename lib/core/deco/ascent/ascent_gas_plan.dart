@@ -1,5 +1,3 @@
-import 'package:submersion/core/deco/constants/buhlmann_coefficients.dart';
-
 /// Inert gas fractions to breathe at a given simulated ascent depth.
 class AscentGas {
   const AscentGas({required this.fN2, required this.fHe});
@@ -55,7 +53,8 @@ class AvailableGas {
 /// so ppO2 is never re-derived here.
 class OptimalOcAscentGas extends AscentGasPlan {
   OptimalOcAscentGas({required List<AvailableGas> gases, required this.maxPpO2})
-    : _gases = List.unmodifiable(gases);
+    : assert(gases.isNotEmpty, 'OptimalOcAscentGas requires at least one gas'),
+      _gases = List.unmodifiable(gases);
 
   final List<AvailableGas> _gases;
   final double maxPpO2;
