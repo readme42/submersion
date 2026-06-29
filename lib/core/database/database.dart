@@ -807,6 +807,10 @@ class DiverSettings extends Table {
       boolean().withDefault(const Constant(true))();
   RealColumn get lastStopDepth => real().withDefault(const Constant(3.0))();
   RealColumn get decoStopIncrement => real().withDefault(const Constant(3.0))();
+  // coverage:ignore-start
+  /// Index of AscentGasSet (0 = allCarried). Drives the ideal-gas ascent set.
+  IntColumn get ascentGasSet => integer().withDefault(const Constant(0))();
+  // coverage:ignore-end
   BoolColumn get o2Narcotic => boolean().withDefault(const Constant(true))();
   RealColumn get endLimit => real().withDefault(const Constant(30.0))();
   BoolColumn get useDiveComputerCnsData =>
@@ -1707,7 +1711,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 93;
+  static const int currentSchemaVersion = 94;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -1804,6 +1808,7 @@ class AppDatabase extends _$AppDatabase {
     91,
     92,
     93,
+    94,
   ];
 
   /// Tables that carry a per-row Hybrid Logical Clock for cross-device conflict
@@ -4318,6 +4323,17 @@ class AppDatabase extends _$AppDatabase {
           }
         }
         if (from < 93) await reportProgress();
+        if (from < 94) {
+          // Guarded by sqlite_master so minimal-schema migration tests without
+          // diver_settings are unaffected.
+          final dsTable = await customSelect(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='diver_settings'",
+          ).get();
+          if (dsTable.isNotEmpty) {
+            await m.addColumn(diverSettings, diverSettings.ascentGasSet);
+          }
+        }
+        if (from < 94) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
