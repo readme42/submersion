@@ -932,6 +932,11 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     await _saveSettings();
   }
 
+  Future<void> setAscentGasSet(AscentGasSet value) async {
+    state = state.copyWith(ascentGasSet: value);
+    await _saveSettings();
+  }
+
   Future<void> setEndLimit(double value) async {
     final clamped = value.clamp(20.0, 50.0);
     state = state.copyWith(endLimit: clamped);
