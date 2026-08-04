@@ -140,6 +140,27 @@ if(WIN32)
     target_link_libraries(test_parse_raw_dive PRIVATE SetupAPI.lib ws2_32.lib)
 endif()
 
+# Regression test for issue #855: per-cell O2 readings must survive the
+# parser's calibration check on Petrel Native Format logs. Same source set as
+# test_parse_raw_dive -- it goes through libdc_parse_raw_dive as well.
+add_executable(test_shearwater_o2_cells
+    test_shearwater_o2_cells.c
+    ${WRAPPER_DIR}/libdc_wrapper.c
+    ${WRAPPER_DIR}/libdc_download.c
+    ${LIBDC_ALL_SOURCES}
+)
+target_include_directories(test_shearwater_o2_cells PRIVATE
+    ${WRAPPER_DIR}
+    ${LIBDC_DIR}/include
+    ${LIBDC_DIR}/src
+    ${PLATFORM_CONFIG_DIR}
+)
+target_compile_definitions(test_shearwater_o2_cells PRIVATE HAVE_CONFIG_H)
+if(WIN32)
+    target_compile_definitions(test_shearwater_o2_cells PRIVATE _CRT_SECURE_NO_WARNINGS)
+    target_link_libraries(test_shearwater_o2_cells PRIVATE SetupAPI.lib ws2_32.lib)
+endif()
+
 enable_testing()
 add_test(NAME test_dive_converter COMMAND test_dive_converter)
 add_test(NAME test_serial_callbacks COMMAND test_serial_callbacks)
@@ -148,5 +169,8 @@ add_test(NAME test_descriptor_match_integration COMMAND test_descriptor_match_in
 add_test(NAME test_hw_ostc3_read COMMAND test_hw_ostc3_read)
 add_test(NAME test_shearwater_petrel_foreach COMMAND test_shearwater_petrel_foreach)
 add_test(NAME test_parse_raw_dive COMMAND test_parse_raw_dive
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+add_test(NAME test_shearwater_o2_cells COMMAND test_shearwater_o2_cells
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 )
