@@ -10,9 +10,15 @@
 //
 // The fixture is the reporter's own Petrel 3 log from issue #810 (the raw
 // dive_details/log_data blob out of a Shearwater Cloud database, decompressed).
-// It carries three cells per sample, and 2100 is the factor the computer itself
-// uses: its display shows ppO2 1.3 where the cells read 62/65/62 mV, and
-// median(62) * 0.021 = 1.302.
+// It carries three cells in every one of its 419 CCR samples.
+//
+// The stored 2100 is not exactly the factor the computer uses. Fitted across
+// this log the implied factor is ~0.02047, so cells derived with 2100 run about
+// 2.6% high against the computer's own voted ppO2 (mean 0.034 bar, worst 0.097).
+// No simple correction is exact either: the implied ADC offset is not constant
+// (~1.93 early, ~1.67 mid-dive), so the vote is not a plain single-factor
+// function of the logged bytes. The assertions below are therefore about the
+// cells being present and plausible, not about matching the computer exactly.
 //
 // Without the fix, sample_count is unchanged but every o2_sensor[] entry is NAN.
 
@@ -40,13 +46,14 @@ static unsigned int load_fixture(const char *path, unsigned char **out) {
     return (unsigned int)read;
 }
 
-// Every CCR sample in this log carries three cells, and each must land near the
-// aggregate ppO2 the computer voted from them. The tolerance covers the spread
-// between cells (the vote is their median), not measurement error: cell 2 reads
-// a few percent above cells 1 and 3 throughout. Decoding this fixture by hand
-// puts the widest gap at 0.147 bar (sample 291, cell 2 at 1.617 against an
-// aggregate of 1.47), so the bound is deliberately well clear of it -- it is
-// here to catch cells that are garbage, not to pin the spread to the millibar.
+// Every CCR sample in this log carries three cells, each landing near the
+// aggregate ppO2 the computer voted from them. Two things separate the two
+// numbers: the spread between the cells themselves (cell 2 reads a few percent
+// above cells 1 and 3 throughout), and the ~2.6% scale error from deriving with
+// the stored calibration. Decoding this fixture by hand puts the widest gap at
+// 0.147 bar (sample 291, cell 2 at 1.617 against an aggregate of 1.47), so the
+// bound is deliberately well clear of it -- it is here to catch cells decoded as
+// garbage, not to pin either effect to the millibar.
 static void test_per_cell_ppo2_is_reported(void) {
     unsigned char *data = NULL;
     unsigned int size = load_fixture("fixtures/petrel3_ccr_o2_cells.bin", &data);
