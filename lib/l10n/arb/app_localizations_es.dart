@@ -24818,6 +24818,38 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get diveLog_detail_menu_resyncImportedFile =>
+      'Resincronizar desde el archivo original';
+
+  @override
+  String get diveLog_detail_resyncSuccess =>
+      'Inmersión actualizada desde el archivo original';
+
+  @override
+  String get diveLog_detail_resyncFailed_diveMissing =>
+      'No se pudo resincronizar: esta inmersión ya no existe';
+
+  @override
+  String get diveLog_detail_resyncFailed_noStoredFile =>
+      'No se pudo resincronizar: no hay ningún archivo original guardado para esta inmersión';
+
+  @override
+  String get diveLog_detail_resyncFailed_unsupportedFormat =>
+      'No se pudo resincronizar: este formato de archivo no es compatible';
+
+  @override
+  String get diveLog_detail_resyncFailed_storedFileMissing =>
+      'No se pudo resincronizar: el archivo original ya no está en este dispositivo';
+
+  @override
+  String get diveLog_detail_resyncFailed_noMatchingDive =>
+      'No se pudo resincronizar: el archivo original ya no contiene una inmersión coincidente';
+
+  @override
+  String get diveLog_detail_resyncFailed_unexpectedError =>
+      'No se pudo resincronizar: se produjo un error inesperado al leer el archivo original';
+
+  @override
   String get universalImport_label_replaceSource => 'Reemplazar Fuente';
 
   @override
@@ -37824,6 +37856,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settings_storageUsage_group_exports => 'Archivos exportados';
 
   @override
+  String get settings_storageUsage_group_importedFiles =>
+      'Datos brutos de importación';
+
+  @override
   String get settings_storageUsage_category_database =>
       'Base de datos del cuaderno de buceo';
 
@@ -37873,6 +37909,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings_storageUsage_category_exports => 'Archivos exportados';
+
+  @override
+  String get settings_storageUsage_category_importedFiles =>
+      'Archivos de importación originales';
 
   @override
   String get profilePhoto_sheet_title => 'Foto de perfil';
