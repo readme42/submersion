@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,8 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 // ignore: implementation_imports
 import 'package:riverpod/src/framework.dart' as riverpod show Override;
 import 'package:submersion/core/constants/enums.dart';
@@ -137,6 +140,21 @@ class _TestSettingsNotifier extends StateNotifier<AppSettings>
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+/// Fake `path_provider` platform for [ImportedFileStore]. Windows'
+/// `path_provider_windows` resolves the documents path via a native win32
+/// call rather than a `MethodChannel`, so mocking the channel does not
+/// intercept it; overriding [PathProviderPlatform.instance] directly
+/// (this codebase's existing idiom -- see media_cache_root_test.dart) does.
+class _FakePathProviderPlatform extends PathProviderPlatform
+    with MockPlatformInterfaceMixin {
+  _FakePathProviderPlatform(this.documentsPath);
+
+  final String documentsPath;
+
+  @override
+  Future<String?> getApplicationDocumentsPath() async => documentsPath;
+}
+
 /// A testable version of the notifier that allows setting state directly.
 class _TestableImportNotifier extends UniversalImportNotifier {
   _TestableImportNotifier(super.ref);
@@ -244,6 +262,7 @@ List<Override> _fullOverrides({
   ImportOptions? options,
   Diver? diver,
   List<String> fileNames = const [],
+  DetectionResult? detectionResult,
   List<Dive> existingDives = const [],
   List<DiveSite> existingSites = const [],
   List<Trip> existingTrips = const [],
@@ -295,6 +314,7 @@ List<Override> _fullOverrides({
       notifier.setPayload(payload);
       if (options != null) notifier.setOptions(options);
       if (fileNames.isNotEmpty) notifier.setFiles(fileNames);
+      if (detectionResult != null) notifier.setDetectionResult(detectionResult);
       return notifier;
     }),
     settingsProvider.overrideWith((ref) => _TestSettingsNotifier()),
@@ -2441,6 +2461,178 @@ void main() {
             expect(result.importedCounts[ImportEntityType.dives], 1);
           },
         );
+      },
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // performImport -- wires the source file through to DiveDataSources
+  // (issue #478 -- see task-3-report.md for the bug this regression-tests)
+  // -------------------------------------------------------------------------
+
+  group('performImport() - stores the source file (issue #478)', () {
+    testWidgets(
+      'a single-file resyncable import threads fileName/fileBytes/format '
+      'from notifierState through to the persisted DiveDataSource',
+      (tester) async {
+        // UddfEntityImporter's default ImportedFileStore does real
+        // Directory/File I/O against wherever path_provider resolves the
+        // documents directory. Two things matter here:
+        //
+        // 1. Overriding PathProviderPlatform.instance (this codebase's
+        //    existing fake-platform idiom -- see media_cache_root_test.dart)
+        //    routes it at a temp dir instead of the MethodChannel this test
+        //    previously mocked, which never intercepted anything: on
+        //    Windows, path_provider_windows resolves the documents path via
+        //    a native win32 call, not a MethodChannel round trip.
+        // 2. testWidgets bodies run inside a FakeAsync zone. Real dart:io
+        //    async I/O (temp dir creation, the store's own Directory/File
+        //    calls) never completes there without tester.runAsync()'s
+        //    escape hatch to the real event loop -- omitting it is what
+        //    hung this test indefinitely before this fix.
+        final previousPathProvider = PathProviderPlatform.instance;
+        final tempDir = (await tester.runAsync(
+          () => Directory.systemTemp.createTemp('universal_adapter_test_'),
+        ))!;
+        PathProviderPlatform.instance = _FakePathProviderPlatform(tempDir.path);
+        addTearDown(() async {
+          PathProviderPlatform.instance = previousPathProvider;
+          await tester.runAsync(() async {
+            if (await tempDir.exists()) await tempDir.delete(recursive: true);
+          });
+        });
+
+        final payload = ImportPayload(
+          entities: {
+            ui.ImportEntityType.dives: [
+              {
+                'dateTime': DateTime(2026, 3, 15, 10, 0),
+                'maxDepth': 20.0,
+                'runtime': const Duration(minutes: 30),
+              },
+            ],
+          },
+        );
+
+        final mockDiveRepo = MockDiveRepository();
+        final mockTankPresetRepo = MockTankPresetRepository();
+        when(
+          mockTankPresetRepo.getPresetById(any),
+        ).thenAnswer((_) async => null);
+
+        await _runWithAdapter(
+          tester,
+          overrides: _fullOverrides(
+            payload: payload,
+            diver: _testDiver(),
+            mockDiveRepo: mockDiveRepo,
+            mockTankPresetRepo: mockTankPresetRepo,
+            fileNames: const ['dive.uddf'],
+            detectionResult: const DetectionResult(
+              format: ui.ImportFormat.uddf,
+              confidence: 1.0,
+            ),
+          ),
+          callback: (adapter) async {
+            await tester.runAsync(() async {
+              final bundle = await adapter.buildBundle();
+              final result = await adapter.performImport(bundle, {
+                wizard.ImportEntityType.dives: {0},
+              }, {});
+
+              expect(result.errorMessage, isNull);
+            });
+          },
+        );
+
+        // This is the regression this test exists for: before the fix,
+        // performImport() never passed sourceFileName to the importer (the
+        // plan's brief wrongly assumed it already flowed through), so the
+        // store() guard (sourceFileBytes/sourceFileName/sourceFormat all
+        // non-null) was always false in production and no file was ever
+        // stored, even for a qualifying single-file UDDF import.
+        final capturedReadings = verify(
+          mockDiveRepo.saveComputerReading(captureAny),
+        ).captured;
+        final reading = capturedReadings.single;
+        expect(reading.sourceFileName.value, 'dive.uddf');
+        expect(reading.sourceFileFormat.value, 'uddf');
+        expect(reading.importedFilePath.value, isNotNull);
+      },
+    );
+
+    testWidgets(
+      'the diver format override, not the auto-detection, is what gets '
+      'persisted and stored',
+      (tester) async {
+        // Source Confirmation lets the diver correct a wrong auto-detection,
+        // and the parse already runs on the override. Persisting the detected
+        // format instead would hand resync the wrong parser later.
+        final previousPathProvider = PathProviderPlatform.instance;
+        final tempDir = (await tester.runAsync(
+          () => Directory.systemTemp.createTemp('universal_adapter_test_'),
+        ))!;
+        PathProviderPlatform.instance = _FakePathProviderPlatform(tempDir.path);
+        addTearDown(() async {
+          PathProviderPlatform.instance = previousPathProvider;
+          await tester.runAsync(() async {
+            if (await tempDir.exists()) await tempDir.delete(recursive: true);
+          });
+        });
+
+        final payload = ImportPayload(
+          entities: {
+            ui.ImportEntityType.dives: [
+              {
+                'dateTime': DateTime(2026, 3, 15, 10, 0),
+                'maxDepth': 20.0,
+                'runtime': const Duration(minutes: 30),
+              },
+            ],
+          },
+        );
+
+        final mockDiveRepo = MockDiveRepository();
+        final mockTankPresetRepo = MockTankPresetRepository();
+        when(
+          mockTankPresetRepo.getPresetById(any),
+        ).thenAnswer((_) async => null);
+
+        await _runWithAdapter(
+          tester,
+          overrides: _fullOverrides(
+            payload: payload,
+            diver: _testDiver(),
+            mockDiveRepo: mockDiveRepo,
+            mockTankPresetRepo: mockTankPresetRepo,
+            fileNames: const ['logbook.xml'],
+            detectionResult: const DetectionResult(
+              format: ui.ImportFormat.macdiveXml,
+              confidence: 0.5,
+            ),
+            options: const ImportOptions(
+              sourceApp: ui.SourceApp.subsurface,
+              format: ui.ImportFormat.subsurfaceXml,
+              fileName: 'logbook.xml',
+            ),
+          ),
+          callback: (adapter) async {
+            await tester.runAsync(() async {
+              final bundle = await adapter.buildBundle();
+              final result = await adapter.performImport(bundle, {
+                wizard.ImportEntityType.dives: {0},
+              }, {});
+
+              expect(result.errorMessage, isNull);
+            });
+          },
+        );
+
+        final capturedReadings = verify(
+          mockDiveRepo.saveComputerReading(captureAny),
+        ).captured;
+        final reading = capturedReadings.single;
+        expect(reading.sourceFileFormat.value, 'subsurfaceXml');
       },
     );
   });

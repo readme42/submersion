@@ -605,6 +605,15 @@ class UniversalAdapter implements ImportSourceAdapter {
       repositories: repos,
       diverId: currentDiver.id,
       retainSourceDiveNumbers: retainSourceDiveNumbers,
+      // The confirmed options, not the raw auto-detection: Source
+      // Confirmation lets the diver override a wrong guess, the parse
+      // already ran on the override, and a resync later picks its parser
+      // from whatever is persisted here.
+      sourceFormat:
+          notifierState.options?.format ??
+          notifierState.detectionResult?.format,
+      sourceFileBytes: notifierState.fileBytes,
+      sourceFileName: notifierState.fileName,
       preResolvedBuddyIds: preResolvedIdsFor(
         wizard.ImportEntityType.buddies,
         uddfData.buddies,

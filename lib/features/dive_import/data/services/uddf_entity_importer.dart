@@ -7,6 +7,8 @@ import 'package:submersion/core/database/database.dart'
     show DiveDataSourcesCompanion, DiveSitesCompanion, DivesCompanion;
 import 'package:submersion/core/services/export/export_service.dart';
 import 'package:submersion/core/utils/deco_dive_detector.dart';
+import 'package:submersion/features/dive_import/data/services/imported_file_store.dart';
+import 'package:submersion/features/dive_import/domain/resyncable_import_formats.dart';
 import 'package:submersion/features/dive_log/domain/services/dive_altitude_enricher.dart';
 import 'package:submersion/features/equipment/data/services/dive_computer_gear_linker.dart';
 import 'package:submersion/features/equipment/data/services/dive_equipment_defaulter.dart';
@@ -52,6 +54,7 @@ import 'package:submersion/features/tags/domain/entities/tag.dart';
 import 'package:submersion/features/trips/data/repositories/trip_repository.dart';
 import 'package:submersion/features/trips/domain/entities/trip.dart';
 import 'package:submersion/features/tank_presets/domain/entities/tank_preset_entity.dart';
+import 'package:submersion/features/universal_import/data/models/import_enums.dart';
 import 'package:submersion/features/universal_import/data/services/import_tank_defaults.dart';
 import 'package:uuid/uuid.dart';
 
@@ -248,15 +251,19 @@ class UddfEntityImporter {
   /// ISO 639-1 code for reverse-geocoded country/region (issue #1187).
   final String _placeNameLanguage;
 
+  final ImportedFileStore _importedFileStore;
+
   UddfEntityImporter({
     TankPresetEntity? defaultTankPreset,
     int defaultStartPressure = 200,
     bool applyDefaultTankToImports = false,
     String placeNameLanguage = LocationService.defaultLanguageCode,
+    ImportedFileStore? importedFileStore,
   }) : _defaultTankPreset = defaultTankPreset,
        _defaultStartPressure = defaultStartPressure,
        _applyDefaultTankToImports = applyDefaultTankToImports,
-       _placeNameLanguage = placeNameLanguage;
+       _placeNameLanguage = placeNameLanguage,
+       _importedFileStore = importedFileStore ?? ImportedFileStore();
 
   /// Parse a value that may be either an enum instance or a string matching
   /// an enum name. Returns null if the value is null or unrecognised.
@@ -294,6 +301,9 @@ class UddfEntityImporter {
     bool retainSourceDiveNumbers = false,
     Map<String, String> preResolvedBuddyIds = const {},
     Map<String, String> preResolvedTagIds = const {},
+    ImportFormat? sourceFormat,
+    Uint8List? sourceFileBytes,
+    String? sourceFileName,
     ImportProgressCallback? onProgress,
     ImportCancellationToken? cancelToken,
   }) async {
@@ -439,7 +449,9 @@ class UddfEntityImporter {
       tagIdMapping: tagIdMapping,
       siteIdMapping: siteIdMapping,
       courseIdMapping: courseIdMapping,
-      sourceFileName: data.sourceFileName,
+      sourceFileName: sourceFileName ?? data.sourceFileName,
+      sourceFormat: sourceFormat,
+      sourceFileBytes: sourceFileBytes,
       retainSourceDiveNumbers: retainSourceDiveNumbers,
       now: now,
       dataSourcesByDiveRef: data.dataSourcesByDiveRef,
@@ -1549,6 +1561,8 @@ class UddfEntityImporter {
     required Map<String, DiveSite> siteIdMapping,
     required Map<String, String> courseIdMapping,
     String? sourceFileName,
+    ImportFormat? sourceFormat,
+    Uint8List? sourceFileBytes,
     bool retainSourceDiveNumbers = false,
     required DateTime now,
     Map<String, List<Map<String, dynamic>>> dataSourcesByDiveRef = const {},
@@ -1602,6 +1616,48 @@ class UddfEntityImporter {
       repos.diveComputerRepository,
       dataSourcesByDiveRef: dataSourcesByDiveRef,
     );
+
+    // One stored copy for the whole run, shared by every dive's
+    // dive_data_sources row: a multi-dive logbook is one file, and resync
+    // re-reads it and matches within it per dive anyway (issue #478). Storing
+    // bytes no parser can ever replay is pure disk cost, hence the allowlist.
+    final storable =
+        sourceFileBytes != null &&
+            sourceFileName != null &&
+            sourceFormat != null &&
+            resyncableImportFormats.contains(sourceFormat)
+        ? (bytes: sourceFileBytes, fileName: sourceFileName)
+        : null;
+
+    // Written on first use rather than up front. `imported/` has no orphan
+    // sweep and the deletion cascade refcounts off the rows that name a path,
+    // so a copy no row will ever reference is unreachable garbage: only the
+    // synthesised source row below carries a `sourceFileFormat` describing
+    // these bytes, and a run can end before writing one (a cancel, or an
+    // export whose <source> entries define the rows instead).
+    String? importedFilePath;
+    var storeAttempted = false;
+    Future<String?> storeImportedFileOnce() async {
+      if (storable == null || storeAttempted) return importedFilePath;
+      storeAttempted = true;
+      try {
+        importedFilePath = await _importedFileStore.store(
+          bytes: storable.bytes,
+          originalFileName: storable.fileName,
+        );
+      } catch (e, stackTrace) {
+        // An optional enhancement to the import, never a precondition: a full
+        // disk or an unavailable documents directory costs the resync path,
+        // not the dives.
+        _log.warning(
+          'Could not store the imported file; '
+          'the import continues without a resync path',
+          error: e,
+          stackTrace: stackTrace,
+        );
+      }
+      return importedFilePath;
+    }
 
     for (final i in sortedSelected) {
       if (cancelToken?.isCancelled ?? false) break;
@@ -2257,16 +2313,19 @@ class UddfEntityImporter {
       final sourceEntries = _entriesForDive(diveData, dataSourcesByDiveRef);
 
       if (sourceEntries.isEmpty) {
+        final dataSourceId = _uuid.v4();
+
         await repos.diveRepository.saveComputerReading(
           DiveDataSourcesCompanion(
-            id: Value(_uuid.v4()),
+            id: Value(dataSourceId),
             diveId: Value(diveId),
             isPrimary: const Value(true),
             computerId: Value(computerId),
             computerModel: Value(diveData['diveComputerModel'] as String?),
             computerSerial: Value(diveData['diveComputerSerial'] as String?),
             sourceFileName: Value(sourceFileName),
-            sourceFileFormat: const Value('uddf'),
+            sourceFileFormat: Value(sourceFormat?.name ?? 'uddf'),
+            importedFilePath: Value(await storeImportedFileOnce()),
             sourceUuid: Value(diveData['sourceUuid'] as String?),
             maxDepth: Value(asDoubleOrNull(diveData['maxDepth'])),
             avgDepth: Value(asDoubleOrNull(diveData['avgDepth'])),
