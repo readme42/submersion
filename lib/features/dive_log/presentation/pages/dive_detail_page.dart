@@ -1928,6 +1928,22 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
       for (final (index, s) in dataSources.indexed) s.id: sourceColorAt(index),
     };
 
+    // Per-computer color, so the Cylinders / Tank Pressures rows can mark
+    // which computer a tank belongs to when two computers logged tanks
+    // sharing the same gas mix (otherwise identical swatches).
+    final computerColorById = <String, Color>{
+      for (final (index, s) in dataSources.indexed)
+        if (s.computerId != null) s.computerId!: sourceColorAt(index),
+    };
+    final tankSourceColors = isMultiSource
+        ? <String, Color>{
+            for (final t in dive.tanks)
+              if (t.computerId != null &&
+                  computerColorById[t.computerId] != null)
+                t.id: computerColorById[t.computerId]!,
+          }
+        : null;
+
     // The chart's main series: the active source's own points on a
     // multi-source dive; dive.profile otherwise (identical for the primary).
     // activeSourceProfileProvider is the one rule for this, shared with the
@@ -2031,6 +2047,18 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
             color: sourceColorById[id] ?? sourceColorAt(0),
             computerId: sourceProfiles[id]!.computerId,
             points: sourceProfiles[id]!.points,
+            // This source's own computed analysis, for overlay curves with
+            // no raw per-point device field (deco stops, and future
+            // metrics) to fall back on. Cached by the (diveId, sourceId)
+            // family key, so toggling the eye icon doesn't re-run Buhlmann.
+            analysis: ref
+                .watch(
+                  sourceProfileAnalysisProvider((
+                    diveId: dive.id,
+                    sourceId: id,
+                  )),
+                )
+                .valueOrNull,
           ),
       ?plannedOverlay,
     ];
@@ -2055,59 +2083,35 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                 ),
                 Row(
                   children: [
+                    // A toggle, so it reads as one of the row's icons with
+                    // an on state rather than a pill that shoulders them
+                    // aside. The label it used to carry is the tooltip.
                     if (!playbackState.isActive)
-                      rangeState.isEnabled
-                          ? FilledButton.icon(
-                              onPressed: () {
-                                ref
-                                    .read(
-                                      rangeSelectionProvider(dive.id).notifier,
-                                    )
-                                    .disableRangeMode();
-                              },
-                              icon: const Icon(Icons.straighten, size: 14),
-                              label: Text(
-                                context
-                                    .l10n
-                                    .diveLog_detail_button_rangeAnalysis,
-                              ),
-                              style: FilledButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                textStyle: Theme.of(
+                      IconButton(
+                        icon: const Icon(Icons.straighten),
+                        tooltip:
+                            context.l10n.diveLog_detail_button_rangeAnalysis,
+                        visualDensity: VisualDensity.compact,
+                        isSelected: rangeState.isEnabled,
+                        style: IconButton.styleFrom(
+                          backgroundColor: rangeState.isEnabled
+                              ? Theme.of(context).colorScheme.secondaryContainer
+                              : null,
+                          foregroundColor: rangeState.isEnabled
+                              ? Theme.of(
                                   context,
-                                ).textTheme.labelSmall,
-                                visualDensity: VisualDensity.compact,
-                              ),
-                            )
-                          : OutlinedButton.icon(
-                              onPressed: () {
-                                ref
-                                    .read(
-                                      rangeSelectionProvider(dive.id).notifier,
-                                    )
-                                    .enableRangeMode();
-                              },
-                              icon: const Icon(Icons.straighten, size: 14),
-                              label: Text(
-                                context
-                                    .l10n
-                                    .diveLog_detail_button_rangeAnalysis,
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                textStyle: Theme.of(
-                                  context,
-                                ).textTheme.labelSmall,
-                                visualDensity: VisualDensity.compact,
-                              ),
-                            ),
-                    const SizedBox(width: 8),
+                                ).colorScheme.onSecondaryContainer
+                              : null,
+                        ),
+                        onPressed: () {
+                          final notifier = ref.read(
+                            rangeSelectionProvider(dive.id).notifier,
+                          );
+                          rangeState.isEnabled
+                              ? notifier.disableRangeMode()
+                              : notifier.enableRangeMode();
+                        },
+                      ),
                     // A Builder so the share anchor resolves to this button
                     // rather than the whole profile card; it contributes no
                     // render object, so the lookup descends to the IconButton.
@@ -2135,14 +2139,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.fullscreen),
-                      tooltip:
-                          context.l10n.diveLog_detail_tooltip_viewFullscreen,
-                      visualDensity: VisualDensity.compact,
-                      onPressed: () =>
-                          _showFullscreenProfile(context, ref, dive),
-                    ),
-                    IconButton(
                       icon: const Icon(Icons.view_in_ar),
                       tooltip: context.l10n.dive3d_previewTitle,
                       visualDensity: VisualDensity.compact,
@@ -2161,6 +2157,14 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                           builder: (_) => SpatialSitePage(diveId: dive.id),
                         ),
                       ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.fullscreen),
+                      tooltip:
+                          context.l10n.diveLog_detail_tooltip_viewFullscreen,
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () =>
+                          _showFullscreenProfile(context, ref, dive),
                     ),
                   ],
                 ),
@@ -2255,6 +2259,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                             estimatedTankPressures?.pressures ?? tankPressures,
                         estimatedTankIds:
                             estimatedTankPressures?.estimatedTankIds,
+                        tankSourceColors: tankSourceColors,
                         gasSwitches: gasSwitchesAsync.value,
                         gasSegments:
                             (dive.tanks.isEmpty || chartProfile.isEmpty)
