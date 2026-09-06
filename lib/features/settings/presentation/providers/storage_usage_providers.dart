@@ -13,6 +13,7 @@ import 'package:submersion/core/services/storage/storage_category.dart';
 import 'package:submersion/core/services/storage/storage_inventory.dart';
 import 'package:submersion/features/backup/data/repositories/backup_preferences.dart';
 import 'package:submersion/features/backup/data/services/backup_service.dart';
+import 'package:submersion/features/dive_import/presentation/providers/dive_resync_providers.dart';
 import 'package:submersion/features/maps/data/services/tile_cache_service.dart';
 import 'package:submersion/features/media_store/data/media_cache_store.dart';
 import 'package:submersion/features/media_store/presentation/providers/media_store_providers.dart';
@@ -50,6 +51,8 @@ final storageInventoryProvider = Provider<StorageInventory>((ref) {
     networkImageDirectory: () async => Directory(
       p.join((await getTemporaryDirectory()).path, DefaultCacheManager.key),
     ),
+    importedFilesDirectory: () =>
+        ref.read(importedFileStoreProvider).directory(),
   );
 });
 
