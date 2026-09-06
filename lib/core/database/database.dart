@@ -2989,6 +2989,7 @@ class DiveDataSources extends Table {
   TextColumn get sourceFormat => text().nullable()();
   TextColumn get sourceFileName => text().nullable()();
   TextColumn get sourceFileFormat => text().nullable()();
+  TextColumn get importedFilePath => text().nullable()();
   RealColumn get maxDepth => real().nullable()();
   RealColumn get avgDepth => real().nullable()();
   IntColumn get duration => integer().nullable()();
@@ -3873,7 +3874,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 207;
+  static const int currentSchemaVersion = 208;
 
   /// The oldest schema whose reader can apply this build's sync payloads
   /// without loss or misinterpretation (the compatibility floor).
@@ -4413,6 +4414,12 @@ class AppDatabase extends _$AppDatabase {
     // rung takes 207; the list only counts remaining steps for progress
     // reporting and is non-contiguous by design.
     207,
+    // v208 (issue #478): dive_data_sources.imported_file_path, the path to
+    // re-parse file-imported dives from their original files. Populated by
+    // file importers only. Renumbered from 185: main landed 185 through 207
+    // while this branch was open, and a rung at or below the shipped version
+    // never runs its onUpgrade step.
+    208,
   ];
 
   /// Idempotent DDL for the v106 connector-suggestion columns (Lightroom
@@ -7087,6 +7094,24 @@ class AppDatabase extends _$AppDatabase {
     if (!names.contains('merge_source_slot')) {
       await customStatement(
         'ALTER TABLE dive_data_sources ADD COLUMN merge_source_slot INTEGER',
+      );
+    }
+  }
+
+  /// Idempotent DDL for the v185 dive_data_sources.imported_file_path column
+  /// (issue #478). Same dual-call contract (onUpgrade + beforeOpen backstop)
+  /// as the other column-assert helpers. Nullable with no default: only file
+  /// imports going forward populate it, and only for formats
+  /// `parserForFormat` can re-parse.
+  Future<void> _assertImportedFilePathColumn() async {
+    final cols = await customSelect(
+      "PRAGMA table_info('dive_data_sources')",
+    ).get();
+    if (cols.isEmpty) return;
+    final names = cols.map((c) => c.read<String>('name')).toSet();
+    if (!names.contains('imported_file_path')) {
+      await customStatement(
+        'ALTER TABLE dive_data_sources ADD COLUMN imported_file_path TEXT',
       );
     }
   }
@@ -11365,6 +11390,12 @@ class AppDatabase extends _$AppDatabase {
           await _assertJunctionUpdatedAtColumns();
         }
         if (from < 207) await reportProgress();
+        // v208: the path to re-parse file-imported dives from their original
+        // files (issue #478).
+        if (from < 208) {
+          await _assertImportedFilePathColumn();
+        }
+        if (from < 208) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -11598,6 +11629,10 @@ class AppDatabase extends _$AppDatabase {
         // Reading any dive's sources throws without it. Only the column is
         // re-asserted here; the one-shot backfill belongs to the rung.
         await _assertDataSourceMergeSlotColumn();
+
+        // v185 backstop: re-assert the imported file path column (issue #478;
+        // same parallel-branch version-collision self-heal).
+        await _assertImportedFilePathColumn();
 
         // v160 backstop: re-assert service_kinds.default_category. A device
         // that reached 160 or higher through a parallel branch never enters

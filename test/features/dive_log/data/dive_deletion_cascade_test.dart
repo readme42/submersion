@@ -1,9 +1,13 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/database/database.dart' hide Dive;
 import 'package:submersion/core/database/local_cache_database.dart';
 import 'package:submersion/core/services/database_service.dart';
+import 'package:submersion/features/dive_import/data/services/imported_file_store.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/media/data/repositories/media_repository.dart';
@@ -14,29 +18,58 @@ import 'package:submersion/features/media_store/data/media_transfer_queue_reposi
 
 import '../../../helpers/test_database.dart';
 
+/// Records how many `dives` rows still exist at the moment the bytes are
+/// deleted. The rows have to go first: a failure after the file is gone
+/// would leave a surviving dive pointing at bytes that are not there, while
+/// a failure the other way round only leaks an unreferenced copy.
+class _OrderRecordingImportedFileStore extends ImportedFileStore {
+  _OrderRecordingImportedFileStore({super.documentsDirectory});
+
+  final divesAliveAtDelete = <String, int>{};
+
+  @override
+  Future<void> delete(String path) async {
+    final db = DatabaseService.instance.database;
+    divesAliveAtDelete[path] = (await db.select(db.dives).get()).length;
+    await super.delete(path);
+  }
+}
+
 void main() {
   late LocalCacheDatabase cacheDb;
   late MediaTransferQueueRepository queue;
   late MediaRepository mediaRepository;
   late DiveRepository diveRepository;
+  late Directory tempDocsDir;
+  late ImportedFileStore importedFileStore;
 
   setUp(() async {
     await setUpTestDatabase();
     cacheDb = LocalCacheDatabase(NativeDatabase.memory());
     queue = MediaTransferQueueRepository(database: cacheDb);
     mediaRepository = MediaRepository();
+    tempDocsDir = await Directory.systemTemp.createTemp(
+      'dive_deletion_cascade_test',
+    );
+    importedFileStore = ImportedFileStore(
+      documentsDirectory: () async => tempDocsDir,
+    );
     diveRepository = DiveRepository(
       mediaRepository: mediaRepository,
       mediaDeletionCoordinator: MediaDeletionCoordinator(
         mediaRepository: mediaRepository,
         queue: () => queue,
       ),
+      importedFileStore: importedFileStore,
     );
   });
 
   tearDown(() async {
     await cacheDb.close();
     await tearDownTestDatabase();
+    if (await tempDocsDir.exists()) {
+      await tempDocsDir.delete(recursive: true);
+    }
   });
 
   Future<Dive> makeDive() =>
@@ -175,5 +208,158 @@ void main() {
     expect(await mediaRepository.getMediaById(doomed.id), isNull);
     expect(await mediaTombstones(), contains(doomed.id));
     expect(await queue.allForTesting(), isEmpty);
+  });
+
+  group('imported file cascade (issue #478)', () {
+    Future<String> storeFileFor(
+      List<String> diveIds, {
+      List<int> bytes = const [1, 2, 3],
+    }) async {
+      final db = DatabaseService.instance.database;
+      final path = await importedFileStore.store(
+        bytes: Uint8List.fromList(bytes),
+        originalFileName: 'logbook.uddf',
+      );
+      for (final diveId in diveIds) {
+        await db
+            .into(db.diveDataSources)
+            .insert(
+              DiveDataSourcesCompanion.insert(
+                id: 'src-$diveId',
+                diveId: diveId,
+                isPrimary: const Value(true),
+                importedAt: DateTime(2026, 1, 1),
+                createdAt: DateTime(2026, 1, 1),
+                sourceFileFormat: const Value('uddf'),
+                importedFilePath: Value(path),
+              ),
+            );
+      }
+      return path;
+    }
+
+    test('deleting the only dive that points at a stored file removes '
+        'it', () async {
+      final dive = await makeDive();
+      final path = await storeFileFor([dive.id]);
+
+      await diveRepository.deleteDive(dive.id);
+
+      expect(
+        await File(await importedFileStore.absolutePathFor(path)).exists(),
+        isFalse,
+      );
+    });
+
+    test('a file shared by a surviving dive is kept', () async {
+      final d1 = await makeDive();
+      final d2 = await makeDive();
+      final path = await storeFileFor([d1.id, d2.id]);
+
+      await diveRepository.deleteDive(d1.id);
+
+      expect(
+        await File(await importedFileStore.absolutePathFor(path)).exists(),
+        isTrue,
+      );
+
+      await diveRepository.deleteDive(d2.id);
+
+      expect(
+        await File(await importedFileStore.absolutePathFor(path)).exists(),
+        isFalse,
+      );
+    });
+
+    test('bulkDeleteDives removes a file once its last pointer goes', () async {
+      final d1 = await makeDive();
+      final d2 = await makeDive();
+      final d3 = await makeDive();
+      final shared = await storeFileFor([d1.id, d2.id]);
+      final other = await storeFileFor([d3.id], bytes: const [9, 9, 9]);
+
+      await diveRepository.bulkDeleteDives([d1.id, d2.id]);
+
+      expect(
+        await File(await importedFileStore.absolutePathFor(shared)).exists(),
+        isFalse,
+      );
+      expect(
+        await File(await importedFileStore.absolutePathFor(other)).exists(),
+        isTrue,
+      );
+    });
+
+    test('the rows go before the bytes', () async {
+      final store = _OrderRecordingImportedFileStore(
+        documentsDirectory: () async => tempDocsDir,
+      );
+      final repository = DiveRepository(
+        mediaRepository: mediaRepository,
+        mediaDeletionCoordinator: MediaDeletionCoordinator(
+          mediaRepository: mediaRepository,
+          queue: () => queue,
+        ),
+        importedFileStore: store,
+      );
+      final dive = await makeDive();
+      final path = await storeFileFor([dive.id]);
+
+      await repository.deleteDive(dive.id);
+
+      expect(store.divesAliveAtDelete[await store.absolutePathFor(path)], 0);
+      expect(
+        await File(await importedFileStore.absolutePathFor(path)).exists(),
+        isFalse,
+      );
+    });
+
+    test('a file an older row names by its absolute path survives', () async {
+      // Rows written before imported_file_path went documents-relative carry
+      // the absolute spelling of the very same copy. The refcount has to see
+      // both spellings, or deleting the newer dive takes bytes the older row
+      // still points at.
+      final d1 = await makeDive();
+      final d2 = await makeDive();
+      final path = await storeFileFor([d1.id]);
+      final absolute = await importedFileStore.absolutePathFor(path);
+      final db = DatabaseService.instance.database;
+      await db
+          .into(db.diveDataSources)
+          .insert(
+            DiveDataSourcesCompanion.insert(
+              id: 'src-legacy',
+              diveId: d2.id,
+              isPrimary: const Value(true),
+              importedAt: DateTime(2026, 1, 1),
+              createdAt: DateTime(2026, 1, 1),
+              sourceFileFormat: const Value('uddf'),
+              importedFilePath: Value(absolute),
+            ),
+          );
+
+      await diveRepository.deleteDive(d1.id);
+
+      expect(await File(absolute).exists(), isTrue);
+
+      await diveRepository.deleteDive(d2.id);
+
+      expect(await File(absolute).exists(), isFalse);
+    });
+
+    test(
+      'a restore-safe delete (cascadeMedia: false) keeps the file',
+      () async {
+        final dive = await makeDive();
+        final path = await storeFileFor([dive.id]);
+
+        await diveRepository.deleteDive(dive.id, cascadeMedia: false);
+
+        expect(
+          await File(await importedFileStore.absolutePathFor(path)).exists(),
+          isTrue,
+        );
+      },
+    );
   });
 }
