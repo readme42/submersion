@@ -29,11 +29,16 @@ const _columns = {
 };
 
 void main() {
-  test('v191 is the current schema version and is in the ladder', () {
+  test('v191 is present in the migration ladder', () {
     // Renumbered from v188 (itself renumbered from v185 and v184): main
     // landed the insurance-phone, media-equipment-link and raw-data
     // recompression rungs at 188-190 while this branch was open.
-    expect(AppDatabase.currentSchemaVersion, 191);
+    //
+    // Relaxed from an exact 191 when v192 landed on top: the exact-latest
+    // tripwire lives in the newest migration's test
+    // (migration_v192_imported_file_path_test.dart), and an exact assertion
+    // here becomes a false failure the moment a higher version merges.
+    expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(191));
     expect(AppDatabase.migrationVersions, contains(191));
   });
 

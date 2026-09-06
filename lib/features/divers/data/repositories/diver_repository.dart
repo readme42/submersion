@@ -7,6 +7,7 @@ import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/core/services/sync/sync_event_bus.dart';
+import 'package:submersion/features/dive_import/data/services/imported_file_cleanup.dart';
 import 'package:submersion/features/dive_log/data/repositories/profile_series_repository.dart';
 import 'package:submersion/features/dive_log/data/repositories/tank_pressure_series_repository.dart';
 import 'package:submersion/features/settings/data/repositories/diver_settings_repository.dart';
@@ -35,7 +36,11 @@ class DeleteDiverResult {
 }
 
 class DiverRepository {
+  DiverRepository({ImportedFileCleanup? importedFileCleanup})
+    : _importedFileCleanup = importedFileCleanup ?? ImportedFileCleanup();
+
   AppDatabase get _db => DatabaseService.instance.database;
+  final ImportedFileCleanup _importedFileCleanup;
   final DiverSettingsRepository _settingsRepository = DiverSettingsRepository();
   final SyncRepository _syncRepository = SyncRepository();
   static const _uuid = Uuid();
@@ -319,6 +324,7 @@ class DiverRepository {
   Future<DeleteDiverResult> deleteDiverWithReassignment(String id) async {
     try {
       _log.info('Deleting diver with reassignment: $id');
+      var doomedImportedFiles = const <String>{};
 
       // Find surviving divers (all except the one being deleted), ordered so
       // that the default diver comes first, then oldest by createdAt.
@@ -480,6 +486,13 @@ class DiverRepository {
         // Step 2: Delete dives (cascades: profiles, tanks, data_sources, etc.)
         // stats-scope-exempt: deletion cascade. Deletes the diver's dives,
         // excluded ones included.
+        //
+        // The cascade takes dive_data_sources rows that can be the last
+        // pointers at a stored import copy (issue #478). Read the refcount's
+        // verdict while those rows are still here; the bytes go after the
+        // transaction commits, so a failure leaks a file rather than
+        // stranding a surviving row on bytes that are gone.
+        doomedImportedFiles = await _importedFileCleanup.doomedForDiver(id);
         await _db.customStatement('DELETE FROM dives WHERE diver_id = ?', [id]);
 
         // Step 2b: Null out cross-diver FK references to sites/trips we're
@@ -610,6 +623,7 @@ class DiverRepository {
         await (_db.delete(_db.divers)..where((t) => t.id.equals(id))).go();
         await _syncRepository.logDeletion(entityType: 'divers', recordId: id);
       });
+      await _importedFileCleanup.deleteAll(doomedImportedFiles);
 
       SyncEventBus.notifyLocalChange();
       _log.info('Deleted diver: $id');

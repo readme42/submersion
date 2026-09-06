@@ -20,6 +20,7 @@ import 'package:submersion/core/matching/match_scorer.dart';
 import 'package:submersion/core/utils/deco_dive_detector.dart';
 import 'package:submersion/core/utils/stream_debounce.dart';
 import 'package:submersion/features/dive_computer/data/services/libdc_sample_units.dart';
+import 'package:submersion/features/dive_import/data/services/imported_file_cleanup.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/data/repositories/profile_series_repository.dart';
 import 'package:submersion/features/dive_log/data/repositories/safety_findings_repository.dart';
@@ -45,8 +46,11 @@ import 'package:submersion/features/dive_log/domain/entities/dive_computer.dart'
 
 /// Repository for managing dive computers and multi-profile support.
 class DiveComputerRepository {
-  DiveComputerRepository({DiveAltitudeEnricher? altitudeEnricher})
-    : _altitudeEnricher = altitudeEnricher ?? DiveAltitudeEnricher();
+  DiveComputerRepository({
+    DiveAltitudeEnricher? altitudeEnricher,
+    ImportedFileCleanup? importedFileCleanup,
+  }) : _altitudeEnricher = altitudeEnricher ?? DiveAltitudeEnricher(),
+       _importedFileCleanup = importedFileCleanup ?? ImportedFileCleanup();
 
   AppDatabase get _db => DatabaseService.instance.database;
   final SyncRepository _syncRepository = SyncRepository();
@@ -67,6 +71,11 @@ class DiveComputerRepository {
   Stream<void> watchComputersChanges() => _db
       .tableUpdates(TableUpdateQuery.onTable(_db.diveComputers))
       .debounce(DiveRepository.changeTickDebounce);
+
+  /// The same refcounted cleanup the dive-deletion cascade uses (issue #478):
+  /// the row this repository deletes on the replaceSource path may be the
+  /// last one naming a stored import copy.
+  final ImportedFileCleanup _importedFileCleanup;
 
   /// Held for the repository's lifetime so a multi-dive download shares one
   /// elevation-lookup cache: a trip's worth of dives at the same site costs a
@@ -1064,6 +1073,7 @@ class DiveComputerRepository {
     // ProfileSeriesRepository.clearSource). One transaction with the delete,
     // so a failure between them cannot publish series that gave up an
     // attribution the source row still claims.
+    var doomedImportedFiles = const <String>{};
     await _db.transaction(() async {
       final doomed =
           await (_db.select(_db.diveDataSources)..where(
@@ -1074,12 +1084,20 @@ class DiveComputerRepository {
       for (final source in doomed) {
         await _profileSeries.clearSource(source.id);
       }
+      // A row deleted here can be the last pointer at a stored import copy
+      // (issue #478), which the dive-deletion cascade would have refcounted
+      // before letting the bytes go. Read the verdict while the rows are
+      // still there; act on it once they are not.
+      doomedImportedFiles = await _importedFileCleanup.doomedForSources([
+        for (final source in doomed) source.id,
+      ]);
       // Delete the data source row for this computer+dive
       await _db.customStatement(
         'DELETE FROM dive_data_sources WHERE dive_id = ? AND computer_id = ?',
         [diveId, computerId],
       );
     });
+    await _importedFileCleanup.deleteAll(doomedImportedFiles);
   }
 
   /// Import a profile and associate it with a dive (creating one if needed).

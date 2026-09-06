@@ -29,6 +29,8 @@ import 'package:submersion/features/dive_log/domain/entities/dive_times.dart'
 import 'package:submersion/features/dive_log/domain/entities/dive_weight.dart'
     as domain;
 import 'package:submersion/features/dive_log/domain/entities/gas_switch.dart';
+import 'package:submersion/features/dive_import/data/services/imported_file_cleanup.dart';
+import 'package:submersion/features/dive_import/data/services/imported_file_store.dart';
 import 'package:submersion/features/dive_sites/data/mappers/dive_site_row_mapper.dart';
 import 'package:submersion/features/dive_log/domain/entities/profile_series.dart';
 import 'package:submersion/features/dive_log/domain/entities/source_profile.dart'
@@ -87,6 +89,7 @@ class DiveRepository {
   factory DiveRepository({
     MediaRepository? mediaRepository,
     MediaDeletionCoordinator? mediaDeletionCoordinator,
+    ImportedFileStore? importedFileStore,
   }) {
     final media = mediaRepository ?? MediaRepository();
     return DiveRepository._(
@@ -100,13 +103,19 @@ class DiveRepository {
             // start, or any other kick; the Verify Library sweep is the
             // backstop.
           ),
+      ImportedFileCleanup(store: importedFileStore ?? ImportedFileStore()),
     );
   }
 
-  DiveRepository._(this._mediaRepository, this._mediaDeletionCoordinator);
+  DiveRepository._(
+    this._mediaRepository,
+    this._mediaDeletionCoordinator,
+    this._importedFileCleanup,
+  );
 
   final MediaRepository _mediaRepository;
   final MediaDeletionCoordinator _mediaDeletionCoordinator;
+  final ImportedFileCleanup _importedFileCleanup;
   AppDatabase get _db => DatabaseService.instance.database;
   final SyncRepository _syncRepository = SyncRepository();
   final ProfileSeriesRepository _profileSeries = ProfileSeriesRepository();
@@ -1847,8 +1856,13 @@ class DiveRepository {
   Future<void> deleteDive(String id, {bool cascadeMedia = true}) async {
     try {
       _log.info('Deleting dive: $id');
-      if (cascadeMedia) await _cascadeMediaForDiveDeletion([id]);
+      var doomedImportedFiles = const <String>{};
+      if (cascadeMedia) {
+        await _cascadeMediaForDiveDeletion([id]);
+        doomedImportedFiles = await _importedFileCleanup.doomedForDives([id]);
+      }
       await (_db.delete(_db.dives)..where((t) => t.id.equals(id))).go();
+      await _importedFileCleanup.deleteAll(doomedImportedFiles);
       await _syncRepository.logDeletion(entityType: 'dives', recordId: id);
       SyncEventBus.notifyLocalChange();
       _log.info('Deleted dive: $id');
@@ -1872,8 +1886,13 @@ class DiveRepository {
 
     try {
       _log.info('Bulk deleting ${ids.length} dives');
-      if (cascadeMedia) await _cascadeMediaForDiveDeletion(ids);
+      var doomedImportedFiles = const <String>{};
+      if (cascadeMedia) {
+        await _cascadeMediaForDiveDeletion(ids);
+        doomedImportedFiles = await _importedFileCleanup.doomedForDives(ids);
+      }
       await (_db.delete(_db.dives)..where((t) => t.id.isIn(ids))).go();
+      await _importedFileCleanup.deleteAll(doomedImportedFiles);
       for (final id in ids) {
         await _syncRepository.logDeletion(entityType: 'dives', recordId: id);
       }
@@ -6845,6 +6864,7 @@ class DiveRepository {
       sourceFormat: row.sourceFormat,
       sourceFileName: row.sourceFileName,
       sourceFileFormat: row.sourceFileFormat,
+      importedFilePath: row.importedFilePath,
       maxDepth: row.maxDepth,
       avgDepth: row.avgDepth,
       duration: row.duration,

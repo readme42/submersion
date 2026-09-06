@@ -13,6 +13,7 @@ import 'package:submersion/core/database/profile_series_pack.dart';
 import 'package:submersion/core/services/sync/changeset_log/sync_temp_dir.dart';
 import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/logger_service.dart';
+import 'package:submersion/features/dive_import/data/services/imported_file_cleanup.dart';
 import 'package:submersion/features/dive_log/domain/codecs/profile_series_codec.dart';
 import 'package:submersion/features/dive_log/domain/codecs/profile_series_codec_exception.dart';
 import 'package:submersion/features/dive_log/domain/codecs/profile_series_summary.dart';
@@ -589,9 +590,13 @@ List<({String id, int bytes})> idsWithinBlobBudget(
 }
 
 class SyncDataSerializer {
+  SyncDataSerializer({ImportedFileCleanup? importedFileCleanup})
+    : _importedFileCleanup = importedFileCleanup ?? ImportedFileCleanup();
+
   AppDatabase get _db => DatabaseService.instance.database;
   final _log = LoggerService.forClass(SyncDataSerializer);
   final SyncRepository _syncRepository = SyncRepository();
+  final ImportedFileCleanup _importedFileCleanup;
 
   Future<List<Map<String, dynamic>>> _safeExport(
     String label,
@@ -4599,7 +4604,16 @@ class SyncDataSerializer {
         )..where((t) => t.id.equals(recordId))).go();
         return;
       case 'dives':
+        // The FK cascade takes this dive's dive_data_sources rows, which on
+        // the device that imported the file are the only pointers at the
+        // stored copy. Read the verdict while they are still there, act on
+        // it once they are not -- rows before bytes, as the local delete
+        // cascade does (issue #478).
+        final doomedImportedFiles = await _importedFileCleanup.doomedForDives([
+          recordId,
+        ]);
         await (_db.delete(_db.dives)..where((t) => t.id.equals(recordId))).go();
+        await _importedFileCleanup.deleteAll(doomedImportedFiles);
         return;
       case 'diveTanks':
         await (_db.delete(
