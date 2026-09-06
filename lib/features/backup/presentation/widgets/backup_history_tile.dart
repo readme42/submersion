@@ -56,15 +56,33 @@ class BackupHistoryTile extends ConsumerWidget {
           ],
         ],
       ),
-      subtitle: Text(
-        record.type == BackupType.preMigration
-            ? context.l10n.backup_history_preMigrationSubtitle(
-                record.formattedSize,
-              )
-            : '${record.diveCount ?? 0} dives, '
-                  '${record.siteCount ?? 0} sites - ${record.formattedSize}'
-                  '${record.isAutomatic ? ' (auto)' : ''}',
-      ),
+      subtitle: Text(switch (record.type) {
+        BackupType.preMigration =>
+          context.l10n.backup_history_preMigrationSubtitle(
+            record.formattedSize,
+          ),
+        // Copied from a database this build had already left behind, so it
+        // carries no dive or site counts to report (issue #1589).
+        BackupType.preDowngrade =>
+          context.l10n.backup_history_preDowngradeSubtitle(
+            record.formattedSize,
+          ),
+        // Two messages rather than one plus an appended "(auto)": where the
+        // marker belongs in the sentence is the translator's call, not this
+        // widget's.
+        BackupType.manual =>
+          record.isAutomatic
+              ? context.l10n.backup_history_manualSubtitleAuto(
+                  record.diveCount ?? 0,
+                  record.siteCount ?? 0,
+                  record.formattedSize,
+                )
+              : context.l10n.backup_history_manualSubtitle(
+                  record.diveCount ?? 0,
+                  record.siteCount ?? 0,
+                  record.formattedSize,
+                ),
+      }),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

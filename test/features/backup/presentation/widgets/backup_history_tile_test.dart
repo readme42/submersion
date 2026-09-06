@@ -31,6 +31,23 @@ BackupRecord _manual({
   );
 }
 
+BackupRecord _preDowngrade() {
+  return BackupRecord(
+    id: 'kept',
+    filename: 'newer.db',
+    timestamp: DateTime(2026, 9, 5, 8, 12),
+    sizeBytes: 4096,
+    location: BackupLocation.local,
+    localPath: '/tmp/newer.db',
+    type: BackupType.preDowngrade,
+    appVersion: '1.8.0.7300',
+    // No toSchemaVersion: nothing was migrated, this is where the file
+    // stopped.
+    fromSchemaVersion: 191,
+    pinned: true,
+  );
+}
+
 BackupRecord _preMigration({
   int? fromVersion = 63,
   int? toVersion = 64,
@@ -58,6 +75,14 @@ Widget _wrap(Widget child) {
     // harness never starts, so stand in with the shared mock.
     overrides: [settingsProvider.overrideWith((ref) => MockSettingsNotifier())],
     child: MaterialApp(
+      // Pinned: flutter_test forwards the HOST machine's locale list rather
+      // than a fixed en_US, and this app supports 11 locales, so an unpinned
+      // MaterialApp renders a translated UI on a non-English machine and
+      // every English assertion below finds nothing. CI stays green because
+      // its runners are en_US, so this would fail only for a contributor.
+      // Load-bearing since the manual subtitle moved to l10n: it used to be a
+      // Dart string literal that rendered English whatever the locale.
+      locale: const Locale('en'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(body: child),
@@ -103,6 +128,26 @@ void main() {
       expect(find.textContaining(' (auto)'), findsNothing);
     });
 
+    testWidgets('a single dive and site are not pluralised', (tester) async {
+      // The subtitle went through the localisation layer to stop shipping
+      // hard-coded English on a translated screen; a count of one is what
+      // proves the plural forms are actually being selected rather than a
+      // fixed string being interpolated.
+      await tester.pumpWidget(
+        _wrap(
+          BackupHistoryTile(
+            record: _manual(diveCount: 1, siteCount: 1),
+            leadingIcon: Icons.phone_android,
+            onPinToggle: () {},
+            onRestore: () {},
+            onDelete: () {},
+          ),
+        ),
+      );
+      expect(find.textContaining('1 dive, 1 site'), findsOneWidget);
+      expect(find.textContaining('1 dives'), findsNothing);
+    });
+
     testWidgets('manual record null counts render as 0 dives, 0 sites', (
       tester,
     ) async {
@@ -118,6 +163,30 @@ void main() {
         ),
       );
       expect(find.textContaining('0 dives, 0 sites'), findsOneWidget);
+    });
+
+    testWidgets('preDowngrade record names itself as the kept newer database', (
+      tester,
+    ) async {
+      // Copied from a database this build had already left behind, so it
+      // carries no dive or site counts and must not claim "0 dives".
+      await tester.pumpWidget(
+        _wrap(
+          BackupHistoryTile(
+            record: _preDowngrade(),
+            leadingIcon: Icons.computer,
+            onPinToggle: () {},
+            onRestore: () {},
+            onDelete: () {},
+          ),
+        ),
+      );
+
+      expect(find.textContaining('Newer database'), findsOneWidget);
+      expect(find.textContaining('dives'), findsNothing);
+      // The schema badge belongs to a pre-migration pair; this record has no
+      // toSchemaVersion, so there is no upgrade to name.
+      expect(find.byType(PreMigrationBadge), findsNothing);
     });
 
     testWidgets(

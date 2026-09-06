@@ -36650,4 +36650,63 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get diveComputer_detail_duplicateBannerAction => 'Osszevonas';
+
+  @override
+  String get startup_versionMismatch_restore_title =>
+      'A frissítés előtti biztonsági mentés visszaállítása';
+
+  @override
+  String get startup_versionMismatch_restore_body =>
+      'A frissítés előtt készült biztonsági másolat a merülőnaplódról ezen az eszközön van, és ez a verzió meg tudja nyitni.';
+
+  @override
+  String get startup_versionMismatch_restore_warning =>
+      'Minden, amit a frissítés után rögzítettél, csak az újabb fájlban létezik. Azt a fájlt rögzített biztonsági mentésként megőrizzük, így az újabb verzió ismételt telepítésével visszakapod.';
+
+  @override
+  String backup_history_preDowngradeSubtitle(String size) {
+    return 'Újabb adatbázis, visszalépéskor megőrizve - $size';
+  }
+
+  @override
+  String backup_history_manualSubtitle(
+    int diveCount,
+    int siteCount,
+    String size,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      diveCount,
+      locale: localeName,
+      other: '$diveCount merülés',
+      one: '1 merülés',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      siteCount,
+      locale: localeName,
+      other: '$siteCount merülőhely',
+      one: '1 merülőhely',
+    );
+    return '$_temp0, $_temp1 - $size';
+  }
+
+  @override
+  String backup_history_manualSubtitleAuto(
+    int diveCount,
+    int siteCount,
+    String size,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      diveCount,
+      locale: localeName,
+      other: '$diveCount merülés',
+      one: '1 merülés',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      siteCount,
+      locale: localeName,
+      other: '$siteCount merülőhely',
+      one: '1 merülőhely',
+    );
+    return '$_temp0, $_temp1 - $size (automatikus)';
+  }
 }

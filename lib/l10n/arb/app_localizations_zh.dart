@@ -34631,4 +34631,62 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveComputer_detail_duplicateBannerAction => '合并';
+
+  @override
+  String get startup_versionMismatch_restore_title => '恢复升级前的备份';
+
+  @override
+  String get startup_versionMismatch_restore_body =>
+      '本设备上存有升级前的潜水日志安全副本，当前版本可以打开它。';
+
+  @override
+  String get startup_versionMismatch_restore_warning =>
+      '升级之后记录的内容只存在于较新的文件中。该文件会作为已固定的备份保留，重新安装较新版本即可取回。';
+
+  @override
+  String backup_history_preDowngradeSubtitle(String size) {
+    return '较新的数据库，回退时保留 - $size';
+  }
+
+  @override
+  String backup_history_manualSubtitle(
+    int diveCount,
+    int siteCount,
+    String size,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      diveCount,
+      locale: localeName,
+      other: '$diveCount 次潜水',
+      one: '$diveCount 次潜水',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      siteCount,
+      locale: localeName,
+      other: '$siteCount 个潜点',
+      one: '$siteCount 个潜点',
+    );
+    return '$_temp0, $_temp1 - $size';
+  }
+
+  @override
+  String backup_history_manualSubtitleAuto(
+    int diveCount,
+    int siteCount,
+    String size,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      diveCount,
+      locale: localeName,
+      other: '$diveCount 次潜水',
+      one: '$diveCount 次潜水',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      siteCount,
+      locale: localeName,
+      other: '$siteCount 个潜点',
+      one: '$siteCount 个潜点',
+    );
+    return '$_temp0, $_temp1 - $size（自动）';
+  }
 }

@@ -36734,4 +36734,63 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get diveComputer_detail_duplicateBannerAction => 'Zusammenführen';
+
+  @override
+  String get startup_versionMismatch_restore_title =>
+      'Sicherung von vor dem Upgrade wiederherstellen';
+
+  @override
+  String get startup_versionMismatch_restore_body =>
+      'Eine Sicherheitskopie deines Tauchlogbuchs von vor dem Upgrade liegt auf diesem Gerät, und diese Version kann sie öffnen.';
+
+  @override
+  String get startup_versionMismatch_restore_warning =>
+      'Alles, was du nach dem Upgrade eingetragen hast, liegt nur in der neueren Datei. Diese Datei wird als angeheftete Sicherung behalten; installiere die neuere Version erneut, um sie zurückzuholen.';
+
+  @override
+  String backup_history_preDowngradeSubtitle(String size) {
+    return 'Neuere Datenbank, beim Zurückwechseln behalten - $size';
+  }
+
+  @override
+  String backup_history_manualSubtitle(
+    int diveCount,
+    int siteCount,
+    String size,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      diveCount,
+      locale: localeName,
+      other: '$diveCount Tauchgänge',
+      one: '1 Tauchgang',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      siteCount,
+      locale: localeName,
+      other: '$siteCount Tauchplätze',
+      one: '1 Tauchplatz',
+    );
+    return '$_temp0, $_temp1 - $size';
+  }
+
+  @override
+  String backup_history_manualSubtitleAuto(
+    int diveCount,
+    int siteCount,
+    String size,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      diveCount,
+      locale: localeName,
+      other: '$diveCount Tauchgänge',
+      one: '1 Tauchgang',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      siteCount,
+      locale: localeName,
+      other: '$siteCount Tauchplätze',
+      one: '1 Tauchplatz',
+    );
+    return '$_temp0, $_temp1 - $size (automatisch)';
+  }
 }

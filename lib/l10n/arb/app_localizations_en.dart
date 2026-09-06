@@ -36235,4 +36235,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveComputer_detail_duplicateBannerAction => 'Merge';
+
+  @override
+  String get startup_versionMismatch_restore_title =>
+      'Restore your pre-upgrade backup';
+
+  @override
+  String get startup_versionMismatch_restore_body =>
+      'A safety copy of your dive log, taken before the upgrade, is on this device and this version can open it.';
+
+  @override
+  String get startup_versionMismatch_restore_warning =>
+      'Anything you logged after the upgrade exists only in the newer file. That file is kept as a pinned backup, so installing the newer version again gets it back.';
+
+  @override
+  String backup_history_preDowngradeSubtitle(String size) {
+    return 'Newer database, kept when going back - $size';
+  }
+
+  @override
+  String backup_history_manualSubtitle(
+    int diveCount,
+    int siteCount,
+    String size,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      diveCount,
+      locale: localeName,
+      other: '$diveCount dives',
+      one: '1 dive',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      siteCount,
+      locale: localeName,
+      other: '$siteCount sites',
+      one: '1 site',
+    );
+    return '$_temp0, $_temp1 - $size';
+  }
+
+  @override
+  String backup_history_manualSubtitleAuto(
+    int diveCount,
+    int siteCount,
+    String size,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      diveCount,
+      locale: localeName,
+      other: '$diveCount dives',
+      one: '1 dive',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      siteCount,
+      locale: localeName,
+      other: '$siteCount sites',
+      one: '1 site',
+    );
+    return '$_temp0, $_temp1 - $size (auto)';
+  }
 }

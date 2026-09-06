@@ -36550,4 +36550,63 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get diveComputer_detail_duplicateBannerAction => 'Samenvoegen';
+
+  @override
+  String get startup_versionMismatch_restore_title =>
+      'Back-up van voor de upgrade terugzetten';
+
+  @override
+  String get startup_versionMismatch_restore_body =>
+      'Er staat een veiligheidskopie van je duiklogboek van voor de upgrade op dit apparaat, en deze versie kan die openen.';
+
+  @override
+  String get startup_versionMismatch_restore_warning =>
+      'Alles wat je na de upgrade hebt gelogd, bestaat alleen in het nieuwere bestand. Dat bestand wordt bewaard als vastgezette back-up, dus je krijgt het terug door de nieuwere versie opnieuw te installeren.';
+
+  @override
+  String backup_history_preDowngradeSubtitle(String size) {
+    return 'Nieuwere database, bewaard bij het teruggaan - $size';
+  }
+
+  @override
+  String backup_history_manualSubtitle(
+    int diveCount,
+    int siteCount,
+    String size,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      diveCount,
+      locale: localeName,
+      other: '$diveCount duiken',
+      one: '1 duik',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      siteCount,
+      locale: localeName,
+      other: '$siteCount duikstekken',
+      one: '1 duikstek',
+    );
+    return '$_temp0, $_temp1 - $size';
+  }
+
+  @override
+  String backup_history_manualSubtitleAuto(
+    int diveCount,
+    int siteCount,
+    String size,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      diveCount,
+      locale: localeName,
+      other: '$diveCount duiken',
+      one: '1 duik',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      siteCount,
+      locale: localeName,
+      other: '$siteCount duikstekken',
+      one: '1 duikstek',
+    );
+    return '$_temp0, $_temp1 - $size (automatisch)';
+  }
 }
