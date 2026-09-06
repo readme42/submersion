@@ -39,6 +39,10 @@ import 'package:submersion/features/courses/presentation/providers/course_provid
 import 'package:submersion/features/dive_3d/presentation/pages/dive_3d_page.dart';
 import 'package:submersion/features/dive_3d/presentation/pages/spatial_site_page.dart';
 import 'package:submersion/features/dive_computer/presentation/providers/reparse_providers.dart';
+import 'package:submersion/features/dive_import/data/services/dive_resync_orchestrator.dart';
+import 'package:submersion/features/dive_import/domain/dive_resync_failure.dart';
+import 'package:submersion/features/dive_import/presentation/dive_resync_failure_message.dart';
+import 'package:submersion/features/dive_import/presentation/providers/dive_resync_providers.dart';
 import 'package:submersion/features/dive_log/data/services/gas_usage_segments_service.dart';
 import 'package:submersion/features/dive_log/data/services/profile_analysis_service.dart';
 import 'package:submersion/features/dive_log/data/services/profile_markers_service.dart';
@@ -988,6 +992,8 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     final computerReadingsAsync = ref.watch(diveDataSourcesProvider(dive.id));
     final hasRawData =
         ref.watch(diveHasRawDataProvider(dive.id)).valueOrNull ?? false;
+    final hasImportedFile =
+        ref.watch(diveHasImportedFileProvider(dive.id)).valueOrNull ?? false;
     final linkedPreDive = ref
         .watch(preDiveSessionForDiveProvider(dive.id))
         .value;
@@ -1071,7 +1077,13 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     if (widget.embedded) {
       return Column(
         children: [
-          _buildEmbeddedHeader(context, ref, dive, hasRawData: hasRawData),
+          _buildEmbeddedHeader(
+            context,
+            ref,
+            dive,
+            hasRawData: hasRawData,
+            hasImportedFile: hasImportedFile,
+          ),
           Expanded(child: body),
         ],
       );
@@ -1130,6 +1142,9 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                 case 'reparse':
                   _reparseDive(context, ref, dive);
                   break;
+                case 'resync':
+                  _resyncDive(context, ref, dive);
+                  break;
                 case 'logNearMiss':
                   context.push('/incidents/new?diveId=$diveId');
                   break;
@@ -1185,6 +1200,17 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
+              if (hasImportedFile)
+                PopupMenuItem(
+                  value: 'resync',
+                  child: ListTile(
+                    leading: const Icon(Icons.sync),
+                    title: Text(
+                      context.l10n.diveLog_detail_menu_resyncImportedFile,
+                    ),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
               PopupMenuItem(
                 value: 'delete',
                 child: ListTile(
@@ -1210,6 +1236,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     WidgetRef ref,
     Dive dive, {
     bool hasRawData = false,
+    bool hasImportedFile = false,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
     final linkedPreDive = ref
@@ -1332,6 +1359,9 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                     case 'reparse':
                       _reparseDive(context, ref, dive);
                       break;
+                    case 'resync':
+                      _resyncDive(context, ref, dive);
+                      break;
                     case 'logNearMiss':
                       context.push('/incidents/new?diveId=$diveId');
                       break;
@@ -1388,6 +1418,17 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                         leading: const Icon(Icons.refresh),
                         title: Text(
                           context.l10n.diveLog_detail_menu_reparseRawData,
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                  if (hasImportedFile)
+                    PopupMenuItem(
+                      value: 'resync',
+                      child: ListTile(
+                        leading: const Icon(Icons.sync),
+                        title: Text(
+                          context.l10n.diveLog_detail_menu_resyncImportedFile,
                         ),
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -5745,6 +5786,52 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
         );
       }
     }
+  }
+
+  Future<void> _resyncDive(
+    BuildContext context,
+    WidgetRef ref,
+    Dive dive,
+  ) async {
+    final orchestrator = ref.read(diveResyncOrchestratorProvider);
+    final l10n = context.l10n;
+
+    DiveResyncOutcome outcome;
+    try {
+      outcome = await orchestrator.resync(dive.id);
+    } catch (_) {
+      // The orchestrator's enumerated skip paths never throw; only an
+      // unexpected failure while reading/parsing the stored file (e.g. it
+      // was corrupted or truncated on disk since import) reaches here, and
+      // it must still produce a visible message rather than a silent no-op.
+      outcome = const DiveResyncOutcome.failure(
+        DiveResyncFailure.unexpectedError,
+      );
+    }
+
+    ref.invalidate(diveProvider(dive.id));
+    ref.invalidate(diveProfileProvider(dive.id));
+    ref.invalidate(sourceProfilesProvider(dive.id));
+    ref.invalidate(diveDataSourcesProvider(dive.id));
+
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          outcome.succeeded
+              // A resync on a combined or multi-source dive refreshes the
+              // header and leaves the profile alone; the re-parse path
+              // already has the string for exactly that (#1164).
+              ? (outcome.profilePreserved
+                    ? l10n.diveLog_detail_reparseProfilePreserved
+                    : l10n.diveLog_detail_resyncSuccess)
+              : diveResyncFailureMessage(
+                  l10n,
+                  outcome.failureReason ?? DiveResyncFailure.unexpectedError,
+                ),
+        ),
+      ),
+    );
   }
 
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
