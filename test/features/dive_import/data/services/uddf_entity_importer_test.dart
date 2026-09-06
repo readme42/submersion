@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:path/path.dart' as p;
 import 'package:submersion/core/constants/enums.dart';
 // Only the companion: database.dart also exports Drift row classes whose
 // names collide with the domain entities this test imports (DiveSite, Dive,
@@ -23,7 +24,9 @@ import 'package:submersion/features/certifications/domain/entities/certification
 import 'package:submersion/features/courses/data/repositories/course_repository.dart';
 import 'package:submersion/features/dive_centers/data/repositories/dive_center_repository.dart';
 import 'package:submersion/features/dive_centers/domain/entities/dive_center.dart';
+import 'package:submersion/features/dive_import/data/services/imported_file_store.dart';
 import 'package:submersion/features/dive_import/data/services/uddf_entity_importer.dart';
+import 'package:submersion/features/import_wizard/domain/models/import_cancellation_token.dart';
 import 'package:submersion/features/import_wizard/domain/models/import_phase.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/data/repositories/tank_pressure_repository.dart';
@@ -63,6 +66,41 @@ import 'package:submersion/features/trips/domain/entities/trip.dart';
   ServiceRecordRepository,
 ])
 import 'uddf_entity_importer_test.mocks.dart';
+
+/// Records [store] calls instead of touching disk, so tests can assert
+/// whether-and-what the importer tried to persist without a real
+/// documents directory.
+class _RecordingImportedFileStore extends ImportedFileStore {
+  int storeCalls = 0;
+  String? lastStoredPath;
+
+  @override
+  Future<String> store({
+    required Uint8List bytes,
+    required String originalFileName,
+  }) async {
+    storeCalls++;
+    lastStoredPath =
+        '/fake/imported/${bytes.join('-')}${p.extension(originalFileName)}';
+    return lastStoredPath!;
+  }
+}
+
+/// A store whose disk is full: [store] throws, the way a real
+/// `writeAsBytes` does when the volume is out of space or the documents
+/// directory is unavailable.
+class _FailingImportedFileStore extends ImportedFileStore {
+  int storeCalls = 0;
+
+  @override
+  Future<String> store({
+    required Uint8List bytes,
+    required String originalFileName,
+  }) async {
+    storeCalls++;
+    throw Exception('No space left on device');
+  }
+}
 
 void main() {
   final importer = UddfEntityImporter();
@@ -3368,6 +3406,226 @@ void main() {
         expect(reading.gradientFactorHigh.value, 85);
       },
     );
+  });
+
+  group('Store the imported file and its real format (issue #478)', () {
+    test(
+      'stores the source file and records its format when supported',
+      () async {
+        when(mockDiveRepo.createDive(any)).thenAnswer(
+          (invocation) async => invocation.positionalArguments[0] as Dive,
+        );
+        when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
+
+        final store = _RecordingImportedFileStore();
+        final importer = UddfEntityImporter(importedFileStore: store);
+
+        final data = UddfImportResult(
+          dives: [
+            {'dateTime': now, 'maxDepth': 25.0},
+          ],
+        );
+
+        await importer.import(
+          data: data,
+          selections: const UddfImportSelections(dives: {0}),
+          repositories: repos,
+          diverId: diverId,
+          sourceFormat: ImportFormat.uddf,
+          sourceFileBytes: Uint8List.fromList([1, 2, 3]),
+          sourceFileName: 'dive.uddf',
+        );
+
+        final capturedReadings = verify(
+          mockDiveRepo.saveComputerReading(captureAny),
+        ).captured;
+        final reading = capturedReadings.single;
+        expect(reading.sourceFileFormat.value, 'uddf');
+        expect(reading.importedFilePath.value, store.lastStoredPath);
+        expect(store.storeCalls, 1);
+      },
+    );
+
+    test(
+      'does not store a file for a format parserForFormat cannot re-parse',
+      () async {
+        when(mockDiveRepo.createDive(any)).thenAnswer(
+          (invocation) async => invocation.positionalArguments[0] as Dive,
+        );
+        when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
+
+        final store = _RecordingImportedFileStore();
+        final importer = UddfEntityImporter(importedFileStore: store);
+
+        final data = UddfImportResult(
+          dives: [
+            {'dateTime': now, 'maxDepth': 25.0},
+          ],
+        );
+
+        await importer.import(
+          data: data,
+          selections: const UddfImportSelections(dives: {0}),
+          repositories: repos,
+          diverId: diverId,
+          sourceFormat: ImportFormat.csv,
+          sourceFileBytes: Uint8List.fromList([1, 2, 3]),
+          sourceFileName: 'dive.csv',
+        );
+
+        final capturedReadings = verify(
+          mockDiveRepo.saveComputerReading(captureAny),
+        ).captured;
+        final reading = capturedReadings.single;
+        expect(reading.sourceFileFormat.value, 'csv');
+        expect(reading.importedFilePath.value, isNull);
+        expect(store.storeCalls, 0);
+      },
+    );
+
+    test('a store failure leaves the import intact', () async {
+      // Storing the file is an enhancement to the import, never a
+      // precondition: a full disk must cost the diver a resync path, not the
+      // whole import.
+      when(mockDiveRepo.createDive(any)).thenAnswer(
+        (invocation) async => invocation.positionalArguments[0] as Dive,
+      );
+      when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
+
+      final store = _FailingImportedFileStore();
+      final importer = UddfEntityImporter(importedFileStore: store);
+
+      final data = UddfImportResult(
+        dives: [
+          {'dateTime': now, 'maxDepth': 25.0},
+        ],
+      );
+
+      final result = await importer.import(
+        data: data,
+        selections: const UddfImportSelections(dives: {0}),
+        repositories: repos,
+        diverId: diverId,
+        sourceFormat: ImportFormat.uddf,
+        sourceFileBytes: Uint8List.fromList([1, 2, 3]),
+        sourceFileName: 'dive.uddf',
+      );
+
+      expect(store.storeCalls, 1);
+      expect(result.dives, 1);
+      final reading = verify(
+        mockDiveRepo.saveComputerReading(captureAny),
+      ).captured.single;
+      expect(reading.importedFilePath.value, isNull);
+    });
+
+    test('stores nothing when the dives bring their own source rows', () async {
+      // A Submersion export carries <source> entries, so the restored rows
+      // define this dive's provenance and no synthesised row names the stored
+      // copy. `imported/` has no orphan sweep and the deletion cascade is
+      // refcounted off those pointers, so an unreferenced copy would be
+      // unreachable garbage forever.
+      when(mockDiveRepo.createDive(any)).thenAnswer(
+        (invocation) async => invocation.positionalArguments[0] as Dive,
+      );
+      when(mockDiveRepo.saveComputerReadings(any)).thenAnswer((_) async {});
+
+      final store = _RecordingImportedFileStore();
+      final importer = UddfEntityImporter(importedFileStore: store);
+
+      final data = UddfImportResult(
+        dives: [
+          {'dateTime': now, 'maxDepth': 25.0, 'sourceUuid': 'src-uuid-1'},
+        ],
+        dataSourcesByDiveRef: {
+          'src-uuid-1': [
+            {'isPrimary': true, 'sourceFileFormat': 'libdivecomputer'},
+          ],
+        },
+      );
+
+      await importer.import(
+        data: data,
+        selections: const UddfImportSelections(dives: {0}),
+        repositories: repos,
+        diverId: diverId,
+        sourceFormat: ImportFormat.uddf,
+        sourceFileBytes: Uint8List.fromList([1, 2, 3]),
+        sourceFileName: 'export.uddf',
+      );
+
+      expect(store.storeCalls, 0);
+      verifyNever(mockDiveRepo.saveComputerReading(any));
+    });
+
+    test('stores nothing when the import is cancelled before the first '
+        'dive', () async {
+      when(mockDiveRepo.createDive(any)).thenAnswer(
+        (invocation) async => invocation.positionalArguments[0] as Dive,
+      );
+      when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
+
+      final store = _RecordingImportedFileStore();
+      final importer = UddfEntityImporter(importedFileStore: store);
+      final cancelToken = ImportCancellationToken()..cancel();
+
+      final data = UddfImportResult(
+        dives: [
+          {'dateTime': now, 'maxDepth': 25.0},
+        ],
+      );
+
+      await importer.import(
+        data: data,
+        selections: const UddfImportSelections(dives: {0}),
+        repositories: repos,
+        diverId: diverId,
+        sourceFormat: ImportFormat.uddf,
+        sourceFileBytes: Uint8List.fromList([1, 2, 3]),
+        sourceFileName: 'dive.uddf',
+        cancelToken: cancelToken,
+      );
+
+      expect(store.storeCalls, 0);
+    });
+
+    test('stores one copy per import run, shared by every dive', () async {
+      when(mockDiveRepo.createDive(any)).thenAnswer(
+        (invocation) async => invocation.positionalArguments[0] as Dive,
+      );
+      when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
+
+      final store = _RecordingImportedFileStore();
+      final importer = UddfEntityImporter(importedFileStore: store);
+
+      final data = UddfImportResult(
+        dives: [
+          {'dateTime': now, 'maxDepth': 25.0},
+          {'dateTime': now.add(const Duration(hours: 2)), 'maxDepth': 18.0},
+          {'dateTime': now.add(const Duration(hours: 4)), 'maxDepth': 12.0},
+        ],
+      );
+
+      await importer.import(
+        data: data,
+        selections: const UddfImportSelections(dives: {0, 1, 2}),
+        repositories: repos,
+        diverId: diverId,
+        sourceFormat: ImportFormat.uddf,
+        sourceFileBytes: Uint8List.fromList([1, 2, 3]),
+        sourceFileName: 'logbook.uddf',
+      );
+
+      // One file on disk, three rows pointing at it -- not one copy per dive.
+      expect(store.storeCalls, 1);
+      final captured = verify(
+        mockDiveRepo.saveComputerReading(captureAny),
+      ).captured;
+      expect(captured, hasLength(3));
+      expect(captured.map((r) => r.importedFilePath.value).toSet(), {
+        store.lastStoredPath,
+      });
+    });
   });
 
   group('Import service records', () {
