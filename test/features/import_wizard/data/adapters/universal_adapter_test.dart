@@ -26,6 +26,7 @@ import 'package:submersion/features/courses/presentation/providers/course_provid
 import 'package:submersion/features/dive_centers/data/repositories/dive_center_repository.dart';
 import 'package:submersion/features/dive_centers/domain/entities/dive_center.dart';
 import 'package:submersion/features/dive_centers/presentation/providers/dive_center_providers.dart';
+import 'package:submersion/features/dive_import/data/services/imported_file_store.dart';
 import 'package:submersion/features/dive_import/data/services/uddf_entity_importer.dart';
 import 'package:submersion/features/dive_import/domain/services/dive_matcher.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
@@ -2770,13 +2771,13 @@ void main() {
         expect(januaryPath, isNot(februaryPath));
 
         // Each stored copy holds the bytes of the file its dive came from.
-        Future<List<int>> storedBytes(String storedPath) async {
-          final absolute = p.joinAll([
-            tempDir.path,
-            ...p.url.split(storedPath),
-          ]);
-          return File(absolute).readAsBytes();
-        }
+        // Resolve through the store rather than rebuilding its layout here,
+        // so this test follows the root wherever the store puts it.
+        final store = ImportedFileStore(
+          documentsDirectory: () async => tempDir,
+        );
+        Future<List<int>> storedBytes(String storedPath) async =>
+            File(await store.absolutePathFor(storedPath)).readAsBytes();
 
         await tester.runAsync(() async {
           expect(await storedBytes(januaryPath!), januaryBytes);
