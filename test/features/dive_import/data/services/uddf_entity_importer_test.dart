@@ -26,6 +26,7 @@ import 'package:submersion/features/dive_centers/data/repositories/dive_center_r
 import 'package:submersion/features/dive_centers/domain/entities/dive_center.dart';
 import 'package:submersion/features/dive_import/data/services/imported_file_store.dart';
 import 'package:submersion/features/dive_import/data/services/uddf_entity_importer.dart';
+import 'package:submersion/features/dive_import/domain/import_source_file.dart';
 import 'package:submersion/features/import_wizard/domain/models/import_cancellation_token.dart';
 import 'package:submersion/features/import_wizard/domain/models/import_phase.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
@@ -74,6 +75,10 @@ class _RecordingImportedFileStore extends ImportedFileStore {
   int storeCalls = 0;
   String? lastStoredPath;
 
+  /// Stored path per original file name, so a batch's per-file copies can be
+  /// told apart.
+  final storedPathByFileName = <String, String>{};
+
   @override
   Future<String> store({
     required Uint8List bytes,
@@ -82,6 +87,7 @@ class _RecordingImportedFileStore extends ImportedFileStore {
     storeCalls++;
     lastStoredPath =
         '/fake/imported/${bytes.join('-')}${p.extension(originalFileName)}';
+    storedPathByFileName[originalFileName] = lastStoredPath!;
     return lastStoredPath!;
   }
 }
@@ -3626,6 +3632,209 @@ void main() {
         store.lastStoredPath,
       });
     });
+
+    test('a batch import gives each dive the copy of the file it came '
+        'from', () async {
+      when(mockDiveRepo.createDive(any)).thenAnswer(
+        (invocation) async => invocation.positionalArguments[0] as Dive,
+      );
+      when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
+
+      final store = _RecordingImportedFileStore();
+      final importer = UddfEntityImporter(importedFileStore: store);
+
+      var januaryReads = 0;
+      var februaryReads = 0;
+
+      // Two dives from one file, one from another, in payload order rather
+      // than chronological order so the per-dive lookup cannot ride on the
+      // import's own sort.
+      final data = UddfImportResult(
+        dives: [
+          {'dateTime': now, 'maxDepth': 25.0, '_sourceFileId': 'f0'},
+          {
+            'dateTime': now.add(const Duration(hours: 2)),
+            'maxDepth': 18.0,
+            '_sourceFileId': 'f1',
+          },
+          {
+            'dateTime': now.add(const Duration(hours: 4)),
+            'maxDepth': 12.0,
+            '_sourceFileId': 'f0',
+          },
+        ],
+      );
+
+      await importer.import(
+        data: data,
+        selections: const UddfImportSelections(dives: {0, 1, 2}),
+        repositories: repos,
+        diverId: diverId,
+        sourceFilesById: {
+          'f0': ImportSourceFile(
+            fileName: 'january.uddf',
+            format: ImportFormat.uddf,
+            readBytes: () async {
+              januaryReads++;
+              return Uint8List.fromList([1, 2, 3]);
+            },
+          ),
+          'f1': ImportSourceFile(
+            fileName: 'february.ssrf',
+            format: ImportFormat.subsurfaceXml,
+            readBytes: () async {
+              februaryReads++;
+              return Uint8List.fromList([4, 5, 6]);
+            },
+          ),
+        },
+      );
+
+      // One copy per file, not per dive, and each file's bytes are read once.
+      expect(store.storeCalls, 2);
+      expect(januaryReads, 1);
+      expect(februaryReads, 1);
+
+      final captured = verify(
+        mockDiveRepo.saveComputerReading(captureAny),
+      ).captured;
+      expect(captured, hasLength(3));
+
+      final januaryPath = store.storedPathByFileName['january.uddf'];
+      final februaryPath = store.storedPathByFileName['february.ssrf'];
+      expect(januaryPath, isNotNull);
+      expect(februaryPath, isNotNull);
+      expect(januaryPath, isNot(februaryPath));
+
+      final pathsByName = <String?, Set<String?>>{};
+      final formatsByName = <String?, Set<String?>>{};
+      for (final reading in captured) {
+        (pathsByName[reading.sourceFileName.value] ??= {}).add(
+          reading.importedFilePath.value,
+        );
+        (formatsByName[reading.sourceFileName.value] ??= {}).add(
+          reading.sourceFileFormat.value,
+        );
+      }
+      expect(pathsByName['january.uddf'], {januaryPath});
+      expect(pathsByName['february.ssrf'], {februaryPath});
+      expect(formatsByName['january.uddf'], {'uddf'});
+      expect(formatsByName['february.ssrf'], {'subsurfaceXml'});
+    });
+
+    test('one unreadable file in a batch does not cost the others their '
+        'paths', () async {
+      when(mockDiveRepo.createDive(any)).thenAnswer(
+        (invocation) async => invocation.positionalArguments[0] as Dive,
+      );
+      when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
+
+      final store = _RecordingImportedFileStore();
+      final importer = UddfEntityImporter(importedFileStore: store);
+
+      final data = UddfImportResult(
+        dives: [
+          {'dateTime': now, 'maxDepth': 25.0, '_sourceFileId': 'f0'},
+          {
+            'dateTime': now.add(const Duration(hours: 2)),
+            'maxDepth': 18.0,
+            '_sourceFileId': 'f1',
+          },
+        ],
+      );
+
+      final result = await importer.import(
+        data: data,
+        selections: const UddfImportSelections(dives: {0, 1}),
+        repositories: repos,
+        diverId: diverId,
+        sourceFilesById: {
+          'f0': ImportSourceFile(
+            fileName: 'gone.uddf',
+            format: ImportFormat.uddf,
+            readBytes: () async =>
+                throw const FileSystemException('No such file'),
+          ),
+          'f1': ImportSourceFile(
+            fileName: 'here.uddf',
+            format: ImportFormat.uddf,
+            readBytes: () async => Uint8List.fromList([4, 5, 6]),
+          ),
+        },
+      );
+
+      expect(result.dives, 2);
+      final captured = verify(
+        mockDiveRepo.saveComputerReading(captureAny),
+      ).captured;
+      final byName = {
+        for (final reading in captured)
+          reading.sourceFileName.value: reading.importedFilePath.value,
+      };
+      expect(byName['gone.uddf'], isNull);
+      expect(byName['here.uddf'], store.storedPathByFileName['here.uddf']);
+    });
+
+    test(
+      'a batch stores only the files whose format can be re-parsed',
+      () async {
+        when(mockDiveRepo.createDive(any)).thenAnswer(
+          (invocation) async => invocation.positionalArguments[0] as Dive,
+        );
+        when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
+
+        final store = _RecordingImportedFileStore();
+        final importer = UddfEntityImporter(importedFileStore: store);
+
+        var csvReads = 0;
+
+        final data = UddfImportResult(
+          dives: [
+            {'dateTime': now, 'maxDepth': 25.0, '_sourceFileId': 'f0'},
+            {
+              'dateTime': now.add(const Duration(hours: 2)),
+              'maxDepth': 18.0,
+              '_sourceFileId': 'f1',
+            },
+          ],
+        );
+
+        await importer.import(
+          data: data,
+          selections: const UddfImportSelections(dives: {0, 1}),
+          repositories: repos,
+          diverId: diverId,
+          sourceFilesById: {
+            'f0': ImportSourceFile(
+              fileName: 'log.csv',
+              format: ImportFormat.csv,
+              readBytes: () async {
+                csvReads++;
+                return Uint8List.fromList([1, 2, 3]);
+              },
+            ),
+            'f1': ImportSourceFile(
+              fileName: 'log.uddf',
+              format: ImportFormat.uddf,
+              readBytes: () async => Uint8List.fromList([4, 5, 6]),
+            ),
+          },
+        );
+
+        // The unstorable file is never even read.
+        expect(csvReads, 0);
+        expect(store.storeCalls, 1);
+        final captured = verify(
+          mockDiveRepo.saveComputerReading(captureAny),
+        ).captured;
+        final byName = {
+          for (final reading in captured)
+            reading.sourceFileName.value: reading.importedFilePath.value,
+        };
+        expect(byName['log.csv'], isNull);
+        expect(byName['log.uddf'], isNotNull);
+      },
+    );
   });
 
   group('Import service records', () {

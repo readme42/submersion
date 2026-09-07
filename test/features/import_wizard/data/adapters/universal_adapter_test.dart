@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 // ignore: implementation_imports
@@ -189,6 +190,12 @@ class _TestableImportNotifier extends UniversalImportNotifier {
     );
   }
 
+  /// Batch files as the wizard really holds them: path-backed, each with its
+  /// own detected format and no bytes in memory.
+  void setPickedFiles(List<PickedImportFile> files) {
+    state = state.copyWith(files: files);
+  }
+
   void setDetectedCsvPreset(CsvPreset? preset) {
     state = state.copyWith(detectedCsvPreset: preset);
   }
@@ -263,6 +270,7 @@ List<Override> _fullOverrides({
   ImportOptions? options,
   Diver? diver,
   List<String> fileNames = const [],
+  List<PickedImportFile> pickedFiles = const [],
   DetectionResult? detectionResult,
   List<Dive> existingDives = const [],
   List<DiveSite> existingSites = const [],
@@ -315,6 +323,7 @@ List<Override> _fullOverrides({
       notifier.setPayload(payload);
       if (options != null) notifier.setOptions(options);
       if (fileNames.isNotEmpty) notifier.setFiles(fileNames);
+      if (pickedFiles.isNotEmpty) notifier.setPickedFiles(pickedFiles);
       if (detectionResult != null) notifier.setDetectionResult(detectionResult);
       return notifier;
     }),
@@ -2634,6 +2643,145 @@ void main() {
         ).captured;
         final reading = capturedReadings.single;
         expect(reading.sourceFileFormat.value, 'subsurfaceXml');
+      },
+    );
+
+    testWidgets(
+      'a batch import stores one copy per file and points each dive at the '
+      'copy of the file it came from',
+      (tester) async {
+        // The bug this regression-tests: notifierState.fileBytes/fileName are
+        // the SINGLE selected file, so a multi-file pick stored nothing at all
+        // and no dive ever got a resync path.
+        final previousPathProvider = PathProviderPlatform.instance;
+        final tempDir = (await tester.runAsync(
+          () => Directory.systemTemp.createTemp('universal_adapter_batch_'),
+        ))!;
+        PathProviderPlatform.instance = _FakePathProviderPlatform(tempDir.path);
+        addTearDown(() async {
+          PathProviderPlatform.instance = previousPathProvider;
+          await tester.runAsync(() async {
+            if (await tempDir.exists()) await tempDir.delete(recursive: true);
+          });
+        });
+
+        // Genuinely different content, so a mixed-up attribution cannot pass.
+        final januaryBytes = utf8.encode('<uddf>january</uddf>');
+        final februaryBytes = utf8.encode('<divelog>february</divelog>');
+        final januaryFile = File(p.join(tempDir.path, 'january.uddf'));
+        final februaryFile = File(p.join(tempDir.path, 'february.ssrf'));
+        await tester.runAsync(() async {
+          await januaryFile.writeAsBytes(januaryBytes);
+          await februaryFile.writeAsBytes(februaryBytes);
+        });
+
+        final payload = ImportPayload(
+          entities: {
+            ui.ImportEntityType.dives: [
+              {
+                'dateTime': DateTime(2026, 1, 15, 10, 0),
+                'maxDepth': 20.0,
+                'runtime': const Duration(minutes: 30),
+                '_sourceFile': 'january.uddf',
+                '_sourceFileId': 'f0',
+              },
+              {
+                'dateTime': DateTime(2026, 2, 15, 10, 0),
+                'maxDepth': 18.0,
+                'runtime': const Duration(minutes: 35),
+                '_sourceFile': 'february.ssrf',
+                '_sourceFileId': 'f1',
+              },
+            ],
+          },
+          metadata: const {'batchFileCount': 2},
+        );
+
+        final mockDiveRepo = MockDiveRepository();
+        final mockTankPresetRepo = MockTankPresetRepository();
+        when(
+          mockTankPresetRepo.getPresetById(any),
+        ).thenAnswer((_) async => null);
+
+        await _runWithAdapter(
+          tester,
+          overrides: _fullOverrides(
+            payload: payload,
+            diver: _testDiver(),
+            mockDiveRepo: mockDiveRepo,
+            mockTankPresetRepo: mockTankPresetRepo,
+            pickedFiles: [
+              PickedImportFile(
+                name: 'january.uddf',
+                path: januaryFile.path,
+                detection: const DetectionResult(
+                  format: ui.ImportFormat.uddf,
+                  confidence: 1.0,
+                ),
+                status: ImportFileStatus.parsed,
+              ),
+              PickedImportFile(
+                name: 'february.ssrf',
+                path: februaryFile.path,
+                detection: const DetectionResult(
+                  format: ui.ImportFormat.subsurfaceXml,
+                  confidence: 1.0,
+                ),
+                status: ImportFileStatus.parsed,
+              ),
+            ],
+            detectionResult: const DetectionResult(
+              format: ui.ImportFormat.uddf,
+              confidence: 1.0,
+            ),
+          ),
+          callback: (adapter) async {
+            await tester.runAsync(() async {
+              final bundle = await adapter.buildBundle();
+              final result = await adapter.performImport(bundle, {
+                wizard.ImportEntityType.dives: {0, 1},
+              }, {});
+
+              expect(result.errorMessage, isNull);
+            });
+          },
+        );
+
+        final capturedReadings = verify(
+          mockDiveRepo.saveComputerReading(captureAny),
+        ).captured;
+        expect(capturedReadings, hasLength(2));
+        final byName = {
+          for (final reading in capturedReadings)
+            reading.sourceFileName.value as String?: reading,
+        };
+
+        final january = byName['january.uddf'];
+        final february = byName['february.ssrf'];
+        expect(january, isNotNull);
+        expect(february, isNotNull);
+        expect(january!.sourceFileFormat.value, 'uddf');
+        expect(february!.sourceFileFormat.value, 'subsurfaceXml');
+
+        final januaryPath = january.importedFilePath.value as String?;
+        final februaryPath = february.importedFilePath.value as String?;
+        expect(januaryPath, isNotNull);
+        expect(februaryPath, isNotNull);
+        expect(januaryPath, isNot(februaryPath));
+
+        // Each stored copy holds the bytes of the file its dive came from.
+        Future<List<int>> storedBytes(String storedPath) async {
+          final absolute = p.joinAll([
+            tempDir.path,
+            ...p.url.split(storedPath),
+          ]);
+          return File(absolute).readAsBytes();
+        }
+
+        await tester.runAsync(() async {
+          expect(await storedBytes(januaryPath!), januaryBytes);
+          expect(await storedBytes(februaryPath!), februaryBytes);
+        });
       },
     );
   });

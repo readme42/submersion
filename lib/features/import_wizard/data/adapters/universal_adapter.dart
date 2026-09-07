@@ -43,6 +43,7 @@ import 'package:submersion/features/import_wizard/domain/models/unified_import_r
 import 'package:submersion/features/media/presentation/providers/photo_picker_providers.dart';
 import 'package:submersion/shared/widgets/wizard/wizard_step_def.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
+import 'package:submersion/features/import_wizard/data/adapters/batch_source_files.dart';
 import 'package:submersion/features/import_wizard/data/adapters/import_notice_grouper.dart';
 import 'package:submersion/features/import_wizard/data/adapters/import_photo_linker.dart';
 import 'package:submersion/features/import_wizard/data/adapters/resolved_photo_attachment.dart';
@@ -615,6 +616,7 @@ class UniversalAdapter implements ImportSourceAdapter {
           notifierState.detectionResult?.format,
       sourceFileBytes: notifierState.fileBytes,
       sourceFileName: notifierState.fileName,
+      sourceFilesById: batchSourceFiles(notifierState.files),
       preResolvedBuddyIds: preResolvedIdsFor(
         wizard.ImportEntityType.buddies,
         uddfData.buddies,

@@ -8,6 +8,7 @@ import 'package:submersion/core/database/database.dart'
 import 'package:submersion/core/services/export/export_service.dart';
 import 'package:submersion/core/utils/deco_dive_detector.dart';
 import 'package:submersion/features/dive_import/data/services/imported_file_store.dart';
+import 'package:submersion/features/dive_import/domain/import_source_file.dart';
 import 'package:submersion/features/dive_import/domain/resyncable_import_formats.dart';
 import 'package:submersion/features/dive_log/domain/services/dive_altitude_enricher.dart';
 import 'package:submersion/features/equipment/data/services/dive_computer_gear_linker.dart';
@@ -251,6 +252,11 @@ class UddfEntityImportResult {
 /// cross-references between entity types.
 class UddfEntityImporter {
   static const _uuid = Uuid();
+
+  /// Memo key for the single-file flow, whose dives carry no `_sourceFileId`.
+  /// Not a valid batch file id (those are `f<index>`), so the two can never
+  /// share a slot.
+  static const _singleSourceKey = '';
   final _log = LoggerService.forClass(UddfEntityImporter);
 
   final TankPresetEntity? _defaultTankPreset;
@@ -313,6 +319,7 @@ class UddfEntityImporter {
     ImportFormat? sourceFormat,
     Uint8List? sourceFileBytes,
     String? sourceFileName,
+    Map<String, ImportSourceFile> sourceFilesById = const {},
     ImportProgressCallback? onProgress,
     ImportCancellationToken? cancelToken,
   }) async {
@@ -473,6 +480,7 @@ class UddfEntityImporter {
       sourceFileName: sourceFileName ?? data.sourceFileName,
       sourceFormat: sourceFormat,
       sourceFileBytes: sourceFileBytes,
+      sourceFilesById: sourceFilesById,
       retainSourceDiveNumbers: retainSourceDiveNumbers,
       now: now,
       dataSourcesByDiveRef: data.dataSourcesByDiveRef,
@@ -1639,6 +1647,7 @@ class UddfEntityImporter {
     String? sourceFileName,
     ImportFormat? sourceFormat,
     Uint8List? sourceFileBytes,
+    Map<String, ImportSourceFile> sourceFilesById = const {},
     bool retainSourceDiveNumbers = false,
     required DateTime now,
     Map<String, List<Map<String, dynamic>>> dataSourcesByDiveRef = const {},
@@ -1693,16 +1702,17 @@ class UddfEntityImporter {
       dataSourcesByDiveRef: dataSourcesByDiveRef,
     );
 
-    // One stored copy for the whole run, shared by every dive's
-    // dive_data_sources row: a multi-dive logbook is one file, and resync
-    // re-reads it and matches within it per dive anyway (issue #478). Storing
-    // bytes no parser can ever replay is pure disk cost, hence the allowlist.
-    final storable =
-        sourceFileBytes != null &&
-            sourceFileName != null &&
-            sourceFormat != null &&
-            resyncableImportFormats.contains(sourceFormat)
-        ? (bytes: sourceFileBytes, fileName: sourceFileName)
+    // One stored copy per source file, shared by every dive's
+    // dive_data_sources row that came from it: a multi-dive logbook is one
+    // file, and resync re-reads it and matches within it per dive anyway
+    // (issue #478). A batch import carries one entry per picked file, so each
+    // dive points at the copy of the file it actually came from.
+    final singleFileSource = sourceFileBytes != null && sourceFileName != null
+        ? ImportSourceFile(
+            fileName: sourceFileName,
+            format: sourceFormat,
+            readBytes: () async => sourceFileBytes,
+          )
         : null;
 
     // Written on first use rather than up front. `imported/` has no orphan
@@ -1711,28 +1721,42 @@ class UddfEntityImporter {
     // synthesised source row below carries a `sourceFileFormat` describing
     // these bytes, and a run can end before writing one (a cancel, or an
     // export whose <source> entries define the rows instead).
-    String? importedFilePath;
-    var storeAttempted = false;
-    Future<String?> storeImportedFileOnce() async {
-      if (storable == null || storeAttempted) return importedFilePath;
-      storeAttempted = true;
+    //
+    // Keyed by source file, so bytes are read one file at a time and let go
+    // again -- a folder pick must never hold every raw buffer at once. A key
+    // present with a null value is a file already tried and given up on.
+    final storedPathByKey = <String, String?>{};
+    Future<String?> storeImportedFileOnce(
+      String key,
+      ImportSourceFile source,
+    ) async {
+      if (storedPathByKey.containsKey(key)) return storedPathByKey[key];
+      storedPathByKey[key] = null;
+      // Storing bytes no parser can ever replay is pure disk cost, hence the
+      // allowlist -- applied per file, since a batch can mix a CSV with a
+      // UDDF.
+      final format = source.format;
+      if (format == null || !resyncableImportFormats.contains(format)) {
+        return null;
+      }
       try {
-        importedFilePath = await _importedFileStore.store(
-          bytes: storable.bytes,
-          originalFileName: storable.fileName,
+        storedPathByKey[key] = await _importedFileStore.store(
+          bytes: await source.readBytes(),
+          originalFileName: source.fileName,
         );
       } catch (e, stackTrace) {
         // An optional enhancement to the import, never a precondition: a full
-        // disk or an unavailable documents directory costs the resync path,
-        // not the dives.
+        // disk, an unreadable file, or an unavailable documents directory
+        // costs that file's dives their resync path, not the dives
+        // themselves, and never the other files in the batch.
         _log.warning(
-          'Could not store the imported file; '
-          'the import continues without a resync path',
+          'Could not store the imported file ${source.fileName}; '
+          'the import continues without a resync path for it',
           error: e,
           stackTrace: stackTrace,
         );
       }
-      return importedFilePath;
+      return storedPathByKey[key];
     }
 
     for (final i in sortedSelected) {
@@ -2403,6 +2427,18 @@ class UddfEntityImporter {
       // exactly, which is every foreign UDDF file and every older export.
       final sourceEntries = _entriesForDive(diveData, dataSourcesByDiveRef);
 
+      // Which file this dive came from. A merged batch payload stamps every
+      // item with `_sourceFileId`; the display name it also carries is not a
+      // key, because two files picked from different folders can share a
+      // basename and one file's stored copy must never be attached to
+      // another file's dives. An unstamped dive is the single-file flow.
+      final sourceFileId = diveData['_sourceFileId'] as String?;
+      final source = sourceFileId != null
+          ? sourceFilesById[sourceFileId]
+          : singleFileSource;
+      final diveSourceFileName = source?.fileName ?? sourceFileName;
+      final diveSourceFormat = source?.format ?? sourceFormat;
+
       if (sourceEntries.isEmpty) {
         final dataSourceId = _uuid.v4();
 
@@ -2414,9 +2450,16 @@ class UddfEntityImporter {
             computerId: Value(computerId),
             computerModel: Value(diveData['diveComputerModel'] as String?),
             computerSerial: Value(diveData['diveComputerSerial'] as String?),
-            sourceFileName: Value(sourceFileName),
-            sourceFileFormat: Value(sourceFormat?.name ?? 'uddf'),
-            importedFilePath: Value(await storeImportedFileOnce()),
+            sourceFileName: Value(diveSourceFileName),
+            sourceFileFormat: Value(diveSourceFormat?.name ?? 'uddf'),
+            importedFilePath: Value(
+              source == null
+                  ? null
+                  : await storeImportedFileOnce(
+                      sourceFileId ?? _singleSourceKey,
+                      source,
+                    ),
+            ),
             sourceUuid: Value(diveData['sourceUuid'] as String?),
             maxDepth: Value(asDoubleOrNull(diveData['maxDepth'])),
             avgDepth: Value(asDoubleOrNull(diveData['avgDepth'])),
@@ -2442,7 +2485,7 @@ class UddfEntityImporter {
             diveId: diveId,
             computerIdByKey: computerIdByKey,
             fallbackComputerId: computerId,
-            sourceFileName: sourceFileName,
+            sourceFileName: diveSourceFileName,
             now: now,
           ),
         );
