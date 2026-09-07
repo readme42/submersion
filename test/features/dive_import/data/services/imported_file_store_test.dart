@@ -23,21 +23,32 @@ void main() {
     }
   });
 
-  test('copies bytes into <docs>/imported/<contentHash><ext>', () async {
-    final bytes = Uint8List.fromList([1, 2, 3, 4]);
+  test(
+    'copies bytes into <docs>/Submersion/imported/<contentHash><ext>',
+    () async {
+      final bytes = Uint8List.fromList([1, 2, 3, 4]);
 
-    final path = await store.store(
-      bytes: bytes,
-      originalFileName: 'my dive.uddf',
-    );
+      final path = await store.store(
+        bytes: bytes,
+        originalFileName: 'my dive.uddf',
+      );
 
-    expect(path, 'imported/${sha256.convert(bytes)}.uddf');
-    expect(
-      await store.absolutePathFor(path),
-      p.join(tempDocsDir.path, 'imported', '${sha256.convert(bytes)}.uddf'),
-    );
-    expect(await File(await store.absolutePathFor(path)).readAsBytes(), bytes);
-  });
+      expect(path, 'imported/${sha256.convert(bytes)}.uddf');
+      expect(
+        await store.absolutePathFor(path),
+        p.join(
+          tempDocsDir.path,
+          'Submersion',
+          'imported',
+          '${sha256.convert(bytes)}.uddf',
+        ),
+      );
+      expect(
+        await File(await store.absolutePathFor(path)).readAsBytes(),
+        bytes,
+      );
+    },
+  );
 
   test(
     'preserves an extensionless original file name with no extension',
@@ -56,7 +67,9 @@ void main() {
     final second = await store.store(bytes: bytes, originalFileName: 'a.uddf');
 
     expect(second, first);
-    final entries = Directory(p.join(tempDocsDir.path, 'imported')).listSync();
+    final entries = Directory(
+      p.join(tempDocsDir.path, 'Submersion', 'imported'),
+    ).listSync();
     expect(entries, hasLength(1));
   });
 
@@ -73,16 +86,21 @@ void main() {
     expect(a, isNot(b));
   });
 
-  test('directory resolves to <docs>/imported without creating it', () async {
-    final dir = await store.directory();
+  test(
+    'directory resolves to <docs>/Submersion/imported without creating it',
+    () async {
+      final dir = await store.directory();
 
-    expect(dir.path, p.join(tempDocsDir.path, 'imported'));
-    expect(await dir.exists(), isFalse);
-  });
+      expect(dir.path, p.join(tempDocsDir.path, 'Submersion', 'imported'));
+      expect(await dir.exists(), isFalse);
+    },
+  );
 
   test('read returns null for a path that does not exist', () async {
     expect(
-      await store.read(p.join(tempDocsDir.path, 'imported', 'missing.uddf')),
+      await store.read(
+        p.join(tempDocsDir.path, 'Submersion', 'imported', 'missing.uddf'),
+      ),
       isNull,
     );
   });
@@ -141,11 +159,15 @@ void main() {
       addTearDown(() async {
         if (await moved.exists()) await moved.delete(recursive: true);
       });
-      await Directory(p.join(moved.path, 'imported')).create(recursive: true);
-      for (final entry in Directory(p.join(docs.path, 'imported')).listSync()) {
-        await File(
-          entry.path,
-        ).copy(p.join(moved.path, 'imported', p.basename(entry.path)));
+      await Directory(
+        p.join(moved.path, 'Submersion', 'imported'),
+      ).create(recursive: true);
+      for (final entry in Directory(
+        p.join(docs.path, 'Submersion', 'imported'),
+      ).listSync()) {
+        await File(entry.path).copy(
+          p.join(moved.path, 'Submersion', 'imported', p.basename(entry.path)),
+        );
       }
       await docs.delete(recursive: true);
       docs = moved;
@@ -192,6 +214,102 @@ void main() {
     });
   });
 
+  group(
+    'migration off the misplaced <docs>/imported/ location (issue #478)',
+    () {
+      late Directory legacyDir;
+      late Directory destDir;
+
+      setUp(() {
+        legacyDir = Directory(p.join(tempDocsDir.path, 'imported'));
+        destDir = Directory(p.join(tempDocsDir.path, 'Submersion', 'imported'));
+      });
+
+      test('moves a file already sitting at the old <docs>/imported/ location '
+          'into <docs>/Submersion/imported/', () async {
+        await legacyDir.create(recursive: true);
+        final bytes = Uint8List.fromList([1, 2, 3]);
+        final name = '${sha256.convert(bytes)}.uddf';
+        await File(
+          p.join(legacyDir.path, name),
+        ).writeAsBytes(bytes, flush: true);
+
+        // A row recorded before the fix: relative, resolved against the old
+        // root, but the string itself never changes.
+        final storedPath = 'imported/$name';
+
+        expect(await store.read(storedPath), bytes);
+        expect(await File(p.join(legacyDir.path, name)).exists(), isFalse);
+        expect(await File(p.join(destDir.path, name)).readAsBytes(), bytes);
+      });
+
+      test('skips a legacy file when the destination already holds a file by '
+          'that name, without deleting either copy', () async {
+        await legacyDir.create(recursive: true);
+        await destDir.create(recursive: true);
+        const name = 'clash.uddf';
+        await File(
+          p.join(legacyDir.path, name),
+        ).writeAsBytes([9, 9], flush: true);
+        await File(
+          p.join(destDir.path, name),
+        ).writeAsBytes([1, 1], flush: true);
+
+        await store.directory(); // triggers the migration sweep
+
+        expect(await File(p.join(legacyDir.path, name)).readAsBytes(), [9, 9]);
+        expect(await File(p.join(destDir.path, name)).readAsBytes(), [1, 1]);
+      });
+
+      test('is a no-op when there is nothing at the old location', () async {
+        final dir = await store.directory();
+
+        expect(await legacyDir.exists(), isFalse);
+        expect(await dir.exists(), isFalse);
+      });
+
+      test('runs at most once per store instance', () async {
+        await legacyDir.create(recursive: true);
+        await File(
+          p.join(legacyDir.path, 'a.uddf'),
+        ).writeAsBytes([1], flush: true);
+
+        await store.directory();
+        // A file dropped back into the legacy folder after the first sweep
+        // must not be swept again by the same store instance.
+        await File(
+          p.join(legacyDir.path, 'a.uddf'),
+        ).writeAsBytes([2], flush: true);
+        await store.directory();
+
+        expect(await File(p.join(legacyDir.path, 'a.uddf')).readAsBytes(), [2]);
+      });
+
+      test('a failure moving one legacy file does not stop the store or read '
+          'that triggered it', () async {
+        await legacyDir.create(recursive: true);
+        final bytes = Uint8List.fromList([4, 4]);
+        final name = '${sha256.convert(bytes)}.uddf';
+        await File(
+          p.join(legacyDir.path, name),
+        ).writeAsBytes(bytes, flush: true);
+        // Squat on the destination filename with a directory, so the rename
+        // this store attempts for it fails; the migration must swallow that
+        // and let the read that triggered it succeed via a fresh copy.
+        await Directory(p.join(destDir.path, name)).create(recursive: true);
+
+        final freshBytes = Uint8List.fromList([5, 5, 5]);
+        final path = await store.store(
+          bytes: freshBytes,
+          originalFileName: 'ok.uddf',
+        );
+
+        expect(await store.read(path), freshBytes);
+        expect(await File(p.join(legacyDir.path, name)).exists(), isTrue);
+      });
+    },
+  );
+
   test('rewrites a destination truncated by a crash mid-write', () async {
     // A process that died inside writeAsBytes leaves a short file at the
     // content-hash path. Reusing it would feed every later resync truncated
@@ -199,11 +317,12 @@ void main() {
     final bytes = Uint8List.fromList(List<int>.generate(64, (i) => i));
     final destPath = p.join(
       tempDocsDir.path,
+      'Submersion',
       'imported',
       '${sha256.convert(bytes)}.uddf',
     );
     await Directory(
-      p.join(tempDocsDir.path, 'imported'),
+      p.join(tempDocsDir.path, 'Submersion', 'imported'),
     ).create(recursive: true);
     await File(destPath).writeAsBytes(bytes.sublist(0, 10), flush: true);
 
@@ -220,7 +339,7 @@ void main() {
     );
 
     final entries = Directory(
-      p.join(tempDocsDir.path, 'imported'),
+      p.join(tempDocsDir.path, 'Submersion', 'imported'),
     ).listSync().map((e) => p.basename(e.path)).toList();
     expect(entries, hasLength(1));
     expect(entries.single, endsWith('.uddf'));
@@ -232,6 +351,7 @@ void main() {
     final bytes = Uint8List.fromList([7, 7, 7]);
     final destPath = p.join(
       tempDocsDir.path,
+      'Submersion',
       'imported',
       '${sha256.convert(bytes)}.uddf',
     );
@@ -243,7 +363,7 @@ void main() {
     );
 
     final entries = Directory(
-      p.join(tempDocsDir.path, 'imported'),
+      p.join(tempDocsDir.path, 'Submersion', 'imported'),
     ).listSync().map((e) => p.basename(e.path)).toList();
     expect(entries, [p.basename(destPath)]);
   });
