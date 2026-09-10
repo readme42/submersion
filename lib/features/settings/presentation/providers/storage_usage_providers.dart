@@ -20,6 +20,10 @@ import 'package:submersion/features/media_store/presentation/providers/media_sto
 import 'package:submersion/features/settings/presentation/providers/storage_providers.dart';
 
 /// The real inventory, wired to path_provider and the live services.
+// no-tick: builds the StorageInventory SERVICE, not a measurement. Every size
+// it is given -- importedFileBytes included -- is a callback the inventory
+// invokes while the screen measures, so this provider caches no row that could
+// go stale, and the screen carries its own Recalculate action.
 final storageInventoryProvider = Provider<StorageInventory>((ref) {
   // Memoized because the local cache database and the two thumbnail categories
   // each resolve it, and it is a platform channel round trip that returns the
