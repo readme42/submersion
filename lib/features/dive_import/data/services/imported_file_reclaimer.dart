@@ -14,6 +14,11 @@ import 'package:submersion/features/dive_import/data/repositories/imported_file_
 /// tombstone -- calls [reclaimOrphans] afterwards rather than reasoning about
 /// the refcount itself.
 ///
+/// Reclamation stays local: a device never tells its peers to drop a stored
+/// file. One that is a sync behind still has the dive, and would be told to
+/// throw away bytes it needs. So each device decides from its own rows, which
+/// is why the sync path sweeps as well, right after it applies what it pulled.
+///
 /// The refcount is the anti-join, not bookkeeping the callers carry: the
 /// sweep asks which rows nothing names any more, which is the same answer
 /// whatever deleted them, and is also the answer for a row orphaned by an
