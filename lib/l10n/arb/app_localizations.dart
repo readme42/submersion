@@ -28417,6 +28417,12 @@ abstract class AppLocalizations {
   /// **'Finding'**
   String get settings_conflict_ref_finding;
 
+  /// No description provided for @settings_conflict_ref_importedFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported file'**
+  String get settings_conflict_ref_importedFile;
+
   /// No description provided for @settings_conflict_ref_instructor.
   ///
   /// In en, this message translates to:

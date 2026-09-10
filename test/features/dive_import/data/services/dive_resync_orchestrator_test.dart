@@ -4,18 +4,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/features/dive_import/data/services/dive_resync_orchestrator.dart';
 import 'package:submersion/features/dive_import/domain/dive_resync_failure.dart';
-import 'package:submersion/features/dive_import/data/services/imported_file_store.dart';
+import 'package:submersion/features/dive_import/data/repositories/imported_file_repository.dart';
 import 'package:submersion/features/universal_import/data/models/import_enums.dart';
 import 'package:submersion/features/universal_import/data/models/import_payload.dart';
 import 'package:submersion/features/universal_import/data/models/import_options.dart';
 import 'package:submersion/features/universal_import/data/parsers/import_parser.dart';
 
-class _FakeImportedFileStore extends ImportedFileStore {
+class _FakeImportedFiles extends ImportedFileRepository {
   final Map<String, Uint8List> files;
-  _FakeImportedFileStore(this.files);
+  _FakeImportedFiles(this.files);
 
   @override
-  Future<Uint8List?> read(String path) async => files[path];
+  Future<Uint8List?> read(String id) async => files[id];
 }
 
 class _FakeParser implements ImportParser {
@@ -45,7 +45,7 @@ void main() {
     required DateTime dateTime,
     required double maxDepth,
     required int bottomTimeSeconds,
-    required String importedFilePath,
+    required String importedFileId,
     String sourceFileFormat = 'uddf',
   }) async {
     const diveId = 'dive-1';
@@ -71,7 +71,7 @@ void main() {
             importedAt: dateTime,
             createdAt: dateTime,
             sourceFileFormat: Value(sourceFileFormat),
-            importedFilePath: Value(importedFilePath),
+            importedFileId: Value(importedFileId),
           ),
         );
     return diveId;
@@ -91,7 +91,7 @@ void main() {
         );
     final orchestrator = DiveResyncOrchestrator(
       db: db,
-      importedFileStore: _FakeImportedFileStore(const {}),
+      importedFiles: _FakeImportedFiles(const {}),
       parserFor: (_) => throw StateError('must not be called'),
     );
 
@@ -104,7 +104,7 @@ void main() {
   test('fails cleanly for a dive that no longer exists', () async {
     final orchestrator = DiveResyncOrchestrator(
       db: db,
-      importedFileStore: _FakeImportedFileStore(const {}),
+      importedFiles: _FakeImportedFiles(const {}),
       parserFor: (_) => throw StateError('must not be called'),
     );
 
@@ -114,26 +114,29 @@ void main() {
     expect(outcome.failureReason, DiveResyncFailure.diveMissing);
   });
 
-  test('fails cleanly when the stored file is missing on disk', () async {
-    final dateTime = DateTime(2026, 9, 1, 9);
-    final diveId = await seedDiveWithSource(
-      dateTime: dateTime,
-      maxDepth: 18.0,
-      bottomTimeSeconds: 40 * 60,
-      importedFilePath: '/fake/imported/src-1.uddf',
-    );
+  test(
+    'fails cleanly when this device does not hold the stored file',
+    () async {
+      final dateTime = DateTime(2026, 9, 1, 9);
+      final diveId = await seedDiveWithSource(
+        dateTime: dateTime,
+        maxDepth: 18.0,
+        bottomTimeSeconds: 40 * 60,
+        importedFileId: 'file-uddf',
+      );
 
-    final orchestrator = DiveResyncOrchestrator(
-      db: db,
-      importedFileStore: _FakeImportedFileStore(const {}),
-      parserFor: (_) => throw StateError('must not be called'),
-    );
+      final orchestrator = DiveResyncOrchestrator(
+        db: db,
+        importedFiles: _FakeImportedFiles(const {}),
+        parserFor: (_) => throw StateError('must not be called'),
+      );
 
-    final outcome = await orchestrator.resync(diveId);
+      final outcome = await orchestrator.resync(diveId);
 
-    expect(outcome.succeeded, isFalse);
-    expect(outcome.failureReason, DiveResyncFailure.storedFileMissing);
-  });
+      expect(outcome.succeeded, isFalse);
+      expect(outcome.failureReason, DiveResyncFailure.storedFileMissing);
+    },
+  );
 
   test('fails cleanly for a format resync does not support', () async {
     final dateTime = DateTime(2026, 9, 1, 9);
@@ -141,15 +144,13 @@ void main() {
       dateTime: dateTime,
       maxDepth: 18.0,
       bottomTimeSeconds: 40 * 60,
-      importedFilePath: '/fake/imported/src-1.csv',
+      importedFileId: 'file-csv',
       sourceFileFormat: 'csv',
     );
 
     final orchestrator = DiveResyncOrchestrator(
       db: db,
-      importedFileStore: _FakeImportedFileStore({
-        '/fake/imported/src-1.csv': Uint8List(0),
-      }),
+      importedFiles: _FakeImportedFiles({'file-csv': Uint8List(0)}),
       parserFor: (_) => throw StateError('must not be called'),
     );
 
@@ -165,15 +166,13 @@ void main() {
       dateTime: dateTime,
       maxDepth: 18.0,
       bottomTimeSeconds: 40 * 60,
-      importedFilePath: '/fake/imported/src-1.bin',
+      importedFileId: 'file-bin',
       sourceFileFormat: 'someFutureFormatThatDoesNotExistYet',
     );
 
     final orchestrator = DiveResyncOrchestrator(
       db: db,
-      importedFileStore: _FakeImportedFileStore({
-        '/fake/imported/src-1.bin': Uint8List(0),
-      }),
+      importedFiles: _FakeImportedFiles({'file-bin': Uint8List(0)}),
       parserFor: (_) => throw StateError('must not be called'),
     );
 
@@ -189,7 +188,7 @@ void main() {
       dateTime: dateTime,
       maxDepth: 18.0,
       bottomTimeSeconds: 40 * 60,
-      importedFilePath: '/fake/imported/src-1.uddf',
+      importedFileId: 'file-uddf',
     );
 
     final payload = ImportPayload(
@@ -211,9 +210,7 @@ void main() {
 
     final orchestrator = DiveResyncOrchestrator(
       db: db,
-      importedFileStore: _FakeImportedFileStore({
-        '/fake/imported/src-1.uddf': Uint8List(0),
-      }),
+      importedFiles: _FakeImportedFiles({'file-uddf': Uint8List(0)}),
       parserFor: (_) => _FakeParser(payload),
     );
 
@@ -232,7 +229,7 @@ void main() {
       dateTime: dateTime,
       maxDepth: 18.0,
       bottomTimeSeconds: 40 * 60,
-      importedFilePath: '/fake/imported/src-1.uddf',
+      importedFileId: 'file-uddf',
     );
     // A second source makes the dive multi-source, so the writer refuses to
     // touch the profile strand and the caller has to be able to say so.
@@ -262,9 +259,7 @@ void main() {
 
     final orchestrator = DiveResyncOrchestrator(
       db: db,
-      importedFileStore: _FakeImportedFileStore({
-        '/fake/imported/src-1.uddf': Uint8List(0),
-      }),
+      importedFiles: _FakeImportedFiles({'file-uddf': Uint8List(0)}),
       parserFor: (_) => _FakeParser(payload),
     );
 
@@ -280,7 +275,7 @@ void main() {
       dateTime: dateTime,
       maxDepth: 18.0,
       bottomTimeSeconds: 40 * 60,
-      importedFilePath: '/fake/imported/src-1.uddf',
+      importedFileId: 'file-uddf',
     );
 
     final payload = ImportPayload(
@@ -297,9 +292,7 @@ void main() {
 
     final orchestrator = DiveResyncOrchestrator(
       db: db,
-      importedFileStore: _FakeImportedFileStore({
-        '/fake/imported/src-1.uddf': Uint8List(0),
-      }),
+      importedFiles: _FakeImportedFiles({'file-uddf': Uint8List(0)}),
       parserFor: (_) => _FakeParser(payload),
     );
 

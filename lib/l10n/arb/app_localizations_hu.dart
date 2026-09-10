@@ -17224,6 +17224,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get settings_conflict_ref_finding => 'Eszrevetel';
 
   @override
+  String get settings_conflict_ref_importedFile => 'Importált fájl';
+
+  @override
   String get settings_conflict_ref_instructor => 'Oktato';
 
   @override

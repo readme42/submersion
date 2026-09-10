@@ -5376,6 +5376,7 @@
   "settings_conflict_ref_equipment": "装备",
   "settings_conflict_ref_equipmentSet": "装备套装",
   "settings_conflict_ref_finding": "发现项",
+  "settings_conflict_ref_importedFile": "导入的文件",
   "settings_conflict_ref_instructor": "教练",
   "settings_conflict_ref_linkedDive": "关联潜水",
   "settings_conflict_ref_media": "媒体",

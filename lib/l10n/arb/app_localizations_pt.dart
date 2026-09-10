@@ -17280,6 +17280,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settings_conflict_ref_finding => 'Constatacao';
 
   @override
+  String get settings_conflict_ref_importedFile => 'Arquivo importado';
+
+  @override
   String get settings_conflict_ref_instructor => 'Instrutor';
 
   @override

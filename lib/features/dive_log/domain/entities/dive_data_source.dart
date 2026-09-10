@@ -16,7 +16,7 @@ class DiveDataSource extends Equatable {
   final String? sourceFormat;
   final String? sourceFileName;
   final String? sourceFileFormat;
-  final String? importedFilePath;
+  final String? importedFileId;
   final double? maxDepth;
   final double? avgDepth;
   final int? duration;
@@ -49,7 +49,7 @@ class DiveDataSource extends Equatable {
     this.sourceFormat,
     this.sourceFileName,
     this.sourceFileFormat,
-    this.importedFilePath,
+    this.importedFileId,
     this.maxDepth,
     this.avgDepth,
     this.duration,
@@ -83,7 +83,7 @@ class DiveDataSource extends Equatable {
     String? sourceFormat,
     String? sourceFileName,
     String? sourceFileFormat,
-    String? importedFilePath,
+    String? importedFileId,
     double? maxDepth,
     double? avgDepth,
     int? duration,
@@ -116,7 +116,7 @@ class DiveDataSource extends Equatable {
       sourceFormat: sourceFormat ?? this.sourceFormat,
       sourceFileName: sourceFileName ?? this.sourceFileName,
       sourceFileFormat: sourceFileFormat ?? this.sourceFileFormat,
-      importedFilePath: importedFilePath ?? this.importedFilePath,
+      importedFileId: importedFileId ?? this.importedFileId,
       maxDepth: maxDepth ?? this.maxDepth,
       avgDepth: avgDepth ?? this.avgDepth,
       duration: duration ?? this.duration,
@@ -152,7 +152,7 @@ class DiveDataSource extends Equatable {
     sourceFormat,
     sourceFileName,
     sourceFileFormat,
-    importedFilePath,
+    importedFileId,
     maxDepth,
     avgDepth,
     duration,

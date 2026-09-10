@@ -10299,6 +10299,7 @@
   "settings_conflict_ref_equipment": "Equipment",
   "settings_conflict_ref_equipmentSet": "Equipment set",
   "settings_conflict_ref_finding": "Finding",
+  "settings_conflict_ref_importedFile": "Imported file",
   "settings_conflict_ref_instructor": "Instructor",
   "settings_conflict_ref_linkedDive": "Linked dive",
   "settings_conflict_ref_media": "Media",

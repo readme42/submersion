@@ -38,7 +38,7 @@ void main() {
     Future<Directory> Function()? networkImageDirectory,
     Future<String?> Function()? backupsDirectoryPath,
     Future<String> Function()? databasePath,
-    Future<Directory> Function()? importedFilesDirectory,
+    Future<int> Function()? importedFileBytes,
   }) {
     return StorageInventory(
       supportDirectory: () async => support,
@@ -52,9 +52,7 @@ void main() {
       networkImageDirectory:
           networkImageDirectory ??
           () async => Directory(p.join(temporary.path, 'libCachedImageData')),
-      importedFilesDirectory:
-          importedFilesDirectory ??
-          () async => Directory(p.join(documents.path, 'imported')),
+      importedFileBytes: importedFileBytes ?? () async => 0,
     );
   }
 
@@ -328,12 +326,11 @@ void main() {
     },
   );
 
-  test('imported files walk the imported/ directory', () async {
-    await writeFile(p.join(documents.path, 'imported', 'aabbcc.uddf'), 321);
-    await writeFile(p.join(documents.path, 'imported', 'ddeeff.fit'), 44);
+  test('imported files report what the stored rows occupy', () async {
+    final inventory = build(importedFileBytes: () async => 365);
 
     expect(
-      await categoryFor(build(), StorageCategoryId.importedFiles).measure(),
+      await categoryFor(inventory, StorageCategoryId.importedFiles).measure(),
       365,
     );
   });

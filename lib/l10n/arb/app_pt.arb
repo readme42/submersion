@@ -5208,6 +5208,7 @@
   "settings_conflict_ref_equipment": "Equipamento",
   "settings_conflict_ref_equipmentSet": "Conjunto de equipamentos",
   "settings_conflict_ref_finding": "Constatacao",
+  "settings_conflict_ref_importedFile": "Arquivo importado",
   "settings_conflict_ref_instructor": "Instrutor",
   "settings_conflict_ref_linkedDive": "Mergulho vinculado",
   "settings_conflict_ref_media": "Midia",

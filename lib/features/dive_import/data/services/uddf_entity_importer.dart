@@ -7,7 +7,7 @@ import 'package:submersion/core/database/database.dart'
     show DiveDataSourcesCompanion, DiveSitesCompanion, DivesCompanion;
 import 'package:submersion/core/services/export/export_service.dart';
 import 'package:submersion/core/utils/deco_dive_detector.dart';
-import 'package:submersion/features/dive_import/data/services/imported_file_store.dart';
+import 'package:submersion/features/dive_import/data/repositories/imported_file_repository.dart';
 import 'package:submersion/features/dive_import/domain/import_source_file.dart';
 import 'package:submersion/features/dive_import/domain/resyncable_import_formats.dart';
 import 'package:submersion/features/dive_log/domain/services/dive_altitude_enricher.dart';
@@ -266,19 +266,19 @@ class UddfEntityImporter {
   /// ISO 639-1 code for reverse-geocoded country/region (issue #1187).
   final String _placeNameLanguage;
 
-  final ImportedFileStore _importedFileStore;
+  final ImportedFileRepository _importedFiles;
 
   UddfEntityImporter({
     TankPresetEntity? defaultTankPreset,
     int defaultStartPressure = 200,
     bool applyDefaultTankToImports = false,
     String placeNameLanguage = LocationService.defaultLanguageCode,
-    ImportedFileStore? importedFileStore,
+    ImportedFileRepository? importedFiles,
   }) : _defaultTankPreset = defaultTankPreset,
        _defaultStartPressure = defaultStartPressure,
        _applyDefaultTankToImports = applyDefaultTankToImports,
        _placeNameLanguage = placeNameLanguage,
-       _importedFileStore = importedFileStore ?? ImportedFileStore();
+       _importedFiles = importedFiles ?? ImportedFileRepository();
 
   /// Parse a value that may be either an enum instance or a string matching
   /// an enum name. Returns null if the value is null or unrecognised.
@@ -1702,11 +1702,11 @@ class UddfEntityImporter {
       dataSourcesByDiveRef: dataSourcesByDiveRef,
     );
 
-    // One stored copy per source file, shared by every dive's
+    // One stored row per source file, shared by every dive's
     // dive_data_sources row that came from it: a multi-dive logbook is one
     // file, and resync re-reads it and matches within it per dive anyway
     // (issue #478). A batch import carries one entry per picked file, so each
-    // dive points at the copy of the file it actually came from.
+    // dive points at the row for the file it actually came from.
     final singleFileSource = sourceFileBytes != null && sourceFileName != null
         ? ImportSourceFile(
             fileName: sourceFileName,
@@ -1715,23 +1715,22 @@ class UddfEntityImporter {
           )
         : null;
 
-    // Written on first use rather than up front. `imported/` has no orphan
-    // sweep and the deletion cascade refcounts off the rows that name a path,
-    // so a copy no row will ever reference is unreachable garbage: only the
-    // synthesised source row below carries a `sourceFileFormat` describing
-    // these bytes, and a run can end before writing one (a cancel, or an
-    // export whose <source> entries define the rows instead).
+    // Written on first use rather than up front, because only the
+    // synthesised source row below names the stored row and a run can end
+    // before writing one (a cancel, or an export whose <source> entries
+    // define the rows instead); an unnamed row is just garbage for the
+    // refcounted sweep to collect.
     //
     // Keyed by source file, so bytes are read one file at a time and let go
     // again -- a folder pick must never hold every raw buffer at once. A key
     // present with a null value is a file already tried and given up on.
-    final storedPathByKey = <String, String?>{};
+    final storedIdByKey = <String, String?>{};
     Future<String?> storeImportedFileOnce(
       String key,
       ImportSourceFile source,
     ) async {
-      if (storedPathByKey.containsKey(key)) return storedPathByKey[key];
-      storedPathByKey[key] = null;
+      if (storedIdByKey.containsKey(key)) return storedIdByKey[key];
+      storedIdByKey[key] = null;
       // Storing bytes no parser can ever replay is pure disk cost, hence the
       // allowlist -- applied per file, since a batch can mix a CSV with a
       // UDDF.
@@ -1740,15 +1739,16 @@ class UddfEntityImporter {
         return null;
       }
       try {
-        storedPathByKey[key] = await _importedFileStore.store(
+        storedIdByKey[key] = await _importedFiles.store(
           bytes: await source.readBytes(),
-          originalFileName: source.fileName,
+          fileName: source.fileName,
+          now: now,
         );
       } catch (e, stackTrace) {
-        // An optional enhancement to the import, never a precondition: a full
-        // disk, an unreadable file, or an unavailable documents directory
-        // costs that file's dives their resync path, not the dives
-        // themselves, and never the other files in the batch.
+        // An optional enhancement to the import, never a precondition: a
+        // full disk, an unreadable file, or a write that will not take costs
+        // that file's dives their resync path, not the dives themselves, and
+        // never the other files in the batch.
         _log.warning(
           'Could not store the imported file ${source.fileName}; '
           'the import continues without a resync path for it',
@@ -1756,7 +1756,7 @@ class UddfEntityImporter {
           stackTrace: stackTrace,
         );
       }
-      return storedPathByKey[key];
+      return storedIdByKey[key];
     }
 
     for (final i in sortedSelected) {
@@ -2452,7 +2452,7 @@ class UddfEntityImporter {
             computerSerial: Value(diveData['diveComputerSerial'] as String?),
             sourceFileName: Value(diveSourceFileName),
             sourceFileFormat: Value(diveSourceFormat?.name ?? 'uddf'),
-            importedFilePath: Value(
+            importedFileId: Value(
               source == null
                   ? null
                   : await storeImportedFileOnce(

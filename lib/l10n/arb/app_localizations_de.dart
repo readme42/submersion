@@ -17252,6 +17252,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settings_conflict_ref_finding => 'Befund';
 
   @override
+  String get settings_conflict_ref_importedFile => 'Importierte Datei';
+
+  @override
   String get settings_conflict_ref_instructor => 'Instructor';
 
   @override

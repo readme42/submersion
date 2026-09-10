@@ -16987,6 +16987,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_conflict_ref_finding => 'Finding';
 
   @override
+  String get settings_conflict_ref_importedFile => 'Imported file';
+
+  @override
   String get settings_conflict_ref_instructor => 'Instructor';
 
   @override

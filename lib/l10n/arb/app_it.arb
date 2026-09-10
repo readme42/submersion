@@ -5124,6 +5124,7 @@
   "settings_conflict_ref_equipment": "Attrezzatura",
   "settings_conflict_ref_equipmentSet": "Set di attrezzatura",
   "settings_conflict_ref_finding": "Rilievo",
+  "settings_conflict_ref_importedFile": "File importato",
   "settings_conflict_ref_instructor": "Istruttore",
   "settings_conflict_ref_linkedDive": "Immersione collegata",
   "settings_conflict_ref_media": "Media",

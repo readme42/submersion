@@ -17340,6 +17340,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settings_conflict_ref_finding => 'Anomalie';
 
   @override
+  String get settings_conflict_ref_importedFile => 'Fichier importé';
+
+  @override
   String get settings_conflict_ref_instructor => 'Moniteur';
 
   @override

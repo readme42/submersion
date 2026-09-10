@@ -1,0 +1,104 @@
+import 'package:crypto/crypto.dart';
+import 'package:drift/drift.dart';
+
+import 'package:submersion/core/data/repositories/sync_repository.dart';
+import 'package:submersion/core/database/database.dart';
+import 'package:submersion/core/services/database_service.dart';
+import 'package:submersion/core/services/sync/sync_event_bus.dart';
+
+/// The `imported_files` rows that hold the original logbook file a dive was
+/// imported from, so a later parser fix can be replayed onto it (issue #478).
+///
+/// Content-addressed: the row id is the sha256 of the bytes, so one import run
+/// stores one row however many dives came out of the file, and re-importing
+/// the same file reuses the row it already has.
+class ImportedFileRepository {
+  ImportedFileRepository({AppDatabase Function()? database})
+    : _database = database ?? _defaultDatabase;
+
+  final AppDatabase Function() _database;
+  final SyncRepository _sync = SyncRepository();
+
+  static AppDatabase _defaultDatabase() => DatabaseService.instance.database;
+
+  /// The sync entity type of an `imported_files` row.
+  static const entityType = 'importedFiles';
+
+  /// Stores [bytes] and returns the row id to record in
+  /// `dive_data_sources.imported_file_id`.
+  ///
+  /// A second store of identical bytes is a no-op that returns the same id:
+  /// the id is the content, so there is nothing a re-store could change. That
+  /// is what keeps the refcount honest -- a row is created once and reclaimed
+  /// once.
+  Future<String> store({
+    required Uint8List bytes,
+    String? fileName,
+    DateTime? now,
+  }) async {
+    final db = _database();
+    final id = sha256.convert(bytes).toString();
+    if (await exists(id)) return id;
+
+    final stamp = (now ?? DateTime.now()).millisecondsSinceEpoch;
+    await db
+        .into(db.importedFiles)
+        .insert(
+          ImportedFilesCompanion.insert(
+            id: id,
+            bytes: bytes,
+            fileName: Value(fileName),
+            byteCount: bytes.length,
+            createdAt: stamp,
+            updatedAt: stamp,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
+    await _sync.markRecordPending(
+      entityType: entityType,
+      recordId: id,
+      localUpdatedAt: stamp,
+    );
+    SyncEventBus.notifyLocalChange();
+    return id;
+  }
+
+  /// The stored file's original bytes, or null when this device does not hold
+  /// the row. The blob column's converter inflates it.
+  Future<Uint8List?> read(String id) async {
+    final db = _database();
+    final row = await (db.select(
+      db.importedFiles,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
+    return row?.bytes;
+  }
+
+  /// Whether this device holds the row [id] names, without loading the blob.
+  ///
+  /// The reference syncs ahead of nothing in particular, and a peer below the
+  /// schema floor never sends the file at all, so a source row can legitimately
+  /// name a row that is not here.
+  Future<bool> exists(String id) async {
+    final db = _database();
+    final row =
+        await (db.selectOnly(db.importedFiles)
+              ..addColumns([db.importedFiles.id])
+              ..where(db.importedFiles.id.equals(id))
+              ..limit(1))
+            .getSingleOrNull();
+    return row != null;
+  }
+
+  /// Bytes the stored files occupy at rest, compressed as they are stored, for
+  /// the Storage Usage page.
+  Future<int> storedBytes() async {
+    final db = _database();
+    final row = await db
+        .customSelect(
+          'SELECT COALESCE(SUM(LENGTH(bytes)), 0) AS total FROM imported_files',
+          readsFrom: {db.importedFiles},
+        )
+        .getSingle();
+    return row.read<int>('total');
+  }
+}

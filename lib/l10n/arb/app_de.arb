@@ -5208,6 +5208,7 @@
   "settings_conflict_ref_equipment": "Ausrüstung",
   "settings_conflict_ref_equipmentSet": "Ausrüstungsset",
   "settings_conflict_ref_finding": "Befund",
+  "settings_conflict_ref_importedFile": "Importierte Datei",
   "settings_conflict_ref_instructor": "Instructor",
   "settings_conflict_ref_linkedDive": "Verknüpfter Tauchgang",
   "settings_conflict_ref_media": "Medien",

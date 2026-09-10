@@ -17278,6 +17278,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get settings_conflict_ref_finding => 'Rilievo';
 
   @override
+  String get settings_conflict_ref_importedFile => 'File importato';
+
+  @override
   String get settings_conflict_ref_instructor => 'Istruttore';
 
   @override

@@ -1,6 +1,6 @@
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/features/dive_import/data/services/dive_reimport_service.dart';
-import 'package:submersion/features/dive_import/data/services/imported_file_store.dart';
+import 'package:submersion/features/dive_import/data/repositories/imported_file_repository.dart';
 import 'package:submersion/features/dive_import/domain/dive_resync_failure.dart';
 import 'package:submersion/features/dive_import/domain/resyncable_import_formats.dart';
 import 'package:submersion/features/dive_import/domain/services/dive_matcher.dart';
@@ -27,8 +27,9 @@ class DiveResyncOutcome {
       profilePreserved = false;
 }
 
-/// Re-parses the file a dive was originally imported from (Task 3's stored
-/// copy) and applies the result through [DiveReimportService].
+/// Re-parses the file a dive was originally imported from (the stored
+/// `imported_files` row) and applies the result through
+/// [DiveReimportService].
 ///
 /// The stored file may be a multi-dive logbook, so the parsed dive that
 /// matches the target dive is found by content, not by position -- this
@@ -36,17 +37,17 @@ class DiveResyncOutcome {
 /// flag duplicates, rather than inventing a second matching algorithm.
 class DiveResyncOrchestrator {
   final AppDatabase db;
-  final ImportedFileStore importedFileStore;
+  final ImportedFileRepository importedFiles;
   final ImportParser Function(ImportFormat) parserFor;
   final DiveReimportService _writer;
   static const _matcher = DiveMatcher();
 
   DiveResyncOrchestrator({
     required this.db,
-    ImportedFileStore? importedFileStore,
+    ImportedFileRepository? importedFiles,
     ImportParser Function(ImportFormat)? parserFor,
     DiveReimportService? writer,
-  }) : importedFileStore = importedFileStore ?? ImportedFileStore(),
+  }) : importedFiles = importedFiles ?? ImportedFileRepository(),
        parserFor = parserFor ?? parserForFormat,
        _writer = writer ?? DiveReimportService(db: db);
 
@@ -64,8 +65,8 @@ class DiveResyncOrchestrator {
               ..where((t) => t.isPrimary.equals(true))
               ..limit(1))
             .getSingleOrNull();
-    final path = source?.importedFilePath;
-    if (source == null || path == null) {
+    final storedFileId = source?.importedFileId;
+    if (source == null || storedFileId == null) {
       return const DiveResyncOutcome.failure(DiveResyncFailure.noStoredFile);
     }
 
@@ -76,7 +77,7 @@ class DiveResyncOrchestrator {
       );
     }
 
-    final bytes = await importedFileStore.read(path);
+    final bytes = await importedFiles.read(storedFileId);
     if (bytes == null) {
       return const DiveResyncOutcome.failure(
         DiveResyncFailure.storedFileMissing,

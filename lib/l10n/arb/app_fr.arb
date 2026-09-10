@@ -5124,6 +5124,7 @@
   "settings_conflict_ref_equipment": "Équipement",
   "settings_conflict_ref_equipmentSet": "Ensemble d'équipement",
   "settings_conflict_ref_finding": "Anomalie",
+  "settings_conflict_ref_importedFile": "Fichier importé",
   "settings_conflict_ref_instructor": "Moniteur",
   "settings_conflict_ref_linkedDive": "Plongée liée",
   "settings_conflict_ref_media": "Médias",

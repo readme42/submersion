@@ -17279,6 +17279,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settings_conflict_ref_finding => 'Hallazgo';
 
   @override
+  String get settings_conflict_ref_importedFile => 'Archivo importado';
+
+  @override
   String get settings_conflict_ref_instructor => 'Instructor';
 
   @override

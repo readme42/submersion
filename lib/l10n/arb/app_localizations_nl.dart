@@ -17142,6 +17142,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settings_conflict_ref_finding => 'Bevinding';
 
   @override
+  String get settings_conflict_ref_importedFile => 'Geïmporteerd bestand';
+
+  @override
   String get settings_conflict_ref_instructor => 'Instructeur';
 
   @override

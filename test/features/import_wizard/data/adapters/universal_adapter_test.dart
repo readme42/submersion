@@ -26,7 +26,7 @@ import 'package:submersion/features/courses/presentation/providers/course_provid
 import 'package:submersion/features/dive_centers/data/repositories/dive_center_repository.dart';
 import 'package:submersion/features/dive_centers/domain/entities/dive_center.dart';
 import 'package:submersion/features/dive_centers/presentation/providers/dive_center_providers.dart';
-import 'package:submersion/features/dive_import/data/services/imported_file_store.dart';
+import 'package:submersion/features/dive_import/data/repositories/imported_file_repository.dart';
 import 'package:submersion/features/dive_import/data/services/uddf_entity_importer.dart';
 import 'package:submersion/features/dive_import/domain/services/dive_matcher.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
@@ -94,6 +94,7 @@ import 'package:submersion/features/universal_import/presentation/providers/univ
   MockSpec<UddfEntityImporter>(),
   MockSpec<DiveConsolidationService>(),
 ])
+import '../../../../helpers/test_database.dart';
 import 'universal_adapter_test.mocks.dart';
 
 typedef Override = riverpod.Override;
@@ -143,11 +144,12 @@ class _TestSettingsNotifier extends StateNotifier<AppSettings>
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-/// Fake `path_provider` platform for [ImportedFileStore]. Windows'
-/// `path_provider_windows` resolves the documents path via a native win32
-/// call rather than a `MethodChannel`, so mocking the channel does not
-/// intercept it; overriding [PathProviderPlatform.instance] directly
-/// (this codebase's existing idiom -- see media_cache_root_test.dart) does.
+/// Fake `path_provider` platform, so the batch test's picked files can live
+/// in a temp directory. Windows' `path_provider_windows` resolves the
+/// documents path via a native win32 call rather than a `MethodChannel`, so
+/// mocking the channel does not intercept it; overriding
+/// [PathProviderPlatform.instance] directly (this codebase's existing idiom
+/// -- see media_cache_root_test.dart) does.
 class _FakePathProviderPlatform extends PathProviderPlatform
     with MockPlatformInterfaceMixin {
   _FakePathProviderPlatform(this.documentsPath);
@@ -2486,32 +2488,11 @@ void main() {
       'a single-file resyncable import threads fileName/fileBytes/format '
       'from notifierState through to the persisted DiveDataSource',
       (tester) async {
-        // UddfEntityImporter's default ImportedFileStore does real
-        // Directory/File I/O against wherever path_provider resolves the
-        // documents directory. Two things matter here:
-        //
-        // 1. Overriding PathProviderPlatform.instance (this codebase's
-        //    existing fake-platform idiom -- see media_cache_root_test.dart)
-        //    routes it at a temp dir instead of the MethodChannel this test
-        //    previously mocked, which never intercepted anything: on
-        //    Windows, path_provider_windows resolves the documents path via
-        //    a native win32 call, not a MethodChannel round trip.
-        // 2. testWidgets bodies run inside a FakeAsync zone. Real dart:io
-        //    async I/O (temp dir creation, the store's own Directory/File
-        //    calls) never completes there without tester.runAsync()'s
-        //    escape hatch to the real event loop -- omitting it is what
-        //    hung this test indefinitely before this fix.
-        final previousPathProvider = PathProviderPlatform.instance;
-        final tempDir = (await tester.runAsync(
-          () => Directory.systemTemp.createTemp('universal_adapter_test_'),
-        ))!;
-        PathProviderPlatform.instance = _FakePathProviderPlatform(tempDir.path);
-        addTearDown(() async {
-          PathProviderPlatform.instance = previousPathProvider;
-          await tester.runAsync(() async {
-            if (await tempDir.exists()) await tempDir.delete(recursive: true);
-          });
-        });
+        // UddfEntityImporter's default ImportedFileRepository writes to the
+        // database, so the group needs one; the dive repository itself is
+        // still a mock, which is what the captured companion comes from.
+        final db = await setUpTestDatabase();
+        addTearDown(tearDownTestDatabase);
 
         final payload = ImportPayload(
           entities: {
@@ -2568,7 +2549,15 @@ void main() {
         final reading = capturedReadings.single;
         expect(reading.sourceFileName.value, 'dive.uddf');
         expect(reading.sourceFileFormat.value, 'uddf');
-        expect(reading.importedFilePath.value, isNotNull);
+        final storedId = reading.importedFileId.value as String?;
+        expect(storedId, isNotNull);
+        // The picked file the test notifier holds carries no bytes, so this
+        // asserts the row landed; the batch test below is where byte fidelity
+        // is pinned.
+        expect(
+          await ImportedFileRepository(database: () => db).exists(storedId!),
+          isTrue,
+        );
       },
     );
 
@@ -2579,17 +2568,8 @@ void main() {
         // Source Confirmation lets the diver correct a wrong auto-detection,
         // and the parse already runs on the override. Persisting the detected
         // format instead would hand resync the wrong parser later.
-        final previousPathProvider = PathProviderPlatform.instance;
-        final tempDir = (await tester.runAsync(
-          () => Directory.systemTemp.createTemp('universal_adapter_test_'),
-        ))!;
-        PathProviderPlatform.instance = _FakePathProviderPlatform(tempDir.path);
-        addTearDown(() async {
-          PathProviderPlatform.instance = previousPathProvider;
-          await tester.runAsync(() async {
-            if (await tempDir.exists()) await tempDir.delete(recursive: true);
-          });
-        });
+        await setUpTestDatabase();
+        addTearDown(tearDownTestDatabase);
 
         final payload = ImportPayload(
           entities: {
@@ -2654,6 +2634,8 @@ void main() {
         // The bug this regression-tests: notifierState.fileBytes/fileName are
         // the SINGLE selected file, so a multi-file pick stored nothing at all
         // and no dive ever got a resync path.
+        final db = await setUpTestDatabase();
+        addTearDown(tearDownTestDatabase);
         final previousPathProvider = PathProviderPlatform.instance;
         final tempDir = (await tester.runAsync(
           () => Directory.systemTemp.createTemp('universal_adapter_batch_'),
@@ -2764,25 +2746,16 @@ void main() {
         expect(january!.sourceFileFormat.value, 'uddf');
         expect(february!.sourceFileFormat.value, 'subsurfaceXml');
 
-        final januaryPath = january.importedFilePath.value as String?;
-        final februaryPath = february.importedFilePath.value as String?;
-        expect(januaryPath, isNotNull);
-        expect(februaryPath, isNotNull);
-        expect(januaryPath, isNot(februaryPath));
+        final januaryId = january.importedFileId.value as String?;
+        final februaryId = february.importedFileId.value as String?;
+        expect(januaryId, isNotNull);
+        expect(februaryId, isNotNull);
+        expect(januaryId, isNot(februaryId));
 
-        // Each stored copy holds the bytes of the file its dive came from.
-        // Resolve through the store rather than rebuilding its layout here,
-        // so this test follows the root wherever the store puts it.
-        final store = ImportedFileStore(
-          documentsDirectory: () async => tempDir,
-        );
-        Future<List<int>> storedBytes(String storedPath) async =>
-            File(await store.absolutePathFor(storedPath)).readAsBytes();
-
-        await tester.runAsync(() async {
-          expect(await storedBytes(januaryPath!), januaryBytes);
-          expect(await storedBytes(februaryPath!), februaryBytes);
-        });
+        // Each stored row holds the bytes of the file its dive came from.
+        final importedFiles = ImportedFileRepository(database: () => db);
+        expect(await importedFiles.read(januaryId!), januaryBytes);
+        expect(await importedFiles.read(februaryId!), februaryBytes);
       },
     );
   });

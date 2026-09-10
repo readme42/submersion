@@ -5212,6 +5212,7 @@
   "settings_conflict_ref_equipment": "ציוד",
   "settings_conflict_ref_equipmentSet": "סט ציוד",
   "settings_conflict_ref_finding": "ממצא",
+  "settings_conflict_ref_importedFile": "קובץ מיובא",
   "settings_conflict_ref_instructor": "מדריך",
   "settings_conflict_ref_linkedDive": "צלילה מקושרת",
   "settings_conflict_ref_media": "מדיה",

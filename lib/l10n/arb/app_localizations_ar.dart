@@ -16965,6 +16965,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings_conflict_ref_finding => 'الملاحظة';
 
   @override
+  String get settings_conflict_ref_importedFile => 'ملف مستورد';
+
+  @override
   String get settings_conflict_ref_instructor => 'المدرب';
 
   @override

@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:path/path.dart' as p;
 import 'package:submersion/core/constants/enums.dart';
 // Only the companion: database.dart also exports Drift row classes whose
 // names collide with the domain entities this test imports (DiveSite, Dive,
@@ -24,7 +23,7 @@ import 'package:submersion/features/certifications/domain/entities/certification
 import 'package:submersion/features/courses/data/repositories/course_repository.dart';
 import 'package:submersion/features/dive_centers/data/repositories/dive_center_repository.dart';
 import 'package:submersion/features/dive_centers/domain/entities/dive_center.dart';
-import 'package:submersion/features/dive_import/data/services/imported_file_store.dart';
+import 'package:submersion/features/dive_import/data/repositories/imported_file_repository.dart';
 import 'package:submersion/features/dive_import/data/services/uddf_entity_importer.dart';
 import 'package:submersion/features/dive_import/domain/import_source_file.dart';
 import 'package:submersion/features/import_wizard/domain/models/import_cancellation_token.dart';
@@ -68,40 +67,39 @@ import 'package:submersion/features/trips/domain/entities/trip.dart';
 ])
 import 'uddf_entity_importer_test.mocks.dart';
 
-/// Records [store] calls instead of touching disk, so tests can assert
-/// whether-and-what the importer tried to persist without a real
-/// documents directory.
-class _RecordingImportedFileStore extends ImportedFileStore {
+/// Records [store] calls instead of writing rows, so tests can assert
+/// whether-and-what the importer tried to persist without a database.
+class _RecordingImportedFiles extends ImportedFileRepository {
   int storeCalls = 0;
-  String? lastStoredPath;
+  String? lastStoredId;
 
-  /// Stored path per original file name, so a batch's per-file copies can be
-  /// told apart.
-  final storedPathByFileName = <String, String>{};
+  /// Stored row id per original file name, so a batch's per-file rows can
+  /// be told apart.
+  final storedIdByFileName = <String, String>{};
 
   @override
   Future<String> store({
     required Uint8List bytes,
-    required String originalFileName,
+    String? fileName,
+    DateTime? now,
   }) async {
     storeCalls++;
-    lastStoredPath =
-        '/fake/imported/${bytes.join('-')}${p.extension(originalFileName)}';
-    storedPathByFileName[originalFileName] = lastStoredPath!;
-    return lastStoredPath!;
+    lastStoredId = 'stored-${bytes.join('-')}';
+    storedIdByFileName[fileName ?? ''] = lastStoredId!;
+    return lastStoredId!;
   }
 }
 
-/// A store whose disk is full: [store] throws, the way a real
-/// `writeAsBytes` does when the volume is out of space or the documents
-/// directory is unavailable.
-class _FailingImportedFileStore extends ImportedFileStore {
+/// A store that cannot write: [store] throws, the way a real insert does
+/// when the volume is out of space or the database is unavailable.
+class _FailingImportedFiles extends ImportedFileRepository {
   int storeCalls = 0;
 
   @override
   Future<String> store({
     required Uint8List bytes,
-    required String originalFileName,
+    String? fileName,
+    DateTime? now,
   }) async {
     storeCalls++;
     throw Exception('No space left on device');
@@ -3423,8 +3421,8 @@ void main() {
         );
         when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
 
-        final store = _RecordingImportedFileStore();
-        final importer = UddfEntityImporter(importedFileStore: store);
+        final store = _RecordingImportedFiles();
+        final importer = UddfEntityImporter(importedFiles: store);
 
         final data = UddfImportResult(
           dives: [
@@ -3447,7 +3445,7 @@ void main() {
         ).captured;
         final reading = capturedReadings.single;
         expect(reading.sourceFileFormat.value, 'uddf');
-        expect(reading.importedFilePath.value, store.lastStoredPath);
+        expect(reading.importedFileId.value, store.lastStoredId);
         expect(store.storeCalls, 1);
       },
     );
@@ -3460,8 +3458,8 @@ void main() {
         );
         when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
 
-        final store = _RecordingImportedFileStore();
-        final importer = UddfEntityImporter(importedFileStore: store);
+        final store = _RecordingImportedFiles();
+        final importer = UddfEntityImporter(importedFiles: store);
 
         final data = UddfImportResult(
           dives: [
@@ -3484,7 +3482,7 @@ void main() {
         ).captured;
         final reading = capturedReadings.single;
         expect(reading.sourceFileFormat.value, 'csv');
-        expect(reading.importedFilePath.value, isNull);
+        expect(reading.importedFileId.value, isNull);
         expect(store.storeCalls, 0);
       },
     );
@@ -3498,8 +3496,8 @@ void main() {
       );
       when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
 
-      final store = _FailingImportedFileStore();
-      final importer = UddfEntityImporter(importedFileStore: store);
+      final store = _FailingImportedFiles();
+      final importer = UddfEntityImporter(importedFiles: store);
 
       final data = UddfImportResult(
         dives: [
@@ -3522,7 +3520,7 @@ void main() {
       final reading = verify(
         mockDiveRepo.saveComputerReading(captureAny),
       ).captured.single;
-      expect(reading.importedFilePath.value, isNull);
+      expect(reading.importedFileId.value, isNull);
     });
 
     test('stores nothing when the dives bring their own source rows', () async {
@@ -3536,8 +3534,8 @@ void main() {
       );
       when(mockDiveRepo.saveComputerReadings(any)).thenAnswer((_) async {});
 
-      final store = _RecordingImportedFileStore();
-      final importer = UddfEntityImporter(importedFileStore: store);
+      final store = _RecordingImportedFiles();
+      final importer = UddfEntityImporter(importedFiles: store);
 
       final data = UddfImportResult(
         dives: [
@@ -3571,8 +3569,8 @@ void main() {
       );
       when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
 
-      final store = _RecordingImportedFileStore();
-      final importer = UddfEntityImporter(importedFileStore: store);
+      final store = _RecordingImportedFiles();
+      final importer = UddfEntityImporter(importedFiles: store);
       final cancelToken = ImportCancellationToken()..cancel();
 
       final data = UddfImportResult(
@@ -3601,8 +3599,8 @@ void main() {
       );
       when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
 
-      final store = _RecordingImportedFileStore();
-      final importer = UddfEntityImporter(importedFileStore: store);
+      final store = _RecordingImportedFiles();
+      final importer = UddfEntityImporter(importedFiles: store);
 
       final data = UddfImportResult(
         dives: [
@@ -3628,8 +3626,8 @@ void main() {
         mockDiveRepo.saveComputerReading(captureAny),
       ).captured;
       expect(captured, hasLength(3));
-      expect(captured.map((r) => r.importedFilePath.value).toSet(), {
-        store.lastStoredPath,
+      expect(captured.map((r) => r.importedFileId.value).toSet(), {
+        store.lastStoredId,
       });
     });
 
@@ -3640,8 +3638,8 @@ void main() {
       );
       when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
 
-      final store = _RecordingImportedFileStore();
-      final importer = UddfEntityImporter(importedFileStore: store);
+      final store = _RecordingImportedFiles();
+      final importer = UddfEntityImporter(importedFiles: store);
 
       var januaryReads = 0;
       var februaryReads = 0;
@@ -3700,8 +3698,8 @@ void main() {
       ).captured;
       expect(captured, hasLength(3));
 
-      final januaryPath = store.storedPathByFileName['january.uddf'];
-      final februaryPath = store.storedPathByFileName['february.ssrf'];
+      final januaryPath = store.storedIdByFileName['january.uddf'];
+      final februaryPath = store.storedIdByFileName['february.ssrf'];
       expect(januaryPath, isNotNull);
       expect(februaryPath, isNotNull);
       expect(januaryPath, isNot(februaryPath));
@@ -3710,7 +3708,7 @@ void main() {
       final formatsByName = <String?, Set<String?>>{};
       for (final reading in captured) {
         (pathsByName[reading.sourceFileName.value] ??= {}).add(
-          reading.importedFilePath.value,
+          reading.importedFileId.value,
         );
         (formatsByName[reading.sourceFileName.value] ??= {}).add(
           reading.sourceFileFormat.value,
@@ -3729,8 +3727,8 @@ void main() {
       );
       when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
 
-      final store = _RecordingImportedFileStore();
-      final importer = UddfEntityImporter(importedFileStore: store);
+      final store = _RecordingImportedFiles();
+      final importer = UddfEntityImporter(importedFiles: store);
 
       final data = UddfImportResult(
         dives: [
@@ -3769,10 +3767,10 @@ void main() {
       ).captured;
       final byName = {
         for (final reading in captured)
-          reading.sourceFileName.value: reading.importedFilePath.value,
+          reading.sourceFileName.value: reading.importedFileId.value,
       };
       expect(byName['gone.uddf'], isNull);
-      expect(byName['here.uddf'], store.storedPathByFileName['here.uddf']);
+      expect(byName['here.uddf'], store.storedIdByFileName['here.uddf']);
     });
 
     test(
@@ -3783,8 +3781,8 @@ void main() {
         );
         when(mockDiveRepo.saveComputerReading(any)).thenAnswer((_) async {});
 
-        final store = _RecordingImportedFileStore();
-        final importer = UddfEntityImporter(importedFileStore: store);
+        final store = _RecordingImportedFiles();
+        final importer = UddfEntityImporter(importedFiles: store);
 
         var csvReads = 0;
 
@@ -3829,7 +3827,7 @@ void main() {
         ).captured;
         final byName = {
           for (final reading in captured)
-            reading.sourceFileName.value: reading.importedFilePath.value,
+            reading.sourceFileName.value: reading.importedFileId.value,
         };
         expect(byName['log.csv'], isNull);
         expect(byName['log.uddf'], isNotNull);

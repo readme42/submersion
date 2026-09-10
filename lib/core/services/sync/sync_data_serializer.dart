@@ -14,7 +14,7 @@ import 'package:submersion/core/database/profile_series_pack.dart';
 import 'package:submersion/core/services/sync/changeset_log/sync_temp_dir.dart';
 import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/logger_service.dart';
-import 'package:submersion/features/dive_import/data/services/imported_file_cleanup.dart';
+import 'package:submersion/features/dive_import/data/services/imported_file_reclaimer.dart';
 import 'package:submersion/features/dive_log/domain/codecs/profile_series_codec.dart';
 import 'package:submersion/features/dive_log/domain/codecs/profile_series_codec_exception.dart';
 import 'package:submersion/features/dive_log/domain/codecs/profile_series_summary.dart';
@@ -303,6 +303,7 @@ class SyncData {
   final List<Map<String, dynamic>> incidents;
   final List<Map<String, dynamic>> gasSwitches;
   final List<Map<String, dynamic>> diveCustomFields;
+  final List<Map<String, dynamic>> importedFiles;
   final List<Map<String, dynamic>> diveDataSources;
   final List<Map<String, dynamic>> siteSpecies;
   final List<Map<String, dynamic>> mediaSpecies;
@@ -386,6 +387,7 @@ class SyncData {
     this.incidents = const [],
     this.gasSwitches = const [],
     this.diveCustomFields = const [],
+    this.importedFiles = const [],
     this.diveDataSources = const [],
     this.siteSpecies = const [],
     this.mediaSpecies = const [],
@@ -468,6 +470,7 @@ class SyncData {
     'incidents': incidents,
     'gasSwitches': gasSwitches,
     'diveCustomFields': diveCustomFields,
+    'importedFiles': importedFiles,
     'diveDataSources': diveDataSources,
     'siteSpecies': siteSpecies,
     'mediaSpecies': mediaSpecies,
@@ -555,6 +558,7 @@ class SyncData {
       incidents: _parseList(json['incidents']),
       gasSwitches: _parseList(json['gasSwitches']),
       diveCustomFields: _parseList(json['diveCustomFields']),
+      importedFiles: _parseList(json['importedFiles']),
       diveDataSources: _parseList(json['diveDataSources']),
       siteSpecies: _parseList(json['siteSpecies']),
       mediaSpecies: _parseList(json['mediaSpecies']),
@@ -607,13 +611,13 @@ List<({String id, int bytes})> idsWithinBlobBudget(
 }
 
 class SyncDataSerializer {
-  SyncDataSerializer({ImportedFileCleanup? importedFileCleanup})
-    : _importedFileCleanup = importedFileCleanup ?? ImportedFileCleanup();
+  SyncDataSerializer({ImportedFileReclaimer? importedFileReclaimer})
+    : _importedFileReclaimer = importedFileReclaimer ?? ImportedFileReclaimer();
 
   AppDatabase get _db => DatabaseService.instance.database;
   final _log = LoggerService.forClass(SyncDataSerializer);
   final SyncRepository _syncRepository = SyncRepository();
-  final ImportedFileCleanup _importedFileCleanup;
+  final ImportedFileReclaimer _importedFileReclaimer;
 
   Future<List<Map<String, dynamic>>> _safeExport(
     String label,
@@ -998,6 +1002,7 @@ class SyncDataSerializer {
       blob: false,
       full: null,
     ),
+    (key: 'importedFiles', table: _db.importedFiles, blob: true, full: null),
     (
       key: 'diveDataSources',
       table: _db.diveDataSources,
@@ -1608,6 +1613,10 @@ class SyncDataSerializer {
         'diveCustomFields',
         () => _exportDiveCustomFields(hlcSince),
       ),
+      importedFiles: await _safeExport(
+        'importedFiles',
+        () => _exportImportedFiles(hlcSince),
+      ),
       diveDataSources: await _safeExport(
         'diveDataSources',
         () => _exportDiveDataSources(hlcSince),
@@ -2135,6 +2144,11 @@ class SyncDataSerializer {
           _db.diveCustomFields,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         return row?.toJson();
+      case 'importedFiles':
+        final row = await (_db.select(
+          _db.importedFiles,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson(serializer: _syncBlobSerializer);
       case 'diveDataSources':
         final row = await (_db.select(
           _db.diveDataSources,
@@ -3178,6 +3192,16 @@ class SyncDataSerializer {
               DiveCustomField.fromJson(_withTimestampDefaults(data)),
             );
         return;
+      case 'importedFiles':
+        await _db
+            .into(_db.importedFiles)
+            .insertOnConflictUpdate(
+              ImportedFile.fromJson(
+                _withTimestampDefaults(data),
+                serializer: _syncBlobSerializer,
+              ),
+            );
+        return;
       case 'diveDataSources':
         await _db
             .into(_db.diveDataSources)
@@ -4132,6 +4156,21 @@ class SyncDataSerializer {
           ),
         );
         return;
+      case 'importedFiles':
+        await _db.batch(
+          (b) => b.insertAllOnConflictUpdate(
+            _db.importedFiles,
+            records
+                .map(
+                  (r) => ImportedFile.fromJson(
+                    _withTimestampDefaults(r),
+                    serializer: _syncBlobSerializer,
+                  ),
+                )
+                .toList(),
+          ),
+        );
+        return;
       case 'diveDataSources':
         await _db.batch(
           (b) => b.insertAllOnConflictUpdate(
@@ -4449,6 +4488,8 @@ class SyncDataSerializer {
         return plain(_db.gasSwitches, _db.gasSwitches.id);
       case 'diveCustomFields':
         return plain(_db.diveCustomFields, _db.diveCustomFields.id);
+      case 'importedFiles':
+        return plain(_db.importedFiles, _db.importedFiles.id);
       case 'diveDataSources':
         return plain(_db.diveDataSources, _db.diveDataSources.id);
       case 'siteSpecies':
@@ -4805,6 +4846,8 @@ class SyncDataSerializer {
         return _db.gasSwitches;
       case 'diveCustomFields':
         return _db.diveCustomFields;
+      case 'importedFiles':
+        return _db.importedFiles;
       case 'diveDataSources':
         return _db.diveDataSources;
       case 'siteSpecies':
@@ -4869,15 +4912,11 @@ class SyncDataSerializer {
         return;
       case 'dives':
         // The FK cascade takes this dive's dive_data_sources rows, which on
-        // the device that imported the file are the only pointers at the
-        // stored copy. Read the verdict while they are still there, act on
-        // it once they are not -- rows before bytes, as the local delete
-        // cascade does (issue #478).
-        final doomedImportedFiles = await _importedFileCleanup.doomedForDives([
-          recordId,
-        ]);
+        // the device that imported the file may hold the last reference to
+        // the stored file, so the refcounted sweep runs here just as it does
+        // on the local delete cascade (issue #478).
         await (_db.delete(_db.dives)..where((t) => t.id.equals(recordId))).go();
-        await _importedFileCleanup.deleteAll(doomedImportedFiles);
+        await _importedFileReclaimer.reclaimOrphans();
         return;
       case 'diveTanks':
         await (_db.delete(
@@ -5214,6 +5253,14 @@ class SyncDataSerializer {
         await (_db.delete(
           _db.diveCustomFields,
         )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'importedFiles':
+        // Only while nothing here references it: the peer that reclaimed
+        // the row cannot know this device still holds a dive pointing at
+        // it, and the stored file is the only thing that makes that dive
+        // resyncable (issue #478). A row left standing is swept by the
+        // next local deletion that orphans it.
+        await _importedFileReclaimer.deleteIfUnreferenced(recordId);
         return;
       case 'diveDataSources':
         await (_db.delete(
@@ -6196,6 +6243,23 @@ class SyncDataSerializer {
     }
     final rows = await _db.select(_db.diveCustomFields).get();
     return rows.map((r) => r.toJson()).toList();
+  }
+
+  /// Unlike `dive_data_sources`, which rides its dive's `hlc` and exports
+  /// as a child of modified dives, a stored import file is a top-level
+  /// entity with a clock of its own: storing it does not touch the dive, so
+  /// gating on the dive would keep the bytes out of every changeset
+  /// (issue #478).
+  Future<List<Map<String, dynamic>>> _exportImportedFiles(
+    String? hlcSince,
+  ) async {
+    final query = _db.select(_db.importedFiles);
+    if (hlcSince != null) {
+      query.where((t) => t.hlc.isBiggerThanValue(hlcSince));
+    }
+    final rows = await query.get();
+    // Carries the file's BLOB; base64-encode it.
+    return rows.map((r) => r.toJson(serializer: _syncBlobSerializer)).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveDataSources(

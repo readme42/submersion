@@ -1,31 +1,21 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path/path.dart' as p;
 import 'package:submersion/core/database/database.dart' as db;
 import 'package:submersion/core/services/database_service.dart';
-import 'package:submersion/features/dive_import/data/services/imported_file_store.dart';
+import 'package:submersion/features/dive_import/data/repositories/imported_file_repository.dart';
 import 'package:submersion/features/dive_import/presentation/providers/dive_resync_providers.dart';
 
 import '../../../../helpers/test_database.dart';
 
 void main() {
-  late Directory tempDir;
+  setUp(setUpTestDatabase);
 
-  setUp(() async {
-    await setUpTestDatabase();
-    tempDir = await Directory.systemTemp.createTemp('dive_resync_providers');
-  });
+  tearDown(tearDownTestDatabase);
 
-  tearDown(() async {
-    await tearDownTestDatabase();
-    if (await tempDir.exists()) await tempDir.delete(recursive: true);
-  });
-
-  Future<void> seedDiveWithSource(String path) async {
+  Future<void> seedDiveWithSource(String? importedFileId) async {
     final database = DatabaseService.instance.database;
     final now = DateTime.now().millisecondsSinceEpoch;
 
@@ -60,60 +50,49 @@ void main() {
             isPrimary: const Value(true),
             importedAt: Value(DateTime.now()),
             createdAt: Value(DateTime.now()),
-            importedFilePath: Value(path),
+            importedFileId: Value(importedFileId),
           ),
         );
   }
 
-  test(
-    'diveHasImportedFileProvider is true for a file still on disk',
-    () async {
-      final path = p.join(tempDir.path, 'logbook.uddf');
-      await File(path).writeAsBytes([1, 2, 3]);
-      await seedDiveWithSource(path);
-
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      expect(
-        await container.read(diveHasImportedFileProvider('d1').future),
-        isTrue,
-      );
-      expect(
-        await container.read(diveHasImportedFileProvider('nope').future),
-        isFalse,
-      );
-    },
-  );
-
-  test('a documents-relative path resolves against the current documents '
-      'directory', () async {
-    // The whole point of storing the path relative: an iOS reinstall or a
-    // restore moves the app container, and the action has to survive it.
-    final store = ImportedFileStore(documentsDirectory: () async => tempDir);
-    final stored = await store.store(
+  test('diveHasImportedFileProvider is true for a file held here', () async {
+    final stored = await ImportedFileRepository().store(
       bytes: Uint8List.fromList([1, 2, 3]),
-      originalFileName: 'logbook.uddf',
+      fileName: 'logbook.uddf',
     );
-    expect(p.isRelative(stored), isTrue);
     await seedDiveWithSource(stored);
 
-    final container = ProviderContainer(
-      overrides: [importedFileStoreProvider.overrideWithValue(store)],
-    );
+    final container = ProviderContainer();
     addTearDown(container.dispose);
 
     expect(
       await container.read(diveHasImportedFileProvider('d1').future),
       isTrue,
     );
+    expect(
+      await container.read(diveHasImportedFileProvider('nope').future),
+      isFalse,
+    );
   });
 
-  test('a synced path that does not resolve on this device is false', () async {
-    // `imported_file_path` is exported verbatim by sync, so a peer (or this
-    // device after an iOS reinstall moves the container) holds a path whose
-    // file never existed here. Offering resync there only ever fails.
-    await seedDiveWithSource(p.join(tempDir.path, 'never-written.uddf'));
+  test('a dive with no stored file at all is false', () async {
+    await seedDiveWithSource(null);
+
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    expect(
+      await container.read(diveHasImportedFileProvider('d1').future),
+      isFalse,
+    );
+  });
+
+  test('a reference whose row this device does not hold is false', () async {
+    // `imported_file_id` travels with its dive, while the row it names is a
+    // top-level entity with its own clock, so a device can hold the reference
+    // before (or without ever) holding the bytes. Offering resync there only
+    // ever fails.
+    await seedDiveWithSource('a-file-this-device-never-received');
 
     final container = ProviderContainer();
     addTearDown(container.dispose);

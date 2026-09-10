@@ -5124,6 +5124,7 @@
   "settings_conflict_ref_equipment": "Felszereles",
   "settings_conflict_ref_equipmentSet": "Felszereleskeszlet",
   "settings_conflict_ref_finding": "Eszrevetel",
+  "settings_conflict_ref_importedFile": "Importált fájl",
   "settings_conflict_ref_instructor": "Oktato",
   "settings_conflict_ref_linkedDive": "Kapcsolt merules",
   "settings_conflict_ref_media": "Media",

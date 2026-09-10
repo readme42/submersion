@@ -11,7 +11,6 @@
 // DiveReimportService -> assert the fix landed and every diver edit survived.
 
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:drift/drift.dart' show OrderingTerm, Value;
@@ -23,7 +22,7 @@ import 'package:submersion/features/certifications/data/repositories/certificati
 import 'package:submersion/features/courses/data/repositories/course_repository.dart';
 import 'package:submersion/features/dive_centers/data/repositories/dive_center_repository.dart';
 import 'package:submersion/features/dive_import/data/services/dive_resync_orchestrator.dart';
-import 'package:submersion/features/dive_import/data/services/imported_file_store.dart';
+import 'package:submersion/features/dive_import/data/repositories/imported_file_repository.dart';
 import 'package:submersion/features/dive_import/data/services/uddf_entity_importer.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/data/repositories/profile_series_repository.dart';
@@ -238,36 +237,25 @@ Future<String> _createTestDiver() async {
 
 void main() {
   late AppDatabase db;
-  late Directory tempDocsDir;
-  late ImportedFileStore importedFileStore;
+  late ImportedFileRepository importedFiles;
 
   setUp(() async {
     db = await setUpTestDatabase();
-    tempDocsDir = await Directory.systemTemp.createTemp(
-      'resync_preserves_edits_test',
-    );
-    importedFileStore = ImportedFileStore(
-      documentsDirectory: () async => tempDocsDir,
-    );
+    importedFiles = ImportedFileRepository();
   });
 
-  tearDown(() async {
-    await tearDownTestDatabase();
-    if (await tempDocsDir.exists()) {
-      await tempDocsDir.delete(recursive: true);
-    }
-  });
+  tearDown(tearDownTestDatabase);
 
   test('resync applies a parser fix (missed tank/gas switch) while leaving '
       'diver edits and tank-scoped child data untouched', () async {
     final diverId = await _createTestDiver();
 
     // 1. Real import through UddfEntityImporter, storing the source file
-    // via the real ImportedFileStore against a temp directory.
+    // in the real imported_files table.
     final originalBytes = Uint8List.fromList(
       utf8.encode('<uddf version="3.2.1"></uddf>'),
     );
-    final importer = UddfEntityImporter(importedFileStore: importedFileStore);
+    final importer = UddfEntityImporter(importedFiles: importedFiles);
     final importResult = await importer.import(
       data: _originalParse(),
       selections: const UddfImportSelections(dives: {0}),
@@ -321,7 +309,7 @@ void main() {
     final stubParser = _StubFixedParser(_fixedPayload());
     final orchestrator = DiveResyncOrchestrator(
       db: db,
-      importedFileStore: importedFileStore,
+      importedFiles: importedFiles,
       parserFor: (_) => stubParser,
     );
 
@@ -400,7 +388,7 @@ void main() {
       'and still leaves diver edits standing', () async {
     final diverId = await _createTestDiver();
 
-    final importer = UddfEntityImporter(importedFileStore: importedFileStore);
+    final importer = UddfEntityImporter(importedFiles: importedFiles);
     await importer.import(
       data: _originalParse(),
       selections: const UddfImportSelections(dives: {0}),
@@ -438,7 +426,7 @@ void main() {
 
     final orchestrator = DiveResyncOrchestrator(
       db: db,
-      importedFileStore: importedFileStore,
+      importedFiles: importedFiles,
       parserFor: (_) => _StubFixedParser(_fixedPayloadWithProfile()),
     );
 
@@ -493,7 +481,7 @@ void main() {
       'strands when resynced', () async {
     final diverId = await _createTestDiver();
 
-    final importer = UddfEntityImporter(importedFileStore: importedFileStore);
+    final importer = UddfEntityImporter(importedFiles: importedFiles);
     await importer.import(
       data: _originalParse(),
       selections: const UddfImportSelections(dives: {0}),
@@ -550,7 +538,7 @@ void main() {
 
     final orchestrator = DiveResyncOrchestrator(
       db: db,
-      importedFileStore: importedFileStore,
+      importedFiles: importedFiles,
       parserFor: (_) => _StubFixedParser(_fixedPayloadWithProfile()),
     );
 

@@ -51,8 +51,8 @@ final storageInventoryProvider = Provider<StorageInventory>((ref) {
     networkImageDirectory: () async => Directory(
       p.join((await getTemporaryDirectory()).path, DefaultCacheManager.key),
     ),
-    importedFilesDirectory: () =>
-        ref.read(importedFileStoreProvider).directory(),
+    importedFileBytes: () =>
+        ref.read(importedFileRepositoryProvider).storedBytes(),
   );
 });
 

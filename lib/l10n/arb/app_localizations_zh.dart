@@ -16418,6 +16418,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_conflict_ref_finding => '发现项';
 
   @override
+  String get settings_conflict_ref_importedFile => '导入的文件';
+
+  @override
   String get settings_conflict_ref_instructor => '教练';
 
   @override

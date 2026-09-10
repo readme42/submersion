@@ -16846,6 +16846,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get settings_conflict_ref_finding => 'ממצא';
 
   @override
+  String get settings_conflict_ref_importedFile => 'קובץ מיובא';
+
+  @override
   String get settings_conflict_ref_instructor => 'מדריך';
 
   @override

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:drift/drift.dart' show Value;
@@ -7,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/database/database.dart' hide Dive;
 import 'package:submersion/core/database/local_cache_database.dart';
 import 'package:submersion/core/services/database_service.dart';
-import 'package:submersion/features/dive_import/data/services/imported_file_store.dart';
+import 'package:submersion/features/dive_import/data/repositories/imported_file_repository.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/media/data/repositories/media_repository.dart';
@@ -18,58 +17,31 @@ import 'package:submersion/features/media_store/data/media_transfer_queue_reposi
 
 import '../../../helpers/test_database.dart';
 
-/// Records how many `dives` rows still exist at the moment the bytes are
-/// deleted. The rows have to go first: a failure after the file is gone
-/// would leave a surviving dive pointing at bytes that are not there, while
-/// a failure the other way round only leaks an unreferenced copy.
-class _OrderRecordingImportedFileStore extends ImportedFileStore {
-  _OrderRecordingImportedFileStore({super.documentsDirectory});
-
-  final divesAliveAtDelete = <String, int>{};
-
-  @override
-  Future<void> delete(String path) async {
-    final db = DatabaseService.instance.database;
-    divesAliveAtDelete[path] = (await db.select(db.dives).get()).length;
-    await super.delete(path);
-  }
-}
-
 void main() {
   late LocalCacheDatabase cacheDb;
   late MediaTransferQueueRepository queue;
   late MediaRepository mediaRepository;
   late DiveRepository diveRepository;
-  late Directory tempDocsDir;
-  late ImportedFileStore importedFileStore;
+  late ImportedFileRepository importedFiles;
 
   setUp(() async {
     await setUpTestDatabase();
     cacheDb = LocalCacheDatabase(NativeDatabase.memory());
     queue = MediaTransferQueueRepository(database: cacheDb);
     mediaRepository = MediaRepository();
-    tempDocsDir = await Directory.systemTemp.createTemp(
-      'dive_deletion_cascade_test',
-    );
-    importedFileStore = ImportedFileStore(
-      documentsDirectory: () async => tempDocsDir,
-    );
+    importedFiles = ImportedFileRepository();
     diveRepository = DiveRepository(
       mediaRepository: mediaRepository,
       mediaDeletionCoordinator: MediaDeletionCoordinator(
         mediaRepository: mediaRepository,
         queue: () => queue,
       ),
-      importedFileStore: importedFileStore,
     );
   });
 
   tearDown(() async {
     await cacheDb.close();
     await tearDownTestDatabase();
-    if (await tempDocsDir.exists()) {
-      await tempDocsDir.delete(recursive: true);
-    }
   });
 
   Future<Dive> makeDive() =>
@@ -211,14 +183,16 @@ void main() {
   });
 
   group('imported file cascade (issue #478)', () {
+    Future<bool> stillStored(String id) => importedFiles.exists(id);
+
     Future<String> storeFileFor(
       List<String> diveIds, {
       List<int> bytes = const [1, 2, 3],
     }) async {
       final db = DatabaseService.instance.database;
-      final path = await importedFileStore.store(
+      final id = await importedFiles.store(
         bytes: Uint8List.fromList(bytes),
-        originalFileName: 'logbook.uddf',
+        fileName: 'logbook.uddf',
       );
       for (final diveId in diveIds) {
         await db
@@ -231,44 +205,35 @@ void main() {
                 importedAt: DateTime(2026, 1, 1),
                 createdAt: DateTime(2026, 1, 1),
                 sourceFileFormat: const Value('uddf'),
-                importedFilePath: Value(path),
+                importedFileId: Value(id),
               ),
             );
       }
-      return path;
+      return id;
     }
 
     test('deleting the only dive that points at a stored file removes '
         'it', () async {
       final dive = await makeDive();
-      final path = await storeFileFor([dive.id]);
+      final id = await storeFileFor([dive.id]);
 
       await diveRepository.deleteDive(dive.id);
 
-      expect(
-        await File(await importedFileStore.absolutePathFor(path)).exists(),
-        isFalse,
-      );
+      expect(await stillStored(id), isFalse);
     });
 
     test('a file shared by a surviving dive is kept', () async {
       final d1 = await makeDive();
       final d2 = await makeDive();
-      final path = await storeFileFor([d1.id, d2.id]);
+      final id = await storeFileFor([d1.id, d2.id]);
 
       await diveRepository.deleteDive(d1.id);
 
-      expect(
-        await File(await importedFileStore.absolutePathFor(path)).exists(),
-        isTrue,
-      );
+      expect(await stillStored(id), isTrue);
 
       await diveRepository.deleteDive(d2.id);
 
-      expect(
-        await File(await importedFileStore.absolutePathFor(path)).exists(),
-        isFalse,
-      );
+      expect(await stillStored(id), isFalse);
     });
 
     test('bulkDeleteDives removes a file once its last pointer goes', () async {
@@ -280,85 +245,49 @@ void main() {
 
       await diveRepository.bulkDeleteDives([d1.id, d2.id]);
 
-      expect(
-        await File(await importedFileStore.absolutePathFor(shared)).exists(),
-        isFalse,
-      );
-      expect(
-        await File(await importedFileStore.absolutePathFor(other)).exists(),
-        isTrue,
-      );
+      expect(await stillStored(shared), isFalse);
+      expect(await stillStored(other), isTrue);
     });
 
-    test('the rows go before the bytes', () async {
-      final store = _OrderRecordingImportedFileStore(
-        documentsDirectory: () async => tempDocsDir,
-      );
-      final repository = DiveRepository(
-        mediaRepository: mediaRepository,
-        mediaDeletionCoordinator: MediaDeletionCoordinator(
-          mediaRepository: mediaRepository,
-          queue: () => queue,
-        ),
-        importedFileStore: store,
-      );
+    test('tombstones the reclaimed row so peers drop it too', () async {
       final dive = await makeDive();
-      final path = await storeFileFor([dive.id]);
+      final id = await storeFileFor([dive.id]);
+      final db = DatabaseService.instance.database;
 
-      await repository.deleteDive(dive.id);
+      await diveRepository.deleteDive(dive.id);
 
-      expect(store.divesAliveAtDelete[await store.absolutePathFor(path)], 0);
-      expect(
-        await File(await importedFileStore.absolutePathFor(path)).exists(),
-        isFalse,
-      );
+      final tombstones = await (db.select(
+        db.deletionLog,
+      )..where((t) => t.entityType.equals('importedFiles'))).get();
+      expect(tombstones.map((r) => r.recordId), contains(id));
     });
 
-    test('a file an older row names by its absolute path survives', () async {
-      // Rows written before imported_file_path went documents-relative carry
-      // the absolute spelling of the very same copy. The refcount has to see
-      // both spellings, or deleting the newer dive takes bytes the older row
-      // still points at.
-      final d1 = await makeDive();
-      final d2 = await makeDive();
-      final path = await storeFileFor([d1.id]);
-      final absolute = await importedFileStore.absolutePathFor(path);
-      final db = DatabaseService.instance.database;
-      await db
-          .into(db.diveDataSources)
-          .insert(
-            DiveDataSourcesCompanion.insert(
-              id: 'src-legacy',
-              diveId: d2.id,
-              isPrimary: const Value(true),
-              importedAt: DateTime(2026, 1, 1),
-              createdAt: DateTime(2026, 1, 1),
-              sourceFileFormat: const Value('uddf'),
-              importedFilePath: Value(absolute),
-            ),
-          );
+    test('sweeps a row an earlier run orphaned as well', () async {
+      // The sweep asks which rows nothing names any more, so it also collects
+      // a row left behind by an import that never wrote its source row -- the
+      // garbage the on-disk folder had no way to reclaim at all.
+      final dive = await makeDive();
+      final id = await storeFileFor([dive.id]);
+      final stray = await importedFiles.store(
+        bytes: Uint8List.fromList(const [7, 7, 7, 7]),
+        fileName: 'never-referenced.uddf',
+      );
 
-      await diveRepository.deleteDive(d1.id);
+      await diveRepository.deleteDive(dive.id);
 
-      expect(await File(absolute).exists(), isTrue);
-
-      await diveRepository.deleteDive(d2.id);
-
-      expect(await File(absolute).exists(), isFalse);
+      expect(await stillStored(id), isFalse);
+      expect(await stillStored(stray), isFalse);
     });
 
     test(
       'a restore-safe delete (cascadeMedia: false) keeps the file',
       () async {
         final dive = await makeDive();
-        final path = await storeFileFor([dive.id]);
+        final id = await storeFileFor([dive.id]);
 
         await diveRepository.deleteDive(dive.id, cascadeMedia: false);
 
-        expect(
-          await File(await importedFileStore.absolutePathFor(path)).exists(),
-          isTrue,
-        );
+        expect(await stillStored(id), isTrue);
       },
     );
   });
