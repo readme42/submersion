@@ -301,4 +301,78 @@ void main() {
     expect(outcome.succeeded, isFalse);
     expect(outcome.failureReason, DiveResyncFailure.noMatchingDive);
   });
+
+  test('scores a candidate that carries runtime rather than duration', () async {
+    // UDDF emits `runtime` and never `duration`, so reading only `duration`
+    // drops the 20% duration weight entirely. With a depth the parser fix just
+    // moved, time 0.50 + depth 0.10 is 0.60 -- under the 0.70 threshold -- so
+    // the resync refuses the very match it exists to deliver.
+    final dateTime = DateTime(2026, 9, 1, 9);
+    final diveId = await seedDiveWithSource(
+      dateTime: dateTime,
+      maxDepth: 18.0,
+      bottomTimeSeconds: 41 * 60,
+      importedFileId: 'file-uddf',
+    );
+
+    final payload = ImportPayload(
+      entities: {
+        ImportEntityType.dives: [
+          {
+            'dateTime': dateTime,
+            'maxDepth': 21.0,
+            'runtime': const Duration(minutes: 41),
+          },
+        ],
+      },
+    );
+
+    final orchestrator = DiveResyncOrchestrator(
+      db: db,
+      importedFiles: _FakeImportedFiles({'file-uddf': Uint8List(0)}),
+      parserFor: (_) => _FakeParser(payload),
+    );
+
+    final outcome = await orchestrator.resync(diveId);
+
+    expect(outcome.succeeded, isTrue);
+    final dive = await (db.select(
+      db.dives,
+    )..where((t) => t.id.equals(diveId))).getSingle();
+    expect(dive.maxDepth, 21.0);
+  });
+
+  test('prefers duration over runtime when a parser fills both', () async {
+    // macdiveXml fills both, and they mean different things: `duration` is the
+    // bottom time the dive row stores, `runtime` the whole dive. Reading
+    // runtime first would score the wrong pair.
+    final dateTime = DateTime(2026, 9, 1, 9);
+    final diveId = await seedDiveWithSource(
+      dateTime: dateTime,
+      maxDepth: 18.0,
+      bottomTimeSeconds: 41 * 60,
+      importedFileId: 'file-uddf',
+    );
+
+    final payload = ImportPayload(
+      entities: {
+        ImportEntityType.dives: [
+          {
+            'dateTime': dateTime,
+            'maxDepth': 21.0,
+            'duration': const Duration(minutes: 41),
+            'runtime': const Duration(minutes: 95),
+          },
+        ],
+      },
+    );
+
+    final orchestrator = DiveResyncOrchestrator(
+      db: db,
+      importedFiles: _FakeImportedFiles({'file-uddf': Uint8List(0)}),
+      parserFor: (_) => _FakeParser(payload),
+    );
+
+    expect((await orchestrator.resync(diveId)).succeeded, isTrue);
+  });
 }

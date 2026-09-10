@@ -87,12 +87,13 @@ class DiveResyncOrchestrator {
     final payload = await parserFor(format).parse(bytes);
     final candidates = payload.entitiesOf(ImportEntityType.dives);
 
-    // Scoring quirks worth knowing before touching thresholds: maxDepth
+    // Scoring quirk worth knowing before touching thresholds: maxDepth
     // carries 30% of the weight, so a parser fix to a depth bug (the classic
     // ft/m conversion) can itself push the score under the 0.70 threshold and
-    // refuse the resync it exists to deliver. And UDDF emits `runtime`, never
-    // `duration`, so `candidate['duration']` is always null there and the
-    // match rides on time 0.50 + depth 0.30 = 0.80 with no margin.
+    // refuse the resync it exists to deliver. The duration weight is what
+    // leaves any margin for that, which is why `runtime` is read as well as
+    // `duration`: the parsers disagree on which key they fill and UDDF never
+    // sets `duration` at all.
     Map<String, dynamic>? best;
     var bestScore = 0.0;
     for (final candidate in candidates) {
@@ -100,7 +101,9 @@ class DiveResyncOrchestrator {
       if (candidateTime == null) continue;
       final candidateDepth = (candidate['maxDepth'] as num?)?.toDouble() ?? 0.0;
       final candidateDuration =
-          (candidate['duration'] as Duration?)?.inSeconds ?? 0;
+          ((candidate['duration'] ?? candidate['runtime']) as Duration?)
+              ?.inSeconds ??
+          0;
       final score = _matcher.calculateMatchScore(
         wearableStartTime: candidateTime,
         wearableMaxDepth: candidateDepth,
