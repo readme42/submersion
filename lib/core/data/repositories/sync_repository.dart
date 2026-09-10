@@ -620,6 +620,16 @@ class SyncRepository {
     // land. Without an entry here such a row is invisible to the
     // incremental export forever, because NULL never passes the strict
     // watermark comparison.
+    // Logbook files adopted out of the pre-database `imported/` folder
+    // (issue #478). The adoption runs inside a migration, which has no clock
+    // and no sync bookkeeping, so its rows land unstamped; without an entry
+    // here they would reach a peer only on a full base republish.
+    (
+      entityType: 'importedFiles',
+      table: 'imported_files',
+      timestamp: 'updated_at',
+      filter: null,
+    ),
     (
       entityType: 'diveProfileSeries',
       table: 'dive_profile_series',

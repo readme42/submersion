@@ -6,6 +6,7 @@ import 'package:drift/drift.dart';
 import 'package:submersion/core/database/dive_computer_gear_backfill.dart';
 import 'package:submersion/core/database/dive_type_uniqueness.dart';
 import 'package:submersion/core/database/imported_computer_backfill.dart';
+import 'package:submersion/core/database/imported_file_folder_adoption.dart';
 import 'package:submersion/core/database/performance_indexes.dart';
 import 'package:submersion/core/database/profile_series_pack_coverage.dart';
 import 'package:submersion/core/database/profile_series_pack.dart';
@@ -11467,6 +11468,7 @@ class AppDatabase extends _$AppDatabase {
         // re-parsed from, and the reference that names it (issue #478).
         if (from < 208) {
           await _assertImportedFilesSchema();
+          await adoptImportedFileFolder(this);
         }
         if (from < 208) await reportProgress();
       },
@@ -11707,6 +11709,9 @@ class AppDatabase extends _$AppDatabase {
         // to it (issue #478; same parallel-branch version-collision
         // self-heal).
         await _assertImportedFilesSchema();
+        // Self-limiting and disk-free once done; see the function's own doc for
+        // why it has to be here and not only in the rung.
+        await adoptImportedFileFolder(this);
 
         // v160 backstop: re-assert service_kinds.default_category. A device
         // that reached 160 or higher through a parallel branch never enters
