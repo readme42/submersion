@@ -1025,6 +1025,28 @@ void main() {
       expect(dive.bottomTime, 50 * 60);
     });
 
+    test('leaves the dive mode alone when the parse states none', () async {
+      // UDDF, FIT and MacDive state no mode. Defaulting those to open circuit
+      // would not be writing what the parse says, it would be inventing a
+      // value -- a computer re-parse always has a real parsed mode.
+      final diveId = await seedDive(notes: '', buddy: '');
+      await seedSource(diveId, id: 'src-file');
+      await (db.update(db.dives)..where((t) => t.id.equals(diveId))).write(
+        const DivesCompanion(diveMode: Value('ccr')),
+      );
+
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {'dateTime': DateTime(2026, 9, 1, 9), 'maxDepth': 20.0},
+        now: DateTime(2026, 9, 3),
+      );
+
+      final dive = await (db.select(
+        db.dives,
+      )..where((t) => t.id.equals(diveId))).getSingle();
+      expect(dive.diveMode, 'ccr');
+    });
+
     test('clears a summary value the fixed parse no longer reports', () async {
       // The same rule a computer re-parse applies: these columns belong to the
       // parse, so a parser fix that stops emitting one clears the stale value
@@ -1225,6 +1247,34 @@ void main() {
         'imported',
         reason: 'the importer overrides the user-authored factory default',
       );
+    });
+
+    test('replaces the events a UDDF parse puts under profileEvents', () async {
+      // SSRF and DL7 fill `events`, the UDDF path fills `profileEvents`. The
+      // importer reads both; reading only the first here left the commonest
+      // resync never replacing an event at all.
+      final diveId = await seedDive(notes: '', buddy: '');
+      await seedSource(diveId, id: 'src-file');
+      await seedEvent(diveId, id: 'ev-old');
+
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {
+          'dateTime': DateTime(2026, 9, 1, 9),
+          'profileEvents': freshEvents,
+        },
+        now: DateTime(2026, 9, 3),
+      );
+
+      final events = await (db.select(
+        db.diveProfileEvents,
+      )..where((e) => e.diveId.equals(diveId))).get();
+      expect(events.map((e) => e.id), isNot(contains('ev-old')));
+      expect(events.map((e) => e.eventType), <String>{
+        'decoStopStart',
+        'ppO2High',
+        'bookmark',
+      });
     });
 
     test('leaves the events of a multi-source dive alone', () async {

@@ -191,9 +191,10 @@ class DiveReimportService {
     return duration is Duration ? duration : null;
   }
 
-  /// Dive mode as the importer derives it: a parsed enum or its name, else
-  /// open circuit.
-  static DiveMode _parsedDiveMode(Object? v) {
+  /// Dive mode when the parse states one, else null. UDDF, FIT and MacDive
+  /// state none, and defaulting those to open circuit would push a CCR dive
+  /// back to OC on every resync.
+  static DiveMode? _parsedDiveModeOrNull(Object? v) {
     if (v is DiveMode) return v;
     if (v is String) {
       final lower = v.toLowerCase();
@@ -201,7 +202,7 @@ class DiveReimportService {
         if (mode.name.toLowerCase() == lower) return mode;
       }
     }
-    return DiveMode.oc;
+    return null;
   }
 
   static List<Map<String, dynamic>>? _profileOf(Map<String, dynamic> diveData) {
@@ -265,9 +266,16 @@ class DiveReimportService {
     final exitLatitude = _asDouble(diveData['exitLatitude']);
     final exitLongitude = _asDouble(diveData['exitLongitude']);
 
+    final maxDepth = _asDouble(diveData['maxDepth']);
+    final diveMode = _parsedDiveModeOrNull(diveData['diveMode']);
+    final decoAlgorithm = _asString(diveData['decoAlgorithm']);
+    final decoConservatism = _asInt(diveData['decoConservatism']);
+    final gfLow = _asInt(diveData['gradientFactorLow']);
+    final gfHigh = _asInt(diveData['gradientFactorHigh']);
+
     await (db.update(db.dives)..where((t) => t.id.equals(diveId))).write(
       DivesCompanion(
-        maxDepth: Value(_asDouble(diveData['maxDepth'])),
+        maxDepth: Value(maxDepth),
         avgDepth: Value(avgDepth == 0.0 ? null : avgDepth),
         runtime: Value(runtime?.inSeconds),
         diveDateTime: dateTime != null
@@ -277,13 +285,15 @@ class DiveReimportService {
         exitTime: Value(exitTime?.millisecondsSinceEpoch),
         bottomTime: Value(bottomTime),
         waterTemp: waterTemp != null ? Value(waterTemp) : const Value.absent(),
-        diveMode: Value(_parsedDiveMode(diveData['diveMode']).code),
+        diveMode: diveMode != null
+            ? Value(diveMode.code)
+            : const Value.absent(),
         cnsEnd: Value(_asDouble(diveData['cnsEnd'])),
         otu: Value(_asDouble(diveData['otu'])),
-        decoAlgorithm: Value(_asString(diveData['decoAlgorithm'])),
-        decoConservatism: Value(_asInt(diveData['decoConservatism'])),
-        gradientFactorLow: Value(_asInt(diveData['gradientFactorLow'])),
-        gradientFactorHigh: Value(_asInt(diveData['gradientFactorHigh'])),
+        decoAlgorithm: Value(decoAlgorithm),
+        decoConservatism: Value(decoConservatism),
+        gradientFactorLow: Value(gfLow),
+        gradientFactorHigh: Value(gfHigh),
         entryLatitude: entryLatitude != null
             ? Value(entryLatitude)
             : const Value.absent(),
@@ -598,7 +608,10 @@ class DiveReimportService {
     required Map<String, dynamic> diveData,
     required DateTime now,
   }) async {
-    final eventsRaw = diveData['events'];
+    // Both keys, as the importer reads them: SSRF and DL7 fill `events`, the
+    // UDDF path fills `profileEvents`. Reading only the first would leave a
+    // UDDF resync -- the commonest one -- never replacing an event at all.
+    final eventsRaw = diveData['events'] ?? diveData['profileEvents'];
     if (eventsRaw is! List) return;
 
     final existing = await (db.select(
