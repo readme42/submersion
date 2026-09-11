@@ -47,6 +47,7 @@ void main() {
     required int bottomTimeSeconds,
     required String importedFileId,
     String sourceFileFormat = 'uddf',
+    int? runtimeSeconds,
   }) async {
     const diveId = 'dive-1';
     await db
@@ -57,6 +58,7 @@ void main() {
             diveDateTime: dateTime.millisecondsSinceEpoch,
             maxDepth: Value(maxDepth),
             bottomTime: Value(bottomTimeSeconds),
+            runtime: Value(runtimeSeconds),
             createdAt: dateTime.millisecondsSinceEpoch,
             updatedAt: dateTime.millisecondsSinceEpoch,
           ),
@@ -342,15 +344,19 @@ void main() {
     expect(dive.maxDepth, 21.0);
   });
 
-  test('prefers duration over runtime when a parser fills both', () async {
-    // macdiveXml fills both, and they mean different things: `duration` is the
-    // bottom time the dive row stores, `runtime` the whole dive. Reading
-    // runtime first would score the wrong pair.
+  test('matches the very parser fix it exists to deliver', () async {
+    // The reviewer's worked example. The stored dive was imported with an
+    // ft/m depth bug, so the fixed parse reports a depth that scores 0; the
+    // whole remaining margin is the duration weight, and it is only there if
+    // like is compared with like. The stored bottom time excludes ascent and
+    // stops, so scoring the candidate's total time against it spends the
+    // margin on a difference that is not a disagreement at all.
     final dateTime = DateTime(2026, 9, 1, 9);
     final diveId = await seedDiveWithSource(
       dateTime: dateTime,
       maxDepth: 18.0,
-      bottomTimeSeconds: 41 * 60,
+      bottomTimeSeconds: 42 * 60,
+      runtimeSeconds: 50 * 60,
       importedFileId: 'file-uddf',
     );
 
@@ -359,7 +365,82 @@ void main() {
         ImportEntityType.dives: [
           {
             'dateTime': dateTime,
-            'maxDepth': 21.0,
+            'maxDepth': 60.0,
+            'runtime': const Duration(minutes: 50),
+          },
+        ],
+      },
+    );
+
+    final orchestrator = DiveResyncOrchestrator(
+      db: db,
+      importedFiles: _FakeImportedFiles({'file-uddf': Uint8List(0)}),
+      parserFor: (_) => _FakeParser(payload),
+    );
+
+    final outcome = await orchestrator.resync(diveId);
+
+    expect(outcome.succeeded, isTrue, reason: outcome.failureReason?.name);
+    final dive = await (db.select(
+      db.dives,
+    )..where((t) => t.id.equals(diveId))).getSingle();
+    expect(dive.maxDepth, 60.0);
+  });
+
+  test('falls back to the stored bottom time when the dive has no '
+      'runtime', () async {
+    // Dives imported before `runtime` was filled have only a bottom time, so
+    // the comparison has to degrade to it rather than to zero.
+    final dateTime = DateTime(2026, 9, 1, 9);
+    final diveId = await seedDiveWithSource(
+      dateTime: dateTime,
+      maxDepth: 18.0,
+      bottomTimeSeconds: 42 * 60,
+      importedFileId: 'file-uddf',
+    );
+
+    final payload = ImportPayload(
+      entities: {
+        ImportEntityType.dives: [
+          {
+            'dateTime': dateTime,
+            'maxDepth': 60.0,
+            'runtime': const Duration(minutes: 42),
+          },
+        ],
+      },
+    );
+
+    final orchestrator = DiveResyncOrchestrator(
+      db: db,
+      importedFiles: _FakeImportedFiles({'file-uddf': Uint8List(0)}),
+      parserFor: (_) => _FakeParser(payload),
+    );
+
+    expect((await orchestrator.resync(diveId)).succeeded, isTrue);
+  });
+
+  test('reads runtime first when a parser fills both', () async {
+    // macdiveXml fills both, and they mean different things: `duration` is the
+    // bottom time, `runtime` the whole dive. The dive's own total time is what
+    // the candidate is scored against, so `runtime` is the half of the pair
+    // that belongs in the comparison -- pairing `duration` with the stored
+    // bottom time is what this dive's numbers would defeat.
+    final dateTime = DateTime(2026, 9, 1, 9);
+    final diveId = await seedDiveWithSource(
+      dateTime: dateTime,
+      maxDepth: 18.0,
+      bottomTimeSeconds: 30 * 60,
+      runtimeSeconds: 95 * 60,
+      importedFileId: 'file-uddf',
+    );
+
+    final payload = ImportPayload(
+      entities: {
+        ImportEntityType.dives: [
+          {
+            'dateTime': dateTime,
+            'maxDepth': 60.0,
             'duration': const Duration(minutes: 41),
             'runtime': const Duration(minutes: 95),
           },

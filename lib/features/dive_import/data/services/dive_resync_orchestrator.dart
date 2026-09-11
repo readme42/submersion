@@ -90,10 +90,14 @@ class DiveResyncOrchestrator {
     // Scoring quirk worth knowing before touching thresholds: maxDepth
     // carries 30% of the weight, so a parser fix to a depth bug (the classic
     // ft/m conversion) can itself push the score under the 0.70 threshold and
-    // refuse the resync it exists to deliver. The duration weight is what
-    // leaves any margin for that, which is why `runtime` is read as well as
-    // `duration`: the parsers disagree on which key they fill and UDDF never
-    // sets `duration` at all.
+    // refuse the resync it exists to deliver. The duration weight is the only
+    // margin left for that, so both sides of it must measure the same
+    // quantity: the candidate's total time (`runtime`, else the `duration` the
+    // parsers that fill only that one emit) against the dive's own total time.
+    // `dives.bottomTime` is profile-derived and excludes the ascent and every
+    // stop, so scoring a total time against it spends the margin on a
+    // difference that is not a disagreement. It is still the fallback, because
+    // a dive imported before `runtime` was filled has nothing else.
     Map<String, dynamic>? best;
     var bestScore = 0.0;
     for (final candidate in candidates) {
@@ -101,7 +105,7 @@ class DiveResyncOrchestrator {
       if (candidateTime == null) continue;
       final candidateDepth = (candidate['maxDepth'] as num?)?.toDouble() ?? 0.0;
       final candidateDuration =
-          ((candidate['duration'] ?? candidate['runtime']) as Duration?)
+          ((candidate['runtime'] ?? candidate['duration']) as Duration?)
               ?.inSeconds ??
           0;
       final score = _matcher.calculateMatchScore(
@@ -112,7 +116,7 @@ class DiveResyncOrchestrator {
           dive.diveDateTime,
         ),
         existingMaxDepth: dive.maxDepth ?? 0.0,
-        existingDurationSeconds: dive.bottomTime ?? 0,
+        existingDurationSeconds: dive.runtime ?? dive.bottomTime ?? 0,
       );
       if (score > bestScore) {
         bestScore = score;
