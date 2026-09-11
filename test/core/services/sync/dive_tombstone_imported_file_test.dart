@@ -101,6 +101,34 @@ void main() {
     expect(await db.select(db.dives).get(), isEmpty);
   });
 
+  test('a source-row tombstone takes the file it last referenced', () async {
+    // A peer can delete a single data source without deleting its dive (a
+    // replaceSource re-download on that device), and that row may be the only
+    // one naming the stored file, so this path has to sweep like every other
+    // deletion path.
+    await insertDive('dive-1');
+    final id = await storeFile();
+    await insertSource(id: 'src-1', diveId: 'dive-1', importedFileId: id);
+
+    await serializer.deleteRecord('diveDataSources', 'src-1');
+
+    expect(await db.select(db.diveDataSources).get(), isEmpty);
+    expect(await importedFiles.exists(id), isFalse);
+  });
+
+  test('a source-row tombstone keeps a file another row still '
+      'names', () async {
+    await insertDive('dive-1');
+    await insertDive('dive-2');
+    final id = await storeFile();
+    await insertSource(id: 'src-1', diveId: 'dive-1', importedFileId: id);
+    await insertSource(id: 'src-2', diveId: 'dive-2', importedFileId: id);
+
+    await serializer.deleteRecord('diveDataSources', 'src-1');
+
+    expect(await importedFiles.exists(id), isTrue);
+  });
+
   test('an importedFiles tombstone reclaims an unreferenced row', () async {
     final id = await storeFile();
 

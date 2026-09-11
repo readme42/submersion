@@ -5263,9 +5263,14 @@ class SyncDataSerializer {
         await _importedFileReclaimer.deleteIfUnreferenced(recordId);
         return;
       case 'diveDataSources':
+        // A peer can drop one source row without dropping its dive (its own
+        // replaceSource re-download), and that row may hold the last
+        // reference to the stored import file, so the refcounted sweep runs
+        // here too (issue #478).
         await (_db.delete(
           _db.diveDataSources,
         )..where((t) => t.id.equals(recordId))).go();
+        await _importedFileReclaimer.reclaimOrphans();
         return;
       case 'siteSpecies':
         await (_db.delete(
