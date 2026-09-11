@@ -614,16 +614,12 @@ class SyncRepository {
       timestamp: 'created_at',
       filter: null,
     ),
-    // The packed sample series (schema v182). A row can reach these tables
-    // unstamped two ways: the v182 pack runs on a device that had no clock
-    // to advance yet, and any series write whose sync bookkeeping did not
-    // land. Without an entry here such a row is invisible to the
-    // incremental export forever, because NULL never passes the strict
-    // watermark comparison.
-    // Logbook files adopted out of the pre-database `imported/` folder
-    // (issue #478). The adoption runs inside a migration, which has no clock
-    // and no sync bookkeeping, so its rows land unstamped; without an entry
-    // here they would reach a peer only on a full base republish.
+    // The packed sample series (schema v182) and the stored logbook files
+    // (v208, issue #478). A row can reach these tables unstamped two ways:
+    // the v182 pack runs on a device that had no clock to advance yet, and
+    // any write whose sync bookkeeping did not land. Without an entry here
+    // such a row is invisible to the incremental export forever, because NULL
+    // never passes the strict watermark comparison.
     (
       entityType: 'importedFiles',
       table: 'imported_files',
