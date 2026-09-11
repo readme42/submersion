@@ -34,9 +34,14 @@ final diveHasImportedFileProvider = FutureProvider.family<bool, String>((
   ref,
   diveId,
 ) async {
+  final importedFiles = ref.watch(importedFileRepositoryProvider);
   ref.invalidateSelfWhen(
     ref.watch(diveRepositoryProvider).watchDiveDetailChanges(),
   );
+  // The detail tick covers `dive_data_sources` but not `imported_files`, and
+  // the two arrive independently: a sync that applies the reference first
+  // leaves this provider holding a false nothing would ever recompute.
+  ref.invalidateSelfWhen(importedFiles.watchImportedFilesChanges());
   final db = DatabaseService.instance.database;
   final source =
       await (db.select(db.diveDataSources)
@@ -46,5 +51,5 @@ final diveHasImportedFileProvider = FutureProvider.family<bool, String>((
           .getSingleOrNull();
   final storedFileId = source?.importedFileId;
   if (storedFileId == null) return false;
-  return ref.read(importedFileRepositoryProvider).exists(storedFileId);
+  return importedFiles.exists(storedFileId);
 });

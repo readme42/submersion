@@ -17,7 +17,11 @@ import 'package:submersion/features/dive_import/data/repositories/imported_file_
 /// Reclamation stays local: a device never tells its peers to drop a stored
 /// file. One that is a sync behind still has the dive, and would be told to
 /// throw away bytes it needs. So each device decides from its own rows, which
-/// is why the sync path sweeps as well, right after it applies what it pulled.
+/// is why the sync path sweeps from its own deletion handlers rather than
+/// trusting a peer: `SyncDataSerializer.deleteRecord` calls [reclaimOrphans]
+/// after applying a `dives` or `diveDataSources` tombstone, the two that can
+/// remove the last reference, and routes an `importedFiles` tombstone through
+/// [deleteIfUnreferenced] instead of deleting outright.
 ///
 /// The refcount is the anti-join, not bookkeeping the callers carry: the
 /// sweep asks which rows nothing names any more, which is the same answer
@@ -28,7 +32,10 @@ class ImportedFileReclaimer {
     : _database = database ?? _defaultDatabase;
 
   final AppDatabase Function() _database;
-  final SyncRepository _sync = SyncRepository();
+
+  /// Bound to the database the rows are deleted from, so the tombstones land
+  /// beside them rather than in the global instance.
+  SyncRepository get _sync => SyncRepository(database: _database());
   static const _log = LoggerService('ImportedFileReclaimer');
 
   static AppDatabase _defaultDatabase() => DatabaseService.instance.database;

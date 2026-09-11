@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -84,6 +85,34 @@ void main() {
     expect(
       await container.read(diveHasImportedFileProvider('d1').future),
       isFalse,
+    );
+  });
+
+  test('turns true when the stored file arrives after the '
+      'reference', () async {
+    // `imported_file_id` and the row it names travel as separate entities, so
+    // sync routinely applies the reference first. Nothing writes
+    // `dive_data_sources` again when the blob row lands, so without the
+    // imported_files tick the action never appears on the page.
+    final bytes = Uint8List.fromList([1, 2, 3]);
+    final fileId = sha256.convert(bytes).toString();
+    await seedDiveWithSource(fileId);
+
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    container.listen(diveHasImportedFileProvider('d1'), (_, _) {});
+
+    expect(
+      await container.read(diveHasImportedFileProvider('d1').future),
+      isFalse,
+    );
+
+    await ImportedFileRepository().store(bytes: bytes, fileName: 'late.uddf');
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+
+    expect(
+      await container.read(diveHasImportedFileProvider('d1').future),
+      isTrue,
     );
   });
 

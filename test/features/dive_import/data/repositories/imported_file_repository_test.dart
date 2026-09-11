@@ -125,6 +125,30 @@ void main() {
     expect(pending.map((r) => r.recordId), contains(id));
   });
 
+  test('keeps its sync bookkeeping in the database it was given', () async {
+    // The repository takes an injected database, so everything it writes has
+    // to land there -- a SyncRepository bound to the global instance files the
+    // pending mark in a different database from the row it describes, and the
+    // row then never reaches a changeset.
+    final injected = createTestDatabase();
+    addTearDown(injected.close);
+    final isolated = ImportedFileRepository(database: () => injected);
+
+    final id = await isolated.store(
+      bytes: bytesOf('<uddf>injected</uddf>'),
+      fileName: 'injected.uddf',
+    );
+
+    final pending = await (injected.select(
+      injected.syncRecords,
+    )..where((t) => t.entityType.equals('importedFiles'))).get();
+    expect(pending.map((r) => r.recordId), contains(id));
+    final global = await (db.select(
+      db.syncRecords,
+    )..where((t) => t.entityType.equals('importedFiles'))).get();
+    expect(global, isEmpty);
+  });
+
   test('reports a row this device does not hold as absent', () async {
     expect(await repository.exists('not-a-stored-file'), isFalse);
     expect(await repository.read('not-a-stored-file'), isNull);
