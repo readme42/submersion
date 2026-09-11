@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/features/dive_import/data/services/dive_reimport_service.dart';
@@ -967,6 +968,482 @@ void main() {
       expect(byId['tank-b']!.o2Percent, 50.0);
       expect(byId['tank-b']!.startPressure, 207.0);
     });
+  });
+
+  group('dive row mirrors a computer re-parse', () {
+    test('rewrites runtime, the clock and exitTime from the fresh '
+        'parse', () async {
+      // A parser fix that changes the recording length has to move the header,
+      // the list and every surface-interval calculation with it: ReparseService
+      // writes runtime/diveDateTime/entryTime/exitTime unconditionally.
+      final diveId = await seedDive(notes: '', buddy: '');
+      await seedSource(diveId, id: 'src-file');
+      await (db.update(db.dives)..where((t) => t.id.equals(diveId))).write(
+        const DivesCompanion(runtime: Value(2100), exitTime: Value(3100)),
+      );
+
+      final dateTime = DateTime(2026, 9, 1, 9);
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {
+          'dateTime': dateTime,
+          'runtime': const Duration(minutes: 50),
+          'maxDepth': 20.0,
+        },
+        now: DateTime(2026, 9, 3),
+      );
+
+      final dive = await (db.select(
+        db.dives,
+      )..where((t) => t.id.equals(diveId))).getSingle();
+      expect(dive.runtime, 50 * 60);
+      expect(dive.diveDateTime, dateTime.millisecondsSinceEpoch);
+      expect(dive.entryTime, dateTime.millisecondsSinceEpoch);
+      expect(
+        dive.exitTime,
+        dateTime.add(const Duration(minutes: 50)).millisecondsSinceEpoch,
+      );
+    });
+
+    test('falls back to runtime for bottom time, as the importer '
+        'does', () async {
+      final diveId = await seedDive(notes: '', buddy: '');
+      await seedSource(diveId, id: 'src-file');
+
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {
+          'dateTime': DateTime(2026, 9, 1, 9),
+          'runtime': const Duration(minutes: 50),
+        },
+        now: DateTime(2026, 9, 3),
+      );
+
+      final dive = await (db.select(
+        db.dives,
+      )..where((t) => t.id.equals(diveId))).getSingle();
+      expect(dive.bottomTime, 50 * 60);
+    });
+
+    test('clears a summary value the fixed parse no longer reports', () async {
+      // The same rule a computer re-parse applies: these columns belong to the
+      // parse, so a parser fix that stops emitting one clears the stale value
+      // instead of leaving it to contradict the rest of the dive.
+      final diveId = await seedDive(notes: '', buddy: '');
+      await seedSource(diveId, id: 'src-file');
+      await (db.update(db.dives)..where((t) => t.id.equals(diveId))).write(
+        const DivesCompanion(
+          decoAlgorithm: Value('buhlmann'),
+          gradientFactorLow: Value(30),
+          gradientFactorHigh: Value(70),
+          decoConservatism: Value(2),
+          cnsEnd: Value(44.0),
+          otu: Value(30.0),
+        ),
+      );
+
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {'dateTime': DateTime(2026, 9, 1, 9), 'maxDepth': 20.0},
+        now: DateTime(2026, 9, 3),
+      );
+
+      final dive = await (db.select(
+        db.dives,
+      )..where((t) => t.id.equals(diveId))).getSingle();
+      expect(dive.decoAlgorithm, isNull);
+      expect(dive.gradientFactorLow, isNull);
+      expect(dive.gradientFactorHigh, isNull);
+      expect(dive.decoConservatism, isNull);
+      expect(dive.cnsEnd, isNull);
+      expect(dive.otu, isNull);
+    });
+
+    test('writes the O2 exposure the file parse carries', () async {
+      // ParsedDive has no OTU, so a computer re-parse leaves that column
+      // alone; a file parse does carry one, and the synthesised source row has
+      // stored it since the first import.
+      final diveId = await seedDive(notes: '', buddy: '');
+      await seedSource(diveId, id: 'src-file');
+
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {
+          'dateTime': DateTime(2026, 9, 1, 9),
+          'cnsEnd': 18.0,
+          'otu': 12.0,
+          'decoConservatism': 1,
+        },
+        now: DateTime(2026, 9, 3),
+      );
+
+      final dive = await (db.select(
+        db.dives,
+      )..where((t) => t.id.equals(diveId))).getSingle();
+      expect(dive.cnsEnd, 18.0);
+      expect(dive.otu, 12.0);
+      expect(dive.decoConservatism, 1);
+    });
+
+    test('rewrites the dive mode the parse reports', () async {
+      final diveId = await seedDive(notes: '', buddy: '');
+      await seedSource(diveId, id: 'src-file');
+
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {
+          'dateTime': DateTime(2026, 9, 1, 9),
+          'diveMode': DiveMode.ccr,
+        },
+        now: DateTime(2026, 9, 3),
+      );
+
+      final dive = await (db.select(
+        db.dives,
+      )..where((t) => t.id.equals(diveId))).getSingle();
+      expect(dive.diveMode, 'ccr');
+    });
+
+    test('keeps water temp and GPS the parse does not report', () async {
+      // The two exceptions a computer re-parse makes: another source or the
+      // diver may have stamped these, and the source row still records that
+      // this parse had nothing to say about them.
+      final diveId = await seedDive(notes: '', buddy: '');
+      await seedSource(diveId, id: 'src-file');
+      await (db.update(db.dives)..where((t) => t.id.equals(diveId))).write(
+        const DivesCompanion(
+          waterTemp: Value(18.0),
+          entryLatitude: Value(36.5),
+          entryLongitude: Value(-5.1),
+        ),
+      );
+
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {'dateTime': DateTime(2026, 9, 1, 9), 'maxDepth': 20.0},
+        now: DateTime(2026, 9, 3),
+      );
+
+      final dive = await (db.select(
+        db.dives,
+      )..where((t) => t.id.equals(diveId))).getSingle();
+      expect(dive.waterTemp, 18.0);
+      expect(dive.entryLatitude, 36.5);
+      expect(dive.entryLongitude, -5.1);
+    });
+
+    test('takes the GPS fix the fresh parse does report', () async {
+      final diveId = await seedDive(notes: '', buddy: '');
+      await seedSource(diveId, id: 'src-file');
+
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {
+          'dateTime': DateTime(2026, 9, 1, 9),
+          'latitude': 36.7,
+          'longitude': -5.3,
+          'exitLatitude': 36.8,
+          'exitLongitude': -5.4,
+        },
+        now: DateTime(2026, 9, 3),
+      );
+
+      final dive = await (db.select(
+        db.dives,
+      )..where((t) => t.id.equals(diveId))).getSingle();
+      expect(dive.entryLatitude, 36.7);
+      expect(dive.entryLongitude, -5.3);
+      expect(dive.exitLatitude, 36.8);
+      expect(dive.exitLongitude, -5.4);
+    });
+
+    test('stores a zero average depth as no average depth', () async {
+      final diveId = await seedDive(notes: '', buddy: '');
+      await seedSource(diveId, id: 'src-file');
+
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {'dateTime': DateTime(2026, 9, 1, 9), 'avgDepth': 0.0},
+        now: DateTime(2026, 9, 3),
+      );
+
+      final dive = await (db.select(
+        db.dives,
+      )..where((t) => t.id.equals(diveId))).getSingle();
+      expect(dive.avgDepth, isNull);
+    });
+  });
+
+  group('profile events mirror a computer re-parse', () {
+    Future<void> seedEvent(String diveId, {required String id}) async {
+      await db
+          .into(db.diveProfileEvents)
+          .insert(
+            DiveProfileEventsCompanion.insert(
+              id: id,
+              diveId: diveId,
+              timestamp: 60,
+              eventType: 'bookmark',
+              createdAt: 0,
+            ),
+          );
+    }
+
+    const freshEvents = [
+      {'eventType': 'decoStopStart', 'timestamp': 900},
+      {'eventType': 'ppO2High', 'timestamp': 1000, 'value': 1.7},
+      {'eventType': 'bookmark', 'timestamp': 30, 'description': 'nice spot'},
+    ];
+
+    test('replaces the events of a dive it owns', () async {
+      final diveId = await seedDive(notes: '', buddy: '');
+      await seedSource(diveId, id: 'src-file');
+      await seedEvent(diveId, id: 'ev-old');
+
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {'dateTime': DateTime(2026, 9, 1, 9), 'events': freshEvents},
+        now: DateTime(2026, 9, 3),
+      );
+
+      final events = await (db.select(
+        db.diveProfileEvents,
+      )..where((t) => t.diveId.equals(diveId))).get();
+      expect(events.map((e) => e.id), isNot(contains('ev-old')));
+      expect(events.map((e) => e.eventType), <String>{
+        'decoStopStart',
+        'ppO2High',
+        'bookmark',
+      });
+      final ppO2 = events.firstWhere((e) => e.eventType == 'ppO2High');
+      expect(ppO2.value, 1.7);
+      expect(ppO2.severity, 'warning');
+      final bookmark = events.firstWhere((e) => e.eventType == 'bookmark');
+      expect(bookmark.description, 'nice spot');
+      expect(
+        bookmark.source,
+        'imported',
+        reason: 'the importer overrides the user-authored factory default',
+      );
+    });
+
+    test('leaves the events of a multi-source dive alone', () async {
+      final diveId = await seedDive(notes: '', buddy: '');
+      await seedSource(diveId, id: 'src-file');
+      await seedSource(diveId, id: 'src-perdix', isPrimary: false);
+      await seedEvent(diveId, id: 'ev-perdix');
+
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {'dateTime': DateTime(2026, 9, 1, 9), 'events': freshEvents},
+        now: DateTime(2026, 9, 3),
+      );
+
+      final events = await (db.select(
+        db.diveProfileEvents,
+      )..where((t) => t.diveId.equals(diveId))).get();
+      expect(events.map((e) => e.id), ['ev-perdix']);
+    });
+
+    test('keeps the events when the fresh parse reports none', () async {
+      // Same skip-if-absent rule as the profile, the switches and the
+      // pressures: a parse that says nothing about events is not a parse
+      // reporting that there are none.
+      final diveId = await seedDive(notes: '', buddy: '');
+      await seedSource(diveId, id: 'src-file');
+      await seedEvent(diveId, id: 'ev-old');
+
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {'dateTime': DateTime(2026, 9, 1, 9), 'maxDepth': 20.0},
+        now: DateTime(2026, 9, 3),
+      );
+
+      final events = await (db.select(
+        db.diveProfileEvents,
+      )..where((t) => t.diveId.equals(diveId))).get();
+      expect(events.map((e) => e.id), ['ev-old']);
+    });
+
+    test('logs the events it deleted and marks the fresh ones '
+        'pending', () async {
+      final diveId = await seedDive(notes: '', buddy: '');
+      await seedSource(diveId, id: 'src-file');
+      await seedEvent(diveId, id: 'ev-old');
+      final syncRepository = SyncRepository(database: db);
+      final serviceWithSync = DiveReimportService(
+        db: db,
+        syncRepository: syncRepository,
+      );
+
+      await serviceWithSync.applyReimport(
+        diveId: diveId,
+        diveData: {'dateTime': DateTime(2026, 9, 1, 9), 'events': freshEvents},
+        now: DateTime(2026, 9, 3),
+      );
+
+      final tombstones = await (db.select(
+        db.deletionLog,
+      )..where((t) => t.entityType.equals('diveProfileEvents'))).get();
+      expect(tombstones.map((r) => r.recordId), ['ev-old']);
+
+      final pending = await syncRepository.getPendingRecords();
+      final pendingEvents = [
+        for (final record in pending)
+          if (record.entityType == 'diveProfileEvents') record.recordId,
+      ];
+      final fresh = await (db.select(
+        db.diveProfileEvents,
+      )..where((t) => t.diveId.equals(diveId))).get();
+      expect(pendingEvents, unorderedEquals(fresh.map((e) => e.id)));
+    });
+  });
+
+  group('source snapshot mirrors a computer re-parse', () {
+    test('clears a snapshot column the fixed parse no longer '
+        'reports', () async {
+      final diveId = await seedDive(notes: '', buddy: '');
+      await db
+          .into(db.diveDataSources)
+          .insert(
+            DiveDataSourcesCompanion.insert(
+              id: 'src-1',
+              diveId: diveId,
+              isPrimary: const Value(true),
+              importedAt: DateTime.fromMillisecondsSinceEpoch(0),
+              createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+              waterTemp: const Value(18.0),
+              cns: const Value(44.0),
+              otu: const Value(30.0),
+              decoAlgorithm: const Value('buhlmann'),
+              gradientFactorLow: const Value(30),
+              gradientFactorHigh: const Value(70),
+            ),
+          );
+
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {'dateTime': DateTime(2026, 9, 1, 9), 'maxDepth': 20.0},
+        now: DateTime(2026, 9, 3),
+      );
+
+      final source = await (db.select(
+        db.diveDataSources,
+      )..where((t) => t.id.equals('src-1'))).getSingle();
+      expect(source.waterTemp, isNull);
+      expect(source.cns, isNull);
+      expect(source.otu, isNull);
+      expect(source.decoAlgorithm, isNull);
+      expect(source.gradientFactorLow, isNull);
+      expect(source.gradientFactorHigh, isNull);
+    });
+
+    test('snapshots the derived bottom time, not the absent duration '
+        'key', () async {
+      // UDDF never sets `duration`, so reading it alone left the Sources panel
+      // advertising the duration of the profile the resync had just deleted.
+      // The synthesised source row stores the derived bottom time.
+      final diveId = await seedDive(notes: '', buddy: '');
+      await db
+          .into(db.diveDataSources)
+          .insert(
+            DiveDataSourcesCompanion.insert(
+              id: 'src-1',
+              diveId: diveId,
+              isPrimary: const Value(true),
+              importedAt: DateTime.fromMillisecondsSinceEpoch(0),
+              createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+              duration: const Value(99),
+            ),
+          );
+
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {
+          'dateTime': DateTime(2026, 9, 1, 9),
+          'runtime': const Duration(minutes: 25),
+          'profile': profileWithPressure,
+        },
+        now: DateTime(2026, 9, 3),
+      );
+
+      final source = await (db.select(
+        db.diveDataSources,
+      )..where((t) => t.id.equals('src-1'))).getSingle();
+      expect(source.duration, 1200);
+    });
+
+    test('derives the snapshot window the way the first import '
+        'did', () async {
+      final diveId = await seedDive(notes: '', buddy: '');
+      await db
+          .into(db.diveDataSources)
+          .insert(
+            DiveDataSourcesCompanion.insert(
+              id: 'src-1',
+              diveId: diveId,
+              isPrimary: const Value(true),
+              importedAt: DateTime.fromMillisecondsSinceEpoch(0),
+              createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+            ),
+          );
+
+      final dateTime = DateTime(2026, 9, 1, 9);
+      await service.applyReimport(
+        diveId: diveId,
+        diveData: {
+          'dateTime': dateTime,
+          'runtime': const Duration(minutes: 50),
+        },
+        now: DateTime(2026, 9, 3),
+      );
+
+      final source = await (db.select(
+        db.diveDataSources,
+      )..where((t) => t.id.equals('src-1'))).getSingle();
+      expect(source.entryTime, dateTime);
+      expect(source.exitTime, dateTime.add(const Duration(minutes: 50)));
+    });
+  });
+
+  test('keeps the pressure history of a parsed tank the fresh samples '
+      'do not cover', () async {
+    // Both tanks are in the fresh parse, but only one carries pressure
+    // samples: the series of the other is not the parse's to delete, and the
+    // #276 cascade makes the loss unrecoverable.
+    final diveId = await seedDive(notes: '', buddy: '');
+    await seedSource(diveId, id: 'src-file');
+    await seedTank(diveId, id: 'tank-a', tankOrder: 0);
+    await seedTank(diveId, id: 'tank-b', tankOrder: 1);
+    await TankPressureRepository().insertTankPressures(diveId, {
+      'tank-a': [(timestamp: 0, pressure: 190.0)],
+      'tank-b': [(timestamp: 900, pressure: 180.0)],
+    });
+
+    await service.applyReimport(
+      diveId: diveId,
+      diveData: {
+        'tanks': [
+          {'order': 0, 'startPressure': 200.0},
+          {'order': 1, 'startPressure': 207.0},
+        ],
+        'profile': profileWithPressure,
+      },
+      now: DateTime(2026, 9, 3),
+    );
+
+    final untouched = await TankPressureRepository().getPressuresForTank(
+      diveId,
+      'tank-b',
+    );
+    expect(untouched.map((p) => p.timestamp), [900]);
+    expect(untouched.single.pressure, 180.0);
+
+    final replaced = await TankPressureRepository().getPressuresForTank(
+      diveId,
+      'tank-a',
+    );
+    expect(replaced.map((p) => p.timestamp), [0, 60, 1200]);
   });
 
   test('falls back to the parsed duration when no profile resolves '

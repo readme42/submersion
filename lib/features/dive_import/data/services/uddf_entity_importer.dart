@@ -8,6 +8,7 @@ import 'package:submersion/core/database/database.dart'
 import 'package:submersion/core/services/export/export_service.dart';
 import 'package:submersion/core/utils/deco_dive_detector.dart';
 import 'package:submersion/features/dive_import/data/repositories/imported_file_repository.dart';
+import 'package:submersion/features/dive_import/data/services/parsed_profile_event_mapper.dart';
 import 'package:submersion/features/dive_import/domain/import_source_file.dart';
 import 'package:submersion/features/dive_import/domain/resyncable_import_formats.dart';
 import 'package:submersion/features/dive_log/domain/services/dive_altitude_enricher.dart';
@@ -33,7 +34,6 @@ import 'package:submersion/features/dive_log/data/repositories/tank_pressure_rep
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_weight.dart';
 import 'package:submersion/features/dive_log/domain/entities/gas_switch.dart';
-import 'package:submersion/features/dive_log/domain/entities/profile_event.dart';
 import 'package:submersion/features/dive_sites/data/repositories/site_repository_impl.dart';
 import 'package:submersion/features/dive_sites/domain/entities/dive_site.dart';
 import 'package:submersion/features/dive_types/data/repositories/dive_type_repository.dart';
@@ -2253,150 +2253,12 @@ class UddfEntityImporter {
       // future slice adds UDDF event import, unify the keys or add a second
       // consumer block here.
       if (eventMaps != null && eventMaps.isNotEmpty) {
-        final events = <ProfileEvent>[];
-        for (final m in eventMaps) {
-          // Defensive cast: malformed/partial events (missing/non-string
-          // eventType) are forward-compat noise, not errors. Skip quietly.
-          final eventTypeStr = m['eventType'] as String?;
-          if (eventTypeStr == null || eventTypeStr.isEmpty) continue;
-          final timestamp = m['timestamp'] as int?;
-          if (timestamp == null) continue;
-          final value = m['value'] as double?;
-          final description = m['description'] as String?;
-          switch (eventTypeStr) {
-            case 'setpointChange':
-              if (value == null) continue;
-              events.add(
-                ProfileEvent.setpointChange(
-                  id: _uuid.v4(),
-                  diveId: diveId,
-                  timestamp: timestamp,
-                  setpoint: value,
-                  createdAt: now,
-                ),
-              );
-              break;
-
-            case 'bookmark':
-              events.add(
-                ProfileEvent.bookmark(
-                  id: _uuid.v4(),
-                  diveId: diveId,
-                  timestamp: timestamp,
-                  note: description,
-                  createdAt: now,
-                  source:
-                      EventSource.imported, // override `user` factory default
-                ),
-              );
-              break;
-
-            case 'safetyStopStart':
-              events.add(
-                ProfileEvent.safetyStop(
-                  id: _uuid.v4(),
-                  diveId: diveId,
-                  timestamp: timestamp,
-                  depth:
-                      0.0, // parser does not emit depth on event elements; placeholder used across safety/deco/ascent cases. Future enrichment slice may interpolate from samples.
-                  createdAt: now,
-                  isStart: true,
-                  source: EventSource
-                      .imported, // override `computed` factory default
-                ),
-              );
-              break;
-
-            case 'decoStopStart':
-              events.add(
-                ProfileEvent.decoStop(
-                  id: _uuid.v4(),
-                  diveId: diveId,
-                  timestamp: timestamp,
-                  depth: 0.0,
-                  createdAt: now,
-                  isStart: true,
-                  // factory default is already `imported`; no override needed
-                ),
-              );
-              break;
-
-            case 'decoViolation':
-              events.add(
-                ProfileEvent.decoViolation(
-                  id: _uuid.v4(),
-                  diveId: diveId,
-                  timestamp: timestamp,
-                  value: value,
-                  createdAt: now,
-                  // factory default is already `imported`; no override needed
-                ),
-              );
-              break;
-
-            case 'ascentRateWarning':
-              if (value == null) {
-                _log.warning(
-                  'Skipping ascentRateWarning event with missing value',
-                );
-                continue; // match setpointChange/ppO2 null-guard pattern
-              }
-              events.add(
-                ProfileEvent.ascentRateWarning(
-                  id: _uuid.v4(),
-                  diveId: diveId,
-                  timestamp: timestamp,
-                  depth: 0.0,
-                  rate: value,
-                  createdAt: now,
-                  source: EventSource
-                      .imported, // override `computed` factory default
-                ),
-              );
-              break;
-
-            case 'ppO2High':
-              if (value == null) {
-                _log.warning('Skipping ppO2High event with missing value');
-                continue; // match setpointChange null-guard pattern
-              }
-              events.add(
-                ProfileEvent.ppO2High(
-                  id: _uuid.v4(),
-                  diveId: diveId,
-                  timestamp: timestamp,
-                  value: value,
-                  createdAt: now,
-                ),
-              );
-              break;
-
-            case 'ppO2Low':
-              if (value == null) {
-                _log.warning('Skipping ppO2Low event with missing value');
-                continue; // match setpointChange null-guard pattern
-              }
-              events.add(
-                ProfileEvent.ppO2Low(
-                  id: _uuid.v4(),
-                  diveId: diveId,
-                  timestamp: timestamp,
-                  value: value,
-                  createdAt: now,
-                ),
-              );
-              break;
-
-            default:
-              // Unknown event type — skip with a log line so future types can
-              // be tracked. Do not throw: unknown types are forward-compat
-              // noise, not errors.
-              _log.warning(
-                'Skipping unknown profile event type from parser: $eventTypeStr',
-              );
-              break;
-          }
-        }
+        final events = profileEventsFromParsed(
+          diveId: diveId,
+          eventMaps: eventMaps,
+          now: now,
+          onSkipped: _log.warning,
+        );
         if (events.isNotEmpty) {
           await repos.diveRepository.insertProfileEvents(events);
         }

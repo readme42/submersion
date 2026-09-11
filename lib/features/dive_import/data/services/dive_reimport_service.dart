@@ -1,9 +1,12 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/database/database.dart';
+import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/core/services/sync/sync_event_bus.dart';
+import 'package:submersion/features/dive_import/data/services/parsed_profile_event_mapper.dart';
 import 'package:submersion/features/dive_log/data/repositories/profile_series_repository.dart';
 import 'package:submersion/features/dive_log/data/repositories/tank_pressure_repository.dart';
 import 'package:submersion/features/dive_log/domain/codecs/profile_sample.dart'
@@ -35,7 +38,23 @@ class DiveReimportResult {
 }
 
 /// Writes a freshly re-parsed file-import payload back onto an EXISTING
-/// dive, touching only computer-authored data this source actually owns.
+/// dive, touching only the data this source actually owns.
+///
+/// The boundary is the one `ReparseService` draws for a dive-computer
+/// re-parse, and this path draws it identically on purpose. Diver-authored
+/// fields are never read from the parse, let alone written: notes, buddy,
+/// site, rating, tags, trip, course, equipment, weights, sightings, dive
+/// types and the dive's name.
+///
+/// Everything the computer reported is rewritten from the fresh parse,
+/// unconditionally -- summary depths, the clock, runtime, bottom time, dive
+/// mode, O2 exposure, deco model and gradient factors, and the profile,
+/// events, gas switches and tank pressures this source owns. A value the
+/// fixed parse no longer reports is CLEARED rather than left to contradict
+/// the rest of the dive, and a hand correction to one of those computer
+/// values is overwritten with it. That is what a re-parse does, and replaying
+/// the file is the same operation: the fix is the point, and a summary half
+/// from the old parser is not a state the diver asked for.
 ///
 /// `gas_switches`/`tank_pressure_series` both `ON DELETE CASCADE` off
 /// `dive_tanks.id` (#276) -- tank ids must be preserved by `tankOrder`,
@@ -43,6 +62,7 @@ class DiveReimportResult {
 class DiveReimportService {
   final AppDatabase db;
   final _uuid = const Uuid();
+  static const _log = LoggerService('DiveReimportService');
 
   DiveReimportService({
     required this.db,
@@ -132,6 +152,12 @@ class DiveReimportService {
           source: primary,
           now: now,
         );
+
+        await _replaceProfileEvents(
+          diveId: diveId,
+          diveData: diveData,
+          now: now,
+        );
       }
 
       await _updateDataSourceSnapshot(
@@ -152,10 +178,31 @@ class DiveReimportService {
   /// but it shares the same shape when present.
   static DateTime? _asDateTime(Object? v) => v is DateTime ? v : null;
 
-  /// Every parser that emits `duration` (fit, macdive, subsurface, danDl7,
-  /// ratioXml) hands over a real [Duration], never raw seconds.
-  static int? _asDurationSeconds(Object? v) =>
-      v is Duration ? v.inSeconds : null;
+  static int? _asInt(Object? v) => v is int ? v : null;
+
+  static String? _asString(Object? v) => v is String ? v : null;
+
+  /// Total dive time exactly as `UddfEntityImporter` reads it: `runtime`, else
+  /// the `duration` the parsers that fill only that one emit.
+  static Duration? _parsedRuntime(Map<String, dynamic> diveData) {
+    final runtime = diveData['runtime'];
+    if (runtime is Duration) return runtime;
+    final duration = diveData['duration'];
+    return duration is Duration ? duration : null;
+  }
+
+  /// Dive mode as the importer derives it: a parsed enum or its name, else
+  /// open circuit.
+  static DiveMode _parsedDiveMode(Object? v) {
+    if (v is DiveMode) return v;
+    if (v is String) {
+      final lower = v.toLowerCase();
+      for (final mode in DiveMode.values) {
+        if (mode.name.toLowerCase() == lower) return mode;
+      }
+    }
+    return DiveMode.oc;
+  }
 
   static List<Map<String, dynamic>>? _profileOf(Map<String, dynamic> diveData) {
     final raw = diveData['profile'];
@@ -189,33 +236,65 @@ class DiveReimportService {
     return durationValue?.inSeconds;
   }
 
+  /// Rewrites the computer-reported summary from the fresh parse, column for
+  /// column with `ReparseService._updateDiveRow`: the values below belong to
+  /// the parse, so one that no longer reports a value clears it rather than
+  /// leaving the dive contradicting its own profile. Water temp and GPS are
+  /// the two exceptions a re-parse makes, because another source or the diver
+  /// may have stamped them and the source snapshot still records what this
+  /// parse had to say.
+  ///
+  /// `diveDateTime` is the one column that cannot be cleared: it is NOT NULL,
+  /// and a candidate without a clock never reaches here from the orchestrator.
   Future<void> _updateDiveRow({
     required String diveId,
     required Map<String, dynamic> diveData,
     required DateTime now,
   }) async {
-    final maxDepth = _asDouble(diveData['maxDepth']);
+    final dateTime = _asDateTime(diveData['dateTime']);
+    final runtime = _parsedRuntime(diveData);
+    final entryTime = _asDateTime(diveData['entryTime']) ?? dateTime;
+    final exitTime = dateTime != null && runtime != null
+        ? dateTime.add(runtime)
+        : null;
     final avgDepth = _asDouble(diveData['avgDepth']);
     final waterTemp = _asDouble(diveData['waterTemp']);
-    final bottomTime = _deriveBottomTimeSeconds(diveData);
-    final decoAlgorithm = diveData['decoAlgorithm'];
-    final gfLow = diveData['gradientFactorLow'];
-    final gfHigh = diveData['gradientFactorHigh'];
+    final bottomTime = _deriveBottomTimeSeconds(diveData) ?? runtime?.inSeconds;
+    final entryLatitude = _asDouble(diveData['latitude']);
+    final entryLongitude = _asDouble(diveData['longitude']);
+    final exitLatitude = _asDouble(diveData['exitLatitude']);
+    final exitLongitude = _asDouble(diveData['exitLongitude']);
 
     await (db.update(db.dives)..where((t) => t.id.equals(diveId))).write(
       DivesCompanion(
-        maxDepth: maxDepth != null ? Value(maxDepth) : const Value.absent(),
-        avgDepth: avgDepth != null ? Value(avgDepth) : const Value.absent(),
+        maxDepth: Value(_asDouble(diveData['maxDepth'])),
+        avgDepth: Value(avgDepth == 0.0 ? null : avgDepth),
+        runtime: Value(runtime?.inSeconds),
+        diveDateTime: dateTime != null
+            ? Value(dateTime.millisecondsSinceEpoch)
+            : const Value.absent(),
+        entryTime: Value(entryTime?.millisecondsSinceEpoch),
+        exitTime: Value(exitTime?.millisecondsSinceEpoch),
+        bottomTime: Value(bottomTime),
         waterTemp: waterTemp != null ? Value(waterTemp) : const Value.absent(),
-        bottomTime: bottomTime != null
-            ? Value(bottomTime)
+        diveMode: Value(_parsedDiveMode(diveData['diveMode']).code),
+        cnsEnd: Value(_asDouble(diveData['cnsEnd'])),
+        otu: Value(_asDouble(diveData['otu'])),
+        decoAlgorithm: Value(_asString(diveData['decoAlgorithm'])),
+        decoConservatism: Value(_asInt(diveData['decoConservatism'])),
+        gradientFactorLow: Value(_asInt(diveData['gradientFactorLow'])),
+        gradientFactorHigh: Value(_asInt(diveData['gradientFactorHigh'])),
+        entryLatitude: entryLatitude != null
+            ? Value(entryLatitude)
             : const Value.absent(),
-        decoAlgorithm: decoAlgorithm is String
-            ? Value(decoAlgorithm)
+        entryLongitude: entryLongitude != null
+            ? Value(entryLongitude)
             : const Value.absent(),
-        gradientFactorLow: gfLow is int ? Value(gfLow) : const Value.absent(),
-        gradientFactorHigh: gfHigh is int
-            ? Value(gfHigh)
+        exitLatitude: exitLatitude != null
+            ? Value(exitLatitude)
+            : const Value.absent(),
+        exitLongitude: exitLongitude != null
+            ? Value(exitLongitude)
             : const Value.absent(),
         updatedAt: Value(now.millisecondsSinceEpoch),
       ),
@@ -407,9 +486,11 @@ class DiveReimportService {
   /// carries no pressure sample at all, so neither a metadata-only reparse
   /// nor a profile without air integration can blank out existing history.
   ///
-  /// Scoped to the tanks the fresh parse reports: [_carryOverTanks] keeps a
-  /// tank the parse no longer mentions, and a dive-wide replace would delete
-  /// that tank's pressures out from under it.
+  /// Scoped to the tanks the fresh samples actually cover, not every tank the
+  /// parse reports: [_carryOverTanks] keeps a tank the parse no longer
+  /// mentions, and a parsed tank can have no pressure sample of its own (only
+  /// one cylinder carried a transmitter), so a wider delete scope takes a
+  /// history nothing replaces.
   Future<void> _replaceTankPressures({
     required String diveId,
     required Map<String, dynamic> diveData,
@@ -439,7 +520,7 @@ class DiveReimportService {
 
     await _tankPressureRepository.replaceTankPressuresForTanks(
       diveId,
-      tanks.idsByIndex,
+      pressuresByTank.keys,
       pressuresByTank,
     );
   }
@@ -505,9 +586,75 @@ class DiveReimportService {
     );
   }
 
+  /// Full replace when `events` is present: the file-side twin of the event
+  /// delete-and-re-insert a computer re-parse runs inside the same ownership
+  /// gate, converted through the very function the first import converts with.
+  /// Absent means untouched, the rule [_replaceProfile] and
+  /// [_replaceGasSwitches] follow -- a parse that says nothing about events is
+  /// not a parse reporting there are none, and several formats carry their
+  /// events under a key the import path does not read.
+  Future<void> _replaceProfileEvents({
+    required String diveId,
+    required Map<String, dynamic> diveData,
+    required DateTime now,
+  }) async {
+    final eventsRaw = diveData['events'];
+    if (eventsRaw is! List) return;
+
+    final existing = await (db.select(
+      db.diveProfileEvents,
+    )..where((t) => t.diveId.equals(diveId))).get();
+    await (db.delete(
+      db.diveProfileEvents,
+    )..where((t) => t.diveId.equals(diveId))).go();
+    for (final row in existing) {
+      await _syncRepository.logDeletion(
+        entityType: 'diveProfileEvents',
+        recordId: row.id,
+      );
+    }
+
+    final events = profileEventsFromParsed(
+      diveId: diveId,
+      eventMaps: eventsRaw.cast<Map<String, dynamic>>(),
+      now: now,
+      onSkipped: _log.warning,
+    );
+    for (final event in events) {
+      await db
+          .into(db.diveProfileEvents)
+          .insert(
+            DiveProfileEventsCompanion.insert(
+              id: event.id,
+              diveId: diveId,
+              timestamp: event.timestamp,
+              eventType: event.eventType.name,
+              severity: Value(event.severity.name),
+              description: Value(event.description),
+              depth: Value(event.depth),
+              value: Value(event.value),
+              tankId: Value(event.tankId),
+              source: Value(event.source.name),
+              createdAt: event.createdAt.millisecondsSinceEpoch,
+            ),
+          );
+      await _syncRepository.markRecordPending(
+        entityType: 'diveProfileEvents',
+        recordId: event.id,
+        localUpdatedAt: now.millisecondsSinceEpoch,
+      );
+    }
+  }
+
   /// Refreshes the primary `dive_data_sources` row's computer-authored
   /// snapshot so the Sources panel doesn't show pre-resync numbers. No-op
   /// if there is no primary source row.
+  ///
+  /// Written unconditionally, as `ReparseService._updateSourceRow` writes it:
+  /// these columns record what this parse reported, so a value it stops
+  /// reporting has to go. The window and the duration are derived the way the
+  /// first import derived them for the row it synthesised -- `duration` holds
+  /// the bottom time, and UDDF never sets the `duration` key at all.
   Future<void> _updateDataSourceSnapshot({
     required DiveDataSourcesData? primary,
     required Map<String, dynamic> diveData,
@@ -515,37 +662,29 @@ class DiveReimportService {
   }) async {
     if (primary == null) return;
 
-    final maxDepth = _asDouble(diveData['maxDepth']);
+    final dateTime = _asDateTime(diveData['dateTime']);
+    final runtime = _parsedRuntime(diveData);
     final avgDepth = _asDouble(diveData['avgDepth']);
-    final duration = _asDurationSeconds(diveData['duration']);
-    final waterTemp = _asDouble(diveData['waterTemp']);
-    final entryTime = _asDateTime(diveData['entryTime']);
-    final exitTime = _asDateTime(diveData['exitTime']);
-    final decoAlgorithm = diveData['decoAlgorithm'];
-    final gfLow = diveData['gradientFactorLow'];
-    final gfHigh = diveData['gradientFactorHigh'];
-    final cns = _asDouble(diveData['cnsEnd']);
-    final otu = _asDouble(diveData['otu']);
+    final entryTime = _asDateTime(diveData['entryTime']) ?? dateTime;
+    final exitTime = dateTime != null && runtime != null
+        ? dateTime.add(runtime)
+        : _asDateTime(diveData['exitTime']);
 
     await (db.update(
       db.diveDataSources,
     )..where((t) => t.id.equals(primary.id))).write(
       DiveDataSourcesCompanion(
-        maxDepth: maxDepth != null ? Value(maxDepth) : const Value.absent(),
-        avgDepth: avgDepth != null ? Value(avgDepth) : const Value.absent(),
-        duration: duration != null ? Value(duration) : const Value.absent(),
-        waterTemp: waterTemp != null ? Value(waterTemp) : const Value.absent(),
-        entryTime: entryTime != null ? Value(entryTime) : const Value.absent(),
-        exitTime: exitTime != null ? Value(exitTime) : const Value.absent(),
-        decoAlgorithm: decoAlgorithm is String
-            ? Value(decoAlgorithm)
-            : const Value.absent(),
-        gradientFactorLow: gfLow is int ? Value(gfLow) : const Value.absent(),
-        gradientFactorHigh: gfHigh is int
-            ? Value(gfHigh)
-            : const Value.absent(),
-        cns: cns != null ? Value(cns) : const Value.absent(),
-        otu: otu != null ? Value(otu) : const Value.absent(),
+        maxDepth: Value(_asDouble(diveData['maxDepth'])),
+        avgDepth: Value(avgDepth == 0.0 ? null : avgDepth),
+        duration: Value(_deriveBottomTimeSeconds(diveData)),
+        waterTemp: Value(_asDouble(diveData['waterTemp'])),
+        entryTime: Value(entryTime),
+        exitTime: Value(exitTime),
+        decoAlgorithm: Value(_asString(diveData['decoAlgorithm'])),
+        gradientFactorLow: Value(_asInt(diveData['gradientFactorLow'])),
+        gradientFactorHigh: Value(_asInt(diveData['gradientFactorHigh'])),
+        cns: Value(_asDouble(diveData['cnsEnd'])),
+        otu: Value(_asDouble(diveData['otu'])),
       ),
     );
     await _syncRepository.markRecordPending(
