@@ -471,24 +471,24 @@ void main() {
   group('O2 cell millivolts (issue #810)', () {
     test('default to hidden and copyWith flips them', () {
       const state = ProfileLegendState();
-      expect(state.showO2CellMv, isFalse);
-      expect(state.copyWith(showO2CellMv: true).showO2CellMv, isTrue);
+      expect(state.showO2Cells, isFalse);
+      expect(state.copyWith(showO2Cells: true).showO2Cells, isTrue);
     });
 
     test('showing them counts as an active secondary toggle', () {
       const off = ProfileLegendState();
-      final on = off.copyWith(showO2CellMv: true);
+      final on = off.copyWith(showO2Cells: true);
       expect(on.activeSecondaryCount, off.activeSecondaryCount + 1);
     });
 
     test('participate in equality and hashCode', () {
       const off = ProfileLegendState();
-      final on = off.copyWith(showO2CellMv: true);
+      final on = off.copyWith(showO2Cells: true);
       expect(on, isNot(equals(off)));
       expect(on.hashCode, isNot(equals(off.hashCode)));
     });
 
-    test('toggleO2CellMv flips the state', () {
+    test('toggleO2Cells flips the state', () {
       final container = ProviderContainer(
         overrides: [
           settingsProvider.overrideWith(
@@ -497,12 +497,12 @@ void main() {
         ],
       );
       addTearDown(container.dispose);
-      expect(container.read(profileLegendProvider).showO2CellMv, isFalse);
-      container.read(profileLegendProvider.notifier).toggleO2CellMv();
-      expect(container.read(profileLegendProvider).showO2CellMv, isTrue);
+      expect(container.read(profileLegendProvider).showO2Cells, isFalse);
+      container.read(profileLegendProvider.notifier).toggleO2Cells();
+      expect(container.read(profileLegendProvider).showO2Cells, isTrue);
     });
 
-    test('showO2CellMv seeds from defaultShowO2CellMv when true', () {
+    test('showO2Cells seeds from defaultShowO2CellMv when true', () {
       final container = ProviderContainer(
         overrides: [
           settingsProvider.overrideWith(
@@ -513,10 +513,10 @@ void main() {
         ],
       );
       addTearDown(container.dispose);
-      expect(container.read(profileLegendProvider).showO2CellMv, isTrue);
+      expect(container.read(profileLegendProvider).showO2Cells, isTrue);
     });
 
-    test('showO2CellMv seeds from defaultShowO2CellMv when false', () {
+    test('showO2Cells seeds from defaultShowO2CellMv when false', () {
       final container = ProviderContainer(
         overrides: [
           settingsProvider.overrideWith(
@@ -527,7 +527,7 @@ void main() {
         ],
       );
       addTearDown(container.dispose);
-      expect(container.read(profileLegendProvider).showO2CellMv, isFalse);
+      expect(container.read(profileLegendProvider).showO2Cells, isFalse);
     });
   });
 
