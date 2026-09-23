@@ -1762,6 +1762,42 @@ void main() {
       expect(lines.every((b) => b.barWidth < 2), isTrue);
     });
 
+    testWidgets('cell ppO2 lines follow new sensor curves', (tester) async {
+      // A ppO2-only dive whose cell curves arrive after the first frame. The
+      // profile and aggregate are the same instances across both pumps, so
+      // only the cell curves can tell the cached traces apart.
+      final profile = makeRichProfile();
+      final ppO2 = List.generate(10, (i) => 0.7 + i * 0.05);
+
+      await tester.pumpWidget(_buildChart(profile: profile, ppO2Curve: ppO2));
+      await tester.pumpAndSettle();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(DiveProfileChart)),
+      );
+      container.read(profileLegendProvider.notifier).toggleO2Cells();
+      await tester.pumpAndSettle();
+      expect(_cellLines(tester), isEmpty);
+
+      await tester.pumpWidget(
+        _buildChart(
+          profile: profile,
+          ppO2Curve: ppO2,
+          o2SensorCurves: <List<double?>>[
+            List.generate(10, (i) => 0.68 + i * 0.05),
+            List.generate(10, (i) => 0.72 + i * 0.05),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        _cellLines(tester),
+        hasLength(2),
+        reason: 'the cached analysis series must key on the cell ppO2 curves',
+      );
+    });
+
     testWidgets('cell ppO2 lines share the aggregate ppO2 mapping', (
       tester,
     ) async {

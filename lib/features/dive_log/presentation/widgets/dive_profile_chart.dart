@@ -2373,6 +2373,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
       identityHashCode(widget.gtrCurve),
       identityHashCode(widget.cnsCurve),
       identityHashCode(widget.otuCurve),
+      identityHashCode(widget.o2SensorCurves),
       identityHashCode(widget.o2CellMvCurves),
       vpBucket,
     ]);

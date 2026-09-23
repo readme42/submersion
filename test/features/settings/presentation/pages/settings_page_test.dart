@@ -44,13 +44,13 @@ import 'package:submersion/features/dive_log/presentation/widgets/tissue_color_s
 import 'package:submersion/core/services/log_file_service.dart';
 import 'package:submersion/features/settings/presentation/providers/debug_log_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/debug_mode_provider.dart';
+import 'package:submersion/core/constants/o2_cell_unit.dart';
 import 'package:submersion/core/utils/coordinates/coordinate_format.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/settings/presentation/widgets/nav_customization_tile.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
 
 import '../../../../support/fake_app_settings_repository.dart';
-import 'package:submersion/core/constants/o2_cell_unit.dart';
 
 typedef Override = riverpod.Override;
 

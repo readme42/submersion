@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:submersion/core/constants/o2_cell_unit.dart';
 import 'package:submersion/core/constants/profile_metrics.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/dive_log/presentation/providers/profile_legend_provider.dart';
@@ -15,6 +16,11 @@ class _StubSettingsNotifier extends StateNotifier<AppSettings>
       fullscreenReadoutCardX: x,
       fullscreenReadoutCardY: y,
     );
+  }
+
+  @override
+  Future<void> setO2CellUnit(O2CellUnit value) async {
+    state = state.copyWith(o2CellUnit: value);
   }
 
   @override
@@ -54,6 +60,77 @@ void main() {
         );
       },
     );
+  });
+
+  group('ProfileLegend survives an O2 cell unit change', () {
+    test(
+      'picking a unit keeps the session toggles and applies the unit',
+      () async {
+        final stub = _StubSettingsNotifier();
+        final container = ProviderContainer(
+          overrides: [settingsProvider.overrideWith((ref) => stub)],
+        );
+        addTearDown(container.dispose);
+        final sub = container.listen(profileLegendProvider, (_, _) {});
+        addTearDown(sub.close);
+
+        final notifier = container.read(profileLegendProvider.notifier);
+        notifier.toggleO2Cells();
+        notifier.toggleSac();
+
+        // What the chart options dialog does when the unit is picked.
+        notifier.setO2CellUnit(O2CellUnit.millivolts);
+        await stub.setO2CellUnit(O2CellUnit.millivolts);
+        await Future<void>.delayed(Duration.zero);
+
+        final state = container.read(profileLegendProvider);
+        expect(state.o2CellUnit, O2CellUnit.millivolts);
+        expect(
+          state.showO2Cells,
+          isTrue,
+          reason: 'persisting the unit must not switch the cell traces off',
+        );
+        expect(state.showSac, isTrue);
+      },
+    );
+
+    test('a unit arriving from settings is applied without a reset', () async {
+      final stub = _StubSettingsNotifier();
+      final container = ProviderContainer(
+        overrides: [settingsProvider.overrideWith((ref) => stub)],
+      );
+      addTearDown(container.dispose);
+      final sub = container.listen(profileLegendProvider, (_, _) {});
+      addTearDown(sub.close);
+
+      container.read(profileLegendProvider.notifier).toggleO2Cells();
+
+      // E.g. the device-local preference finishing its asynchronous load
+      // after the legend was first built.
+      await stub.setO2CellUnit(O2CellUnit.millivolts);
+      await Future<void>.delayed(Duration.zero);
+
+      final state = container.read(profileLegendProvider);
+      expect(state.o2CellUnit, O2CellUnit.millivolts);
+      expect(state.showO2Cells, isTrue);
+    });
+
+    test('the unit seeds from settings on first build', () {
+      final container = ProviderContainer(
+        overrides: [
+          settingsProvider.overrideWith(
+            (ref) => _StubSettingsNotifier(
+              const AppSettings(o2CellUnit: O2CellUnit.millivolts),
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      expect(
+        container.read(profileLegendProvider).o2CellUnit,
+        O2CellUnit.millivolts,
+      );
+    });
   });
 
   group('metricsFollowViewport', () {

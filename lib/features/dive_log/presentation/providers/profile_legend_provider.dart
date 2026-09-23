@@ -406,7 +406,6 @@ class ProfileLegend extends _$ProfileLegend {
           defaultShowPhotoMarkers: s.defaultShowPhotoMarkers,
           defaultShowGasTimeline: s.defaultShowGasTimeline,
           defaultShowO2CellMv: s.defaultShowO2CellMv,
-          o2CellUnit: s.o2CellUnit,
           showNdlOnProfile: s.showNdlOnProfile,
           defaultShowPpO2: s.defaultShowPpO2,
           defaultShowPpN2: s.defaultShowPpN2,
@@ -428,6 +427,14 @@ class ProfileLegend extends _$ProfileLegend {
         ),
       ),
     );
+    // The cell unit is written from the chart itself (chart options dialog),
+    // so watching it would rebuild this provider, and so reset every session
+    // toggle, including the cell traces, on the very pick that persists it.
+    // Seed it once and apply later changes in place instead.
+    ref.listen(
+      settingsProvider.select((s) => s.o2CellUnit),
+      (_, unit) => state = state.copyWith(o2CellUnit: unit),
+    );
     return ProfileLegendState(
       // rightAxisMetric is null initially - uses setting default via fallback
       showTemperature: settings.defaultShowTemperature,
@@ -445,7 +452,7 @@ class ProfileLegend extends _$ProfileLegend {
       showPhotoMarkers: settings.defaultShowPhotoMarkers,
       showGas: settings.defaultShowGasTimeline,
       showO2Cells: settings.defaultShowO2CellMv,
-      o2CellUnit: settings.o2CellUnit,
+      o2CellUnit: ref.read(settingsProvider).o2CellUnit,
       showNdl: settings.showNdlOnProfile,
       showPpO2: settings.defaultShowPpO2,
       showPpN2: settings.defaultShowPpN2,
