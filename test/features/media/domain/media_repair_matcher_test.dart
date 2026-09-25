@@ -63,6 +63,35 @@ void main() {
         isNull,
       );
     });
+
+    test('detects a whole-tree move across Windows paths', () {
+      final move = detectPrefixMove(
+        brokenPaths: [
+          r'C:\old\Dives\2026\a.jpg',
+          r'C:\old\Dives\2026\b.jpg',
+          r'C:\old\Dives\misc\c.mp4',
+        ],
+        foundPaths: {
+          r'D:\nas\Dives\2026\a.jpg',
+          r'D:\nas\Dives\2026\b.jpg',
+          r'D:\nas\Dives\misc\c.mp4',
+        },
+      );
+      expect(move, isNotNull);
+      expect(move!.fromPrefix, r'C:\old\Dives');
+      expect(move.toPrefix, r'D:\nas\Dives');
+      expect(move.coveredCount, 3);
+    });
+
+    test('a single coincidental Windows filename is not a move', () {
+      expect(
+        detectPrefixMove(
+          brokenPaths: [r'C:\old\a.jpg'],
+          foundPaths: {r'D:\nas\a.jpg'},
+        ),
+        isNull,
+      );
+    });
   });
 
   group('buildRepairProposals', () {
@@ -140,6 +169,44 @@ void main() {
       expect(p.viaPrefixMove, isTrue);
       expect(p.candidate!.path, '/nas/a.jpg');
       expect(p.confidence, RepairConfidence.probable);
+    });
+
+    test('a Windows prefix move relocates the row', () {
+      const move = PrefixMove(
+        fromPrefix: r'C:\old',
+        toPrefix: r'D:\nas',
+        coveredCount: 2,
+      );
+      final proposals = buildRepairProposals(
+        brokenRows: [broken('a', localPath: r'C:\old\a.jpg')],
+        candidatesByFilename: {
+          'a.jpg': [
+            const RepairCandidate.file(
+              path: r'E:\elsewhere\a.jpg',
+              sizeBytes: 10,
+            ),
+          ],
+        },
+        prefixMove: move,
+        foundPaths: {r'D:\nas\a.jpg', r'E:\elsewhere\a.jpg'},
+      );
+      final proposal = proposals.single;
+      expect(proposal.viaPrefixMove, isTrue);
+      expect(proposal.candidate!.path, r'D:\nas\a.jpg');
+    });
+
+    test('falls back to the filename in a Windows path', () {
+      final proposals = buildRepairProposals(
+        brokenRows: [
+          broken('a', localPath: r'C:\old\a.jpg', originalFilename: ''),
+        ],
+        candidatesByFilename: {
+          'a.jpg': [
+            const RepairCandidate.file(path: '/nas/a.jpg', sizeBytes: 10),
+          ],
+        },
+      );
+      expect(proposals.single.candidate!.path, '/nas/a.jpg');
     });
 
     test('store candidates propose cloud-backed regardless of filename', () {
