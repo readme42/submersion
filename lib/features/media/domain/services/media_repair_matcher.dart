@@ -34,9 +34,15 @@ bool _isUnder(String path, String prefix) =>
     path.startsWith(prefix) &&
     (path[prefix.length] == '/' || path[prefix.length] == '\\');
 
-/// The separator [path] is written with.
+/// The separator [path] is written with. A bare drive root such as `C:`
+/// carries no separator of its own but is a Windows path all the same.
 String _separatorStyleOf(String path) =>
-    path.contains('\\') && !path.contains('/') ? '\\' : '/';
+    _bareDriveRoot.hasMatch(path) ||
+        (path.contains('\\') && !path.contains('/'))
+    ? '\\'
+    : '/';
+
+final _bareDriveRoot = RegExp(r'^[A-Za-z]:$');
 
 /// [oldPath] re-rooted from [move.fromPrefix] onto [move.toPrefix].
 ///

@@ -195,6 +195,24 @@ void main() {
       expect(proposal.candidate!.path, r'D:\nas\a.jpg');
     });
 
+    test('a tree moved onto a drive root relocates with its separator', () {
+      final move = detectPrefixMove(
+        brokenPaths: [r'D:\old\a.jpg', r'D:\old\b.jpg'],
+        foundPaths: {r'C:\a.jpg', r'C:\b.jpg'},
+      );
+      expect(move, isNotNull);
+      expect(move!.toPrefix, 'C:');
+
+      final proposals = buildRepairProposals(
+        brokenRows: [broken('a', localPath: r'D:\old\a.jpg')],
+        candidatesByFilename: const {},
+        prefixMove: move,
+        foundPaths: {r'C:\a.jpg', r'C:\b.jpg'},
+      );
+      expect(proposals.single.viaPrefixMove, isTrue);
+      expect(proposals.single.candidate!.path, r'C:\a.jpg');
+    });
+
     test('falls back to the filename in a Windows path', () {
       final proposals = buildRepairProposals(
         brokenRows: [
