@@ -14473,5 +14473,5 @@
   "query_editor_needsText": "Escribe al menos una palabra",
   "query_saveNeedsDiver": "Crea un perfil de buceador para guardar consultas",
   "settings_conflict_field_distanceUnit": "Unidad de distancia",
-  "settings_conflict_field_defaultShowLateGasSwitches": "Cambios de gas tardíos"
+  "settings_conflict_field_defaultShowLateGasSwitches": "El perfil muestra los cambios de gas tardíos"
 }

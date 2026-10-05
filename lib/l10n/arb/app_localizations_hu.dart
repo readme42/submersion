@@ -48148,5 +48148,5 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get settings_conflict_field_defaultShowLateGasSwitches =>
-      'Késői gázváltások';
+      'A profil mutatja a késői gázváltásokat';
 }

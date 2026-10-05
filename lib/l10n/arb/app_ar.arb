@@ -14473,5 +14473,5 @@
   "query_editor_needsText": "أدخل كلمة واحدة على الأقل",
   "query_saveNeedsDiver": "أنشئ ملف غواص لحفظ الاستعلامات",
   "settings_conflict_field_distanceUnit": "وحدة المسافة",
-  "settings_conflict_field_defaultShowLateGasSwitches": "تبديلات الغاز المتأخرة"
+  "settings_conflict_field_defaultShowLateGasSwitches": "الملف يعرض تبديلات الغاز المتأخرة"
 }

@@ -14473,5 +14473,5 @@
   "query_editor_needsText": "Adjon meg legalább egy szót",
   "query_saveNeedsDiver": "Hozzon létre merülő profilt a lekérdezések mentéséhez",
   "settings_conflict_field_distanceUnit": "Távolság mértékegysége",
-  "settings_conflict_field_defaultShowLateGasSwitches": "Késői gázváltások"
+  "settings_conflict_field_defaultShowLateGasSwitches": "A profil mutatja a késői gázváltásokat"
 }

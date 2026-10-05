@@ -14594,5 +14594,5 @@
   "query_editor_needsText": "Mindestens ein Wort eingeben",
   "query_saveNeedsDiver": "Legen Sie ein Taucherprofil an, um Abfragen zu speichern",
   "settings_conflict_field_distanceUnit": "Entfernungseinheit",
-  "settings_conflict_field_defaultShowLateGasSwitches": "Späte Gaswechsel"
+  "settings_conflict_field_defaultShowLateGasSwitches": "Profil zeigt späte Gaswechsel"
 }

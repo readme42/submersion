@@ -28873,6 +28873,6 @@
   "@query_saveNeedsDiver": {"description": "Snackbar when Save is tapped with no diver profile"},
   "settings_conflict_field_distanceUnit": "Distance unit",
   "@settings_conflict_field_distanceUnit": {"description": "Sync conflict dialog label for the diver setting distanceUnit"},
-  "settings_conflict_field_defaultShowLateGasSwitches": "Late gas switches",
+  "settings_conflict_field_defaultShowLateGasSwitches": "Profile shows late gas switches",
   "@settings_conflict_field_defaultShowLateGasSwitches": {"description": "Sync conflict dialog label for the diver setting defaultShowLateGasSwitches"}
 }

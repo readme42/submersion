@@ -48420,5 +48420,5 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings_conflict_field_defaultShowLateGasSwitches =>
-      'Cambios de gas tardíos';
+      'El perfil muestra los cambios de gas tardíos';
 }

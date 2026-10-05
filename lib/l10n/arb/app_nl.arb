@@ -14473,5 +14473,5 @@
   "query_editor_needsText": "Voer minstens één woord in",
   "query_saveNeedsDiver": "Maak een duikersprofiel aan om query's op te slaan",
   "settings_conflict_field_distanceUnit": "Afstandseenheid",
-  "settings_conflict_field_defaultShowLateGasSwitches": "Late gaswissels"
+  "settings_conflict_field_defaultShowLateGasSwitches": "Profiel toont late gaswissels"
 }

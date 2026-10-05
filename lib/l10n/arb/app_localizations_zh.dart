@@ -45484,5 +45484,5 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_conflict_field_distanceUnit => '距离单位';
 
   @override
-  String get settings_conflict_field_defaultShowLateGasSwitches => '延迟换气';
+  String get settings_conflict_field_defaultShowLateGasSwitches => '剖面显示延迟换气';
 }

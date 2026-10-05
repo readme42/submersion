@@ -14473,5 +14473,5 @@
   "query_editor_needsText": "请至少输入一个词",
   "query_saveNeedsDiver": "请先创建潜水员档案再保存查询",
   "settings_conflict_field_distanceUnit": "距离单位",
-  "settings_conflict_field_defaultShowLateGasSwitches": "延迟换气"
+  "settings_conflict_field_defaultShowLateGasSwitches": "剖面显示延迟换气"
 }

@@ -48960,5 +48960,5 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settings_conflict_field_defaultShowLateGasSwitches =>
-      'تبديلات الغاز المتأخرة';
+      'الملف يعرض تبديلات الغاز المتأخرة';
 }

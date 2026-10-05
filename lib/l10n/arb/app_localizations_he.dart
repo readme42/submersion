@@ -47377,5 +47377,5 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get settings_conflict_field_defaultShowLateGasSwitches =>
-      'החלפות גז מאוחרות';
+      'הפרופיל מציג החלפות גז מאוחרות';
 }

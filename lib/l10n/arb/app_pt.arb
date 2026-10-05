@@ -14473,5 +14473,5 @@
   "query_editor_needsText": "Digite pelo menos uma palavra",
   "query_saveNeedsDiver": "Crie um perfil de mergulhador para salvar consultas",
   "settings_conflict_field_distanceUnit": "Unidade de distância",
-  "settings_conflict_field_defaultShowLateGasSwitches": "Trocas de gás tardias"
+  "settings_conflict_field_defaultShowLateGasSwitches": "Perfil mostra as trocas de gás tardias"
 }

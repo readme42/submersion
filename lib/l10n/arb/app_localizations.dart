@@ -77142,7 +77142,7 @@ abstract class AppLocalizations {
   /// Sync conflict dialog label for the diver setting defaultShowLateGasSwitches
   ///
   /// In en, this message translates to:
-  /// **'Late gas switches'**
+  /// **'Profile shows late gas switches'**
   String get settings_conflict_field_defaultShowLateGasSwitches;
 }
 
