@@ -24416,12 +24416,30 @@ class AppLocalizationsAr extends AppLocalizations {
     String group,
     String overall,
   ) {
-    return '$count من $total غطسة، متوسط المجموعة $group مقابل $overall إجمالاً';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total غطسة',
+      many: '$total غطسةً',
+      few: '$total غطسات',
+      two: 'غطستين',
+      one: 'غطسة واحدة',
+    );
+    return '$count من $_temp0، متوسط المجموعة $group مقابل $overall إجمالاً';
   }
 
   @override
   String insights_focus_summary_allShown(int total) {
-    return '$total غطسة فقط لها هذه القيمة، لذا تُعرض جميعها';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total غطسة فقط لها هذه القيمة، لذا تُعرض جميعها',
+      many: '$total غطسةً فقط لها هذه القيمة، لذا تُعرض جميعها',
+      few: '$total غطسات فقط لها هذه القيمة، لذا تُعرض جميعها',
+      two: 'غطستان فقط لهما هذه القيمة، لذا تُعرض كلتاهما',
+      one: 'غطسة واحدة فقط لها هذه القيمة، لذا تُعرض',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -24530,7 +24548,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String insights_focus_factors_coverage(int covered, int total) {
-    return '$covered من $total غطسة';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total غطسة',
+      many: '$total غطسةً',
+      few: '$total غطسات',
+      two: 'غطستين',
+      one: 'غطسة واحدة',
+    );
+    return '$covered من $_temp0';
   }
 
   @override

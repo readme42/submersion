@@ -24108,12 +24108,25 @@ class AppLocalizationsNl extends AppLocalizations {
     String group,
     String overall,
   ) {
-    return '$count van $total duiken, groepsgemiddelde $group tegenover $overall in totaal';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total duiken',
+      one: '1 duik',
+    );
+    return '$count van $_temp0, groepsgemiddelde $group tegenover $overall in totaal';
   }
 
   @override
   String insights_focus_summary_allShown(int total) {
-    return 'Slechts $total duiken hebben deze waarde, dus ze worden allemaal getoond';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other:
+          'Slechts $total duiken hebben deze waarde, dus ze worden allemaal getoond',
+      one: 'Slechts 1 duik heeft deze waarde, dus die wordt getoond',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -24223,7 +24236,13 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String insights_focus_factors_coverage(int covered, int total) {
-    return '$covered van $total duiken';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total duiken',
+      one: '1 duik',
+    );
+    return '$covered van $_temp0';
   }
 
   @override

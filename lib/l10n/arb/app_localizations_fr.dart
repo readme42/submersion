@@ -24373,12 +24373,25 @@ class AppLocalizationsFr extends AppLocalizations {
     String group,
     String overall,
   ) {
-    return '$count plongées sur $total, moyenne du groupe $group contre $overall au total';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plongées',
+      one: '$count plongée',
+    );
+    return '$_temp0 sur $total, moyenne du groupe $group contre $overall au total';
   }
 
   @override
   String insights_focus_summary_allShown(int total) {
-    return 'Seules $total plongées ont cette valeur, elles sont donc toutes affichées';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other:
+          'Seules $total plongées ont cette valeur, elles sont donc toutes affichées',
+      one: 'Seule $total plongée a cette valeur, elle est donc affichée',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -24488,7 +24501,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String insights_focus_factors_coverage(int covered, int total) {
-    return '$covered plongées sur $total';
+    String _temp0 = intl.Intl.pluralLogic(
+      covered,
+      locale: localeName,
+      other: '$covered plongées',
+      one: '$covered plongée',
+    );
+    return '$_temp0 sur $total';
   }
 
   @override

@@ -6791,7 +6791,7 @@
   "insights_focus_error": "A merülésfókusz betöltése sikertelen",
   "insights_focus_empty": "Még nincs merülés ezzel az értékkel",
   "insights_focus_summary": "{count} / {total} merülés, csoportátlag {group}, összesen {overall}",
-  "insights_focus_summary_allShown": "Csak {total} merülésnek van ilyen értéke, ezért mind megjelenik",
+  "insights_focus_summary_allShown": "{total, plural, =1{Csak 1 merülésnek van ilyen értéke, ezért az jelenik meg} other{Csak {total} merülésnek van ilyen értéke, ezért mind megjelenik}}",
   "insights_focus_noMatch_above": "Nincs merülés {value} felett. A merüléseid {min} és {max} között vannak.",
   "insights_focus_noMatch_below": "Nincs merülés {value} alatt. A merüléseid {min} és {max} között vannak.",
   "insights_focus_enterValue": "Adj meg egy értéket a felette vagy alatta lévő merülések megtekintéséhez",

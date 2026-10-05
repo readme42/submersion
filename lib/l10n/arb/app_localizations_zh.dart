@@ -22956,7 +22956,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String insights_focus_summary_allShown(int total) {
-    return '只有 $total 次潜水有此数值，因此全部显示';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '只有 $total 次潜水有此数值，因此全部显示',
+      one: '只有 1 次潜水有此数值，因此显示这一次',
+    );
+    return '$_temp0';
   }
 
   @override

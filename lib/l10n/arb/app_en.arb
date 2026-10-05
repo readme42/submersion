@@ -13989,7 +13989,7 @@
   "insights_focus_title": "Dive focus",
   "insights_focus_error": "Failed to load dive focus",
   "insights_focus_empty": "No dives have this value yet",
-  "insights_focus_summary": "{count} of {total} dives, group average {group} vs {overall} overall",
+  "insights_focus_summary": "{count} of {total, plural, =1{1 dive} other{{total} dives}}, group average {group} vs {overall} overall",
   "@insights_focus_summary": {
     "placeholders": {
       "count": { "type": "int" },
@@ -13998,7 +13998,7 @@
       "overall": { "type": "String" }
     }
   },
-  "insights_focus_summary_allShown": "Only {total} dives have this value, so all of them are shown",
+  "insights_focus_summary_allShown": "{total, plural, =1{Only 1 dive has this value, so it is shown} other{Only {total} dives have this value, so all of them are shown}}",
   "@insights_focus_summary_allShown": {
     "placeholders": { "total": { "type": "int" } }
   },
@@ -14053,7 +14053,7 @@
   "@insights_focus_factors_versus": {
     "placeholders": { "group": { "type": "String" }, "baseline": { "type": "String" } }
   },
-  "insights_focus_factors_coverage": "{covered} of {total} dives",
+  "insights_focus_factors_coverage": "{covered} of {total, plural, =1{1 dive} other{{total} dives}}",
   "@insights_focus_factors_coverage": {
     "placeholders": { "covered": { "type": "int" }, "total": { "type": "int" } }
   },

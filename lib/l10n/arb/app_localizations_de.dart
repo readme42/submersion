@@ -24242,12 +24242,25 @@ class AppLocalizationsDe extends AppLocalizations {
     String group,
     String overall,
   ) {
-    return '$count von $total Tauchgängen, Gruppendurchschnitt $group gegenüber $overall insgesamt';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total Tauchgängen',
+      one: '1 Tauchgang',
+    );
+    return '$count von $_temp0, Gruppendurchschnitt $group gegenüber $overall insgesamt';
   }
 
   @override
   String insights_focus_summary_allShown(int total) {
-    return 'Nur $total Tauchgänge haben diesen Wert, daher werden alle angezeigt';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other:
+          'Nur $total Tauchgänge haben diesen Wert, daher werden alle angezeigt',
+      one: 'Nur 1 Tauchgang hat diesen Wert, daher wird er angezeigt',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -24357,7 +24370,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String insights_focus_factors_coverage(int covered, int total) {
-    return '$covered von $total Tauchgängen';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total Tauchgängen',
+      one: '1 Tauchgang',
+    );
+    return '$covered von $_temp0';
   }
 
   @override

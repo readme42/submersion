@@ -23656,12 +23656,26 @@ class AppLocalizationsHe extends AppLocalizations {
     String group,
     String overall,
   ) {
-    return '$count מתוך $total צלילות, ממוצע הקבוצה $group לעומת $overall בסך הכול';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total צלילות',
+      two: 'שתי צלילות',
+      one: 'צלילה אחת',
+    );
+    return '$count מתוך $_temp0, ממוצע הקבוצה $group לעומת $overall בסך הכול';
   }
 
   @override
   String insights_focus_summary_allShown(int total) {
-    return 'רק ל־$total צלילות יש ערך זה, ולכן כולן מוצגות';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: 'רק ל־$total צלילות יש ערך זה, ולכן כולן מוצגות',
+      two: 'רק לשתי צלילות יש ערך זה, ולכן שתיהן מוצגות',
+      one: 'רק לצלילה אחת יש ערך זה, ולכן היא מוצגת',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -23770,7 +23784,14 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String insights_focus_factors_coverage(int covered, int total) {
-    return '$covered מתוך $total צלילות';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total צלילות',
+      two: 'שתי צלילות',
+      one: 'צלילה אחת',
+    );
+    return '$covered מתוך $_temp0';
   }
 
   @override

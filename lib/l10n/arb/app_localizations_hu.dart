@@ -24188,7 +24188,13 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String insights_focus_summary_allShown(int total) {
-    return 'Csak $total merülésnek van ilyen értéke, ezért mind megjelenik';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: 'Csak $total merülésnek van ilyen értéke, ezért mind megjelenik',
+      one: 'Csak 1 merülésnek van ilyen értéke, ezért az jelenik meg',
+    );
+    return '$_temp0';
   }
 
   @override

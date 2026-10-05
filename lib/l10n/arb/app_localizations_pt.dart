@@ -24297,12 +24297,25 @@ class AppLocalizationsPt extends AppLocalizations {
     String group,
     String overall,
   ) {
-    return '$count de $total mergulhos, média do grupo $group contra $overall no total';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total mergulhos',
+      one: '$total mergulho',
+    );
+    return '$count de $_temp0, média do grupo $group contra $overall no total';
   }
 
   @override
   String insights_focus_summary_allShown(int total) {
-    return 'Apenas $total mergulhos têm este valor, por isso são todos mostrados';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other:
+          'Apenas $total mergulhos têm este valor, por isso são todos mostrados',
+      one: 'Apenas $total mergulho tem este valor, por isso é mostrado',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -24412,7 +24425,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String insights_focus_factors_coverage(int covered, int total) {
-    return '$covered de $total mergulhos';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total mergulhos',
+      one: '$total mergulho',
+    );
+    return '$covered de $_temp0';
   }
 
   @override

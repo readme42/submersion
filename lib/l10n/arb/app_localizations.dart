@@ -39430,7 +39430,7 @@ abstract class AppLocalizations {
   /// No description provided for @insights_focus_summary.
   ///
   /// In en, this message translates to:
-  /// **'{count} of {total} dives, group average {group} vs {overall} overall'**
+  /// **'{count} of {total, plural, =1{1 dive} other{{total} dives}}, group average {group} vs {overall} overall'**
   String insights_focus_summary(
     int count,
     int total,
@@ -39441,7 +39441,7 @@ abstract class AppLocalizations {
   /// No description provided for @insights_focus_summary_allShown.
   ///
   /// In en, this message translates to:
-  /// **'Only {total} dives have this value, so all of them are shown'**
+  /// **'{total, plural, =1{Only 1 dive has this value, so it is shown} other{Only {total} dives have this value, so all of them are shown}}'**
   String insights_focus_summary_allShown(int total);
 
   /// No description provided for @insights_focus_noMatch_above.
@@ -39633,7 +39633,7 @@ abstract class AppLocalizations {
   /// No description provided for @insights_focus_factors_coverage.
   ///
   /// In en, this message translates to:
-  /// **'{covered} of {total} dives'**
+  /// **'{covered} of {total, plural, =1{1 dive} other{{total} dives}}'**
   String insights_focus_factors_coverage(int covered, int total);
 
   /// No description provided for @insights_focus_factorGroup_diveShape.
