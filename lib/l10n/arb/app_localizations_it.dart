@@ -15193,7 +15193,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get equipment_tab_sets => 'Set';
 
   @override
-  String get formatter_connector_at => 'a';
+  String get formatter_connector_at => 'alle';
 
   @override
   String get formatter_connector_from => 'Da';

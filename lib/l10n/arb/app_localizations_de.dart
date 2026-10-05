@@ -15176,7 +15176,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get equipment_tab_sets => 'Sets';
 
   @override
-  String get formatter_connector_at => 'bei';
+  String get formatter_connector_at => 'um';
 
   @override
   String get formatter_connector_from => 'Von';

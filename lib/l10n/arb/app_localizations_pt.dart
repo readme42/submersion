@@ -15192,7 +15192,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get equipment_tab_sets => 'Conjuntos';
 
   @override
-  String get formatter_connector_at => 'em';
+  String get formatter_connector_at => 'às';
 
   @override
   String get formatter_connector_from => 'De';
