@@ -165,6 +165,10 @@ final Map<String, ConflictField> diverSettingsFields = {
     (l) => l.settings_conflict_field_defaultShowEvents,
     FieldKind.boolean,
   ),
+  'defaultShowLateGasSwitches': ConflictField(
+    (l) => l.settings_conflict_field_defaultShowLateGasSwitches,
+    FieldKind.boolean,
+  ),
   'defaultShowGasDensity': ConflictField(
     (l) => l.settings_conflict_field_defaultShowGasDensity,
     FieldKind.boolean,
@@ -328,6 +332,10 @@ final Map<String, ConflictField> diverSettingsFields = {
   'highO2ThresholdPercent': ConflictField(
     (l) => l.settings_conflict_field_highO2ThresholdPercent,
     FieldKind.percent,
+  ),
+  'insightsMutedObservationRules': ConflictField(
+    (l) => l.settings_conflict_field_insightsMutedObservationRules,
+    FieldKind.opaque,
   ),
   'locale': ConflictField(
     (l) => l.settings_conflict_field_locale,
