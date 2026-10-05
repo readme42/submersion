@@ -6861,6 +6861,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_edit_row_addSite => 'Duikstek toevoegen';
 
   @override
+  String get diveLog_edit_row_course => 'Cursus';
+
+  @override
   String get diveLog_edit_row_diveCenter => 'Duikcentrum';
 
   @override

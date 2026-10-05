@@ -2195,6 +2195,7 @@
   "diveLog_edit_profile_points": "{count, plural, one{1 punto} other{{count} punti}}",
   "diveLog_edit_row_diveProfile": "Profilo di immersione",
   "diveLog_edit_row_addSite": "Aggiungi sito",
+  "diveLog_edit_row_course": "Corso",
   "diveLog_edit_row_diveCenter": "Diving center",
   "diveLog_edit_row_entry": "Entrata",
   "diveLog_edit_row_exit": "Uscita",

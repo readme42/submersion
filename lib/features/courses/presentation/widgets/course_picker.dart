@@ -122,9 +122,11 @@ class CoursePickerSheet extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                context.l10n.courses_picker_selectTitle,
-                style: Theme.of(context).textTheme.titleLarge,
+              Flexible(
+                child: Text(
+                  context.l10n.courses_picker_selectTitle,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
               ),
               TextButton.icon(
                 onPressed: () {

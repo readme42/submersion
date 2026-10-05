@@ -4040,6 +4040,10 @@
   "@diveLog_edit_row_addSite": {
     "description": "Placeholder when no site selected"
   },
+  "diveLog_edit_row_course": "Course",
+  "@diveLog_edit_row_course": {
+    "description": "Row label: training course picker"
+  },
   "diveLog_edit_row_diveCenter": "Dive center",
   "@diveLog_edit_row_diveCenter": {
     "description": "Row label: dive center picker"

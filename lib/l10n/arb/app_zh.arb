@@ -2407,6 +2407,7 @@
   "diveLog_edit_profile_points": "{count, plural, other{{count} 个点}}",
   "diveLog_edit_row_diveProfile": "潜水曲线",
   "diveLog_edit_row_addSite": "添加潜点",
+  "diveLog_edit_row_course": "课程",
   "diveLog_edit_row_diveCenter": "潜水中心",
   "diveLog_edit_row_entry": "入水",
   "diveLog_edit_row_exit": "出水",

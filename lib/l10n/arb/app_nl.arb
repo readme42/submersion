@@ -2297,6 +2297,7 @@
   "diveLog_edit_profile_points": "{count, plural, one{1 punt} other{{count} punten}}",
   "diveLog_edit_row_diveProfile": "Duikprofiel",
   "diveLog_edit_row_addSite": "Duikstek toevoegen",
+  "diveLog_edit_row_course": "Cursus",
   "diveLog_edit_row_diveCenter": "Duikcentrum",
   "diveLog_edit_row_entry": "Te water",
   "diveLog_edit_row_exit": "Uit het water",

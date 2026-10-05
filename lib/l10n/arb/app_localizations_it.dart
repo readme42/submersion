@@ -6906,6 +6906,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get diveLog_edit_row_addSite => 'Aggiungi sito';
 
   @override
+  String get diveLog_edit_row_course => 'Corso';
+
+  @override
   String get diveLog_edit_row_diveCenter => 'Diving center';
 
   @override

@@ -6892,6 +6892,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_edit_row_addSite => 'Merülőhely hozzáadása';
 
   @override
+  String get diveLog_edit_row_course => 'Tanfolyam';
+
+  @override
   String get diveLog_edit_row_diveCenter => 'Búvárközpont';
 
   @override

@@ -101,4 +101,19 @@ void main() {
     expect(c.diverRole.present, isTrue);
     expect(c.diverRole.value, isNull);
   });
+
+  test('the course gate links every dive to the picked course (#1741)', () {
+    final c = buildScalarCompanion({
+      BulkField.course,
+    }, BulkScalarInputs(courseId: 'aow', tripId: 'trip-1'));
+    expect(c.courseId.present, isTrue);
+    expect(c.courseId.value, 'aow');
+    expect(c.tripId.present, isFalse);
+  });
+
+  test('an enabled course gate with no course clears the link', () {
+    final c = buildScalarCompanion({BulkField.course}, BulkScalarInputs());
+    expect(c.courseId.present, isTrue);
+    expect(c.courseId.value, isNull);
+  });
 }

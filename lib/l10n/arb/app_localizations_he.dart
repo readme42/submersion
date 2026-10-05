@@ -6761,6 +6761,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_edit_row_addSite => 'הוספת אתר';
 
   @override
+  String get diveLog_edit_row_course => 'קורס';
+
+  @override
   String get diveLog_edit_row_diveCenter => 'מרכז צלילה';
 
   @override

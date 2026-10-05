@@ -6923,6 +6923,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveLog_edit_row_addSite => 'Ajouter un site';
 
   @override
+  String get diveLog_edit_row_course => 'Cours';
+
+  @override
   String get diveLog_edit_row_diveCenter => 'Centre de plongée';
 
   @override

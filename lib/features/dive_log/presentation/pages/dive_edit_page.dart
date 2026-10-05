@@ -1378,6 +1378,18 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
                 ),
               ),
               _gatedRow(
+                BulkField.course,
+                FormRow.picker(
+                  label: l10n.diveLog_edit_row_course,
+                  value: _selectedCourse?.name,
+                  placeholder: l10n.diveLog_edit_row_notSet,
+                  onTap: _showBulkCoursePicker,
+                  onClear: _selectedCourse == null
+                      ? null
+                      : () => setState(() => _selectedCourse = null),
+                ),
+              ),
+              _gatedRow(
                 BulkField.rating,
                 FormRow.rating(
                   label: l10n.diveLog_edit_section_rating,
@@ -3041,6 +3053,28 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         }
       }
     }
+  }
+
+  Future<void> _showBulkCoursePicker() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (_, scrollController) => CoursePickerSheet(
+          scrollController: scrollController,
+          selectedCourse: _selectedCourse,
+          onCourseSelected: (course) {
+            Navigator.of(sheetContext).pop();
+            _markDirty();
+            setState(() => _selectedCourse = course);
+          },
+        ),
+      ),
+    );
   }
 
   Widget _buildCourseGroupSection() {

@@ -2195,6 +2195,7 @@
   "diveLog_edit_profile_points": "{count, plural, one{1 pont} other{{count} pont}}",
   "diveLog_edit_row_diveProfile": "Merülési profil",
   "diveLog_edit_row_addSite": "Merülőhely hozzáadása",
+  "diveLog_edit_row_course": "Tanfolyam",
   "diveLog_edit_row_diveCenter": "Búvárközpont",
   "diveLog_edit_row_entry": "Beszállás",
   "diveLog_edit_row_exit": "Kiszállás",

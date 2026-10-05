@@ -6581,6 +6581,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_edit_row_addSite => '添加潜点';
 
   @override
+  String get diveLog_edit_row_course => '课程';
+
+  @override
   String get diveLog_edit_row_diveCenter => '潜水中心';
 
   @override

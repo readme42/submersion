@@ -2195,6 +2195,7 @@
   "diveLog_edit_profile_points": "{count, plural, one{נקודה אחת} other{{count} נקודות}}",
   "diveLog_edit_row_diveProfile": "פרופיל צלילה",
   "diveLog_edit_row_addSite": "הוספת אתר",
+  "diveLog_edit_row_course": "קורס",
   "diveLog_edit_row_diveCenter": "מרכז צלילה",
   "diveLog_edit_row_entry": "כניסה",
   "diveLog_edit_row_exit": "יציאה",

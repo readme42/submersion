@@ -2322,6 +2322,7 @@
   "diveLog_edit_profile_points": "{count, plural, one{1 Punkt} other{{count} Punkte}}",
   "diveLog_edit_row_diveProfile": "Tauchprofil",
   "diveLog_edit_row_addSite": "Tauchplatz hinzufügen",
+  "diveLog_edit_row_course": "Kurs",
   "diveLog_edit_row_diveCenter": "Tauchbasis",
   "diveLog_edit_row_entry": "Einstieg",
   "diveLog_edit_row_exit": "Ausstieg",

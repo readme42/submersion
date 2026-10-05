@@ -2297,6 +2297,7 @@
   "diveLog_edit_profile_points": "{count, plural, one{نقطة واحدة} two{نقطتان} few{{count} نقاط} many{{count} نقطة} other{{count} نقطة}}",
   "diveLog_edit_row_diveProfile": "ملف الغوص",
   "diveLog_edit_row_addSite": "إضافة موقع",
+  "diveLog_edit_row_course": "الدورة",
   "diveLog_edit_row_diveCenter": "مركز الغوص",
   "diveLog_edit_row_entry": "الدخول",
   "diveLog_edit_row_exit": "الخروج",

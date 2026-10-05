@@ -1,6 +1,11 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:submersion/core/database/database.dart'
+    show AppDatabase, CoursesCompanion, DiversCompanion;
 import 'package:submersion/core/providers/provider.dart';
+import 'package:submersion/features/courses/domain/entities/course.dart';
+import 'package:submersion/features/courses/presentation/providers/course_providers.dart';
 import 'package:submersion/features/buddies/data/repositories/buddy_repository.dart';
 import 'package:submersion/features/buddies/domain/entities/buddy.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
@@ -27,9 +32,10 @@ import '../../../../helpers/test_database.dart';
 void main() {
   group('DiveEditPage bulk mode', () {
     late DiveRepository repository;
+    late AppDatabase db;
 
     setUp(() async {
-      await setUpTestDatabase();
+      db = await setUpTestDatabase();
       repository = DiveRepository();
     });
 
@@ -72,11 +78,12 @@ void main() {
     testWidgets('renders gated Logistics + Notes fields', (tester) async {
       await pumpBulk(tester);
 
-      // 4 Logistics + 9 Conditions + 6 Weather + 6 Rebreather + 1 Buddies
-      // (my role, #1220) + 1 Notes + 2 statistics-exclusion gates (#526,
-      // #1272) = 29.
+      // 5 Logistics (course, #1741) + 9 Conditions + 6 Weather + 6 Rebreather
+      // + 1 Buddies (my role, #1220) + 1 Notes + 2 statistics-exclusion gates
+      // (#526, #1272) = 30.
       // (dive type moved from a scalar gate to the collection lane, #414)
-      expect(find.byType(BulkFieldGate), findsNWidgets(29));
+      expect(find.byType(BulkFieldGate), findsNWidgets(30));
+      expect(find.text('Course'), findsOneWidget);
       expect(find.text('Favorite'), findsOneWidget);
       expect(find.text('Exclude from statistics'), findsOneWidget);
       expect(find.text('Exclude from gas statistics'), findsOneWidget);
@@ -270,6 +277,185 @@ void main() {
         (await repository.getDiveById(d2.id))!.diverRoleId,
         DiveRole.instructorId,
       );
+    });
+
+    Future<Course> insertCourse() async {
+      final now = DateTime.utc(2024, 3, 1);
+      final ms = now.millisecondsSinceEpoch;
+      await db
+          .into(db.divers)
+          .insert(
+            DiversCompanion(
+              id: const Value('course-diver'),
+              name: const Value('Course Diver'),
+              createdAt: Value(ms),
+              updatedAt: Value(ms),
+            ),
+          );
+      await db
+          .into(db.courses)
+          .insert(
+            CoursesCompanion(
+              id: const Value('aow'),
+              diverId: const Value('course-diver'),
+              name: const Value('Advanced Open Water'),
+              agency: Value(CertificationAgency.padi.name),
+              startDate: Value(ms),
+              createdAt: Value(ms),
+              updatedAt: Value(ms),
+            ),
+          );
+      return Course(
+        id: 'aow',
+        diverId: 'course-diver',
+        name: 'Advanced Open Water',
+        agency: CertificationAgency.padi,
+        startDate: now,
+        createdAt: now,
+        updatedAt: now,
+      );
+    }
+
+    Future<void> pumpBulkFor(
+      WidgetTester tester,
+      List<String> ids,
+      List<Course> courses,
+    ) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      final overrides = await getBaseOverrides();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ...buildOverrides(overrides),
+            courseListNotifierProvider.overrideWith(
+              (ref) => _FixedCourseListNotifier(courses),
+            ),
+          ].cast(),
+          child: MaterialApp(
+            locale: const Locale('en'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: DiveEditPage(bulkDiveIds: ids, embedded: true),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> saveAndApply(WidgetTester tester) async {
+      await tester.ensureVisible(find.text('Save'));
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Apply'));
+      await tester.pumpAndSettle();
+    }
+
+    Finder courseGate() => find.ancestor(
+      of: find.text('Course'),
+      matching: find.byType(BulkFieldGate),
+    );
+
+    Future<void> enableCourseGate(WidgetTester tester) async {
+      await tester.ensureVisible(courseGate());
+      await tester.tap(
+        find.descendant(of: courseGate(), matching: find.byType(Checkbox)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('the Course gate links every selected dive (#1741)', (
+      tester,
+    ) async {
+      final course = await insertCourse();
+      final d1 = await repository.createDive(
+        createTestDiveWithBottomTime().copyWith(id: 'course-1'),
+      );
+      final d2 = await repository.createDive(
+        createTestDiveWithBottomTime().copyWith(id: 'course-2'),
+      );
+      await pumpBulkFor(tester, [d1.id, d2.id], [course]);
+
+      await enableCourseGate(tester);
+      await tester.tap(
+        find.descendant(of: courseGate(), matching: find.byType(FormRow)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Advanced Open Water'));
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: courseGate(),
+          matching: find.text('Advanced Open Water'),
+        ),
+        findsOneWidget,
+      );
+
+      await saveAndApply(tester);
+
+      expect((await repository.getDiveById(d1.id))!.courseId, 'aow');
+      expect((await repository.getDiveById(d2.id))!.courseId, 'aow');
+    });
+
+    testWidgets('an enabled Course gate left empty unlinks every dive', (
+      tester,
+    ) async {
+      final course = await insertCourse();
+      final d1 = await repository.createDive(
+        createTestDiveWithBottomTime().copyWith(
+          id: 'course-clear-1',
+          courseId: 'aow',
+        ),
+      );
+      final d2 = await repository.createDive(
+        createTestDiveWithBottomTime().copyWith(
+          id: 'course-clear-2',
+          courseId: 'aow',
+        ),
+      );
+      expect((await repository.getDiveById(d1.id))!.courseId, 'aow');
+      await pumpBulkFor(tester, [d1.id, d2.id], [course]);
+
+      await enableCourseGate(tester);
+      await saveAndApply(tester);
+
+      expect((await repository.getDiveById(d1.id))!.courseId, isNull);
+      expect((await repository.getDiveById(d2.id))!.courseId, isNull);
+    });
+
+    testWidgets('a disabled Course gate leaves existing links alone', (
+      tester,
+    ) async {
+      final course = await insertCourse();
+      final d1 = await repository.createDive(
+        createTestDiveWithBottomTime().copyWith(
+          id: 'course-keep-1',
+          courseId: 'aow',
+        ),
+      );
+      final d2 = await repository.createDive(
+        createTestDiveWithBottomTime().copyWith(id: 'course-keep-2'),
+      );
+      await pumpBulkFor(tester, [d1.id, d2.id], [course]);
+
+      final favoriteGate = find.ancestor(
+        of: find.text('Favorite'),
+        matching: find.byType(BulkFieldGate),
+      );
+      await tester.tap(
+        find.descendant(of: favoriteGate, matching: find.byType(Checkbox)),
+      );
+      await tester.pumpAndSettle();
+      await saveAndApply(tester);
+
+      expect((await repository.getDiveById(d1.id))!.courseId, 'aow');
+      expect((await repository.getDiveById(d2.id))!.courseId, isNull);
     });
 
     testWidgets('a buddy row shows its role and changes it on every link', (
@@ -1119,4 +1305,13 @@ void main() {
       expect(find.byType(SnackBar), findsOneWidget);
     });
   });
+}
+
+class _FixedCourseListNotifier extends StateNotifier<AsyncValue<List<Course>>>
+    implements CourseListNotifier {
+  _FixedCourseListNotifier(List<Course> courses)
+    : super(AsyncValue.data(courses));
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
 }

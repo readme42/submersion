@@ -10957,6 +10957,12 @@ abstract class AppLocalizations {
   /// **'Add site'**
   String get diveLog_edit_row_addSite;
 
+  /// Row label: training course picker
+  ///
+  /// In en, this message translates to:
+  /// **'Course'**
+  String get diveLog_edit_row_course;
+
   /// Row label: dive center picker
   ///
   /// In en, this message translates to:
