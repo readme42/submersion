@@ -49394,11 +49394,4 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get query_saveNeedsDiver => 'أنشئ ملف غواص لحفظ الاستعلامات';
-
-  @override
-  String get settings_conflict_field_distanceUnit => 'وحدة المسافة';
-
-  @override
-  String get settings_conflict_field_defaultShowLateGasSwitches =>
-      'الملف يعرض تبديلات الغاز المتأخرة';
 }

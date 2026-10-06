@@ -203,10 +203,6 @@ final Map<String, ConflictField> diverSettingsFields = {
     (l) => l.settings_conflict_field_defaultShowHeartRate,
     FieldKind.boolean,
   ),
-  'defaultShowLateGasSwitches': ConflictField(
-    (l) => l.settings_conflict_field_defaultShowLateGasSwitches,
-    FieldKind.boolean,
-  ),
   'defaultShowMeanDepth': ConflictField(
     (l) => l.settings_conflict_field_defaultShowMeanDepth,
     FieldKind.boolean,

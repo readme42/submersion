@@ -14555,7 +14555,5 @@
   "settings_manage_savedQueries": "שאילתות שמורות",
   "settings_manage_savedQueries_subtitle": "שינוי שם, סידור מחדש ומחיקה של שאילתות שמורות",
   "query_editor_needsText": "הזן לפחות מילה אחת",
-  "query_saveNeedsDiver": "צור פרופיל צולל כדי לשמור שאילתות",
-  "settings_conflict_field_distanceUnit": "יחידת מרחק",
-  "settings_conflict_field_defaultShowLateGasSwitches": "הפרופיל מציג החלפות גז מאוחרות"
+  "query_saveNeedsDiver": "צור פרופיל צולל כדי לשמור שאילתות"
 }

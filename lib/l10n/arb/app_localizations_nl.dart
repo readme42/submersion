@@ -48478,11 +48478,4 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get query_saveNeedsDiver =>
       'Maak een duikersprofiel aan om query\'s op te slaan';
-
-  @override
-  String get settings_conflict_field_distanceUnit => 'Afstandseenheid';
-
-  @override
-  String get settings_conflict_field_defaultShowLateGasSwitches =>
-      'Profiel toont late gaswissels';
 }
