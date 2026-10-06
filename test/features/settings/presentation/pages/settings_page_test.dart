@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:submersion/core/built_ins/built_in_catalog.dart';
 import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/core/constants/gas_consumption_display.dart';
 import 'package:submersion/core/constants/gas_model.dart';
@@ -140,6 +141,22 @@ class _MockSettingsNotifier extends StateNotifier<AppSettings>
       ids.remove(presetName);
     }
     state = state.copyWith(hiddenTankPresetIds: ids);
+  }
+
+  @override
+  Future<void> setBuiltInHidden(
+    BuiltInCatalog catalog,
+    String id,
+    bool hidden,
+  ) async {
+    state = state.copyWith(
+      hiddenBuiltInIds: withBuiltInHidden(
+        state.hiddenBuiltInIds,
+        catalog,
+        id,
+        hidden,
+      ),
+    );
   }
 
   @override
@@ -1726,8 +1743,16 @@ void main() {
             builder: (context, state) => const Text('Service Types Stub'),
           ),
           GoRoute(
+            path: '/equipment/locations',
+            builder: (context, state) => const Text('Locations Stub'),
+          ),
+          GoRoute(
             path: '/site-types',
             builder: (context, state) => const Text('Site Types Stub'),
+          ),
+          GoRoute(
+            path: '/currency-rules',
+            builder: (context, state) => const Text('Currency Rules Stub'),
           ),
           GoRoute(
             path: '/settings/trimix-mixer',
@@ -1789,6 +1814,45 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('renders the locations tile and navigates on tap', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildManageWidget(getOverrides()));
+      await tester.pumpAndSettle();
+
+      final tile = find.byKey(const ValueKey('settings_manage_locations'));
+      expect(tile, findsOneWidget);
+      expect(
+        find.text('Where your gear is kept, serviced or lent'),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(tile);
+      await tester.tap(tile);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Locations Stub'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+      'renders the certification currency tile and navigates on tap',
+      (tester) async {
+        await tester.pumpWidget(buildManageWidget(getOverrides()));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Certification currency'), findsOneWidget);
+        expect(find.text('Refresher and renewal rules'), findsOneWidget);
+
+        await tester.ensureVisible(find.text('Certification currency'));
+        await tester.tap(find.text('Certification currency'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Currency Rules Stub'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets('renders the site types tile and navigates on tap', (
       tester,
     ) async {
@@ -1817,6 +1881,9 @@ void main() {
 
       expect(find.text('Trimix Mixer'), findsOneWidget);
 
+      // The Certification Agencies tile (issue #690) pushed this one down.
+      await tester.ensureVisible(find.text('Trimix Mixer'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Trimix Mixer'));
       await tester.pumpAndSettle();
 

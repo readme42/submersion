@@ -107,6 +107,7 @@ class ConflictReferenceResolver {
     'certificationId': 'certifications',
     'requirementId': 'courseRequirements',
     'serviceKindId': 'serviceKinds',
+    'locationId': 'equipmentLocations',
     'speciesId': 'species',
     'sightingId': 'sightings',
     'mediaId': 'media',
@@ -115,6 +116,8 @@ class ConflictReferenceResolver {
     // Soft links with no Drift constraint (#694): the dialog would otherwise
     // compare and print raw ids for them.
     'diverRole': 'diveRoles',
+    // The role junctions (#1221).
+    'roleId': 'diveRoles',
     'regulatorEquipmentId': 'equipment',
     'viaEquipmentId': 'equipment',
     'viaSetId': 'equipmentSets',

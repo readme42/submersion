@@ -13,6 +13,7 @@ import 'package:drift/drift.dart';
 
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/core/database/dive_computer_gear_backfill.dart';
+import 'package:submersion/core/database/dive_role_link_uniqueness.dart';
 import 'package:submersion/core/database/dive_type_uniqueness.dart';
 import 'package:submersion/core/database/imported_computer_backfill.dart';
 import 'package:submersion/core/database/performance_indexes.dart';
@@ -28,7 +29,10 @@ import 'package:submersion/core/database/tank_shared_computer_backfill.dart';
 import 'package:submersion/core/constants/enums.dart';
 
 part 'before_open.dart';
+part 'before_open_child_columns.dart';
+part 'before_open_table_backstops.dart';
 part 'helpers/buddy_migrations.dart';
+part 'helpers/certification_currency_migrations.dart';
 part 'helpers/connection_migrations.dart';
 part 'helpers/cylinder_migrations.dart';
 part 'helpers/data_source_migrations.dart';
@@ -39,6 +43,7 @@ part 'helpers/dive_profile_migrations.dart';
 part 'helpers/diver_migrations.dart';
 part 'helpers/equipment_migrations.dart';
 part 'helpers/equipment_condition_migrations.dart';
+part 'helpers/equipment_location_migrations.dart';
 part 'helpers/insight_migrations.dart';
 part 'helpers/media_migrations.dart';
 part 'helpers/pre_dive_migrations.dart';
@@ -85,6 +90,8 @@ const List<String> _hlcTables = [
   'equipment_components',
   'dive_types',
   'dive_roles',
+  'custom_certification_agencies',
+  'custom_certification_levels',
   'tank_presets',
   'weight_presets',
   'transmitters',

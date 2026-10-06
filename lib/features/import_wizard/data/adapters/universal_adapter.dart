@@ -12,6 +12,7 @@ import 'package:submersion/core/utils/number_utils.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/core/services/export/models/uddf_import_result.dart';
 import 'package:submersion/features/buddies/presentation/providers/buddy_providers.dart';
+import 'package:submersion/features/certifications/presentation/providers/certification_currency_providers.dart';
 import 'package:submersion/features/certifications/presentation/providers/certification_providers.dart';
 import 'package:submersion/features/cylinder_passports/presentation/providers/cylinder_passport_providers.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart'
@@ -36,6 +37,7 @@ import 'package:submersion/features/equipment/data/services/sensor_summary_sched
 import 'package:submersion/features/equipment/presentation/providers/equipment_observation_providers.dart';
 import 'package:submersion/features/equipment/presentation/providers/equipment_providers.dart';
 import 'package:submersion/features/equipment/presentation/providers/equipment_set_providers.dart';
+import 'package:submersion/features/equipment/presentation/providers/equipment_location_providers.dart';
 import 'package:submersion/features/equipment/presentation/providers/equipment_tag_providers.dart';
 import 'package:submersion/features/import_wizard/domain/adapters/import_source_adapter.dart';
 import 'package:submersion/features/import_wizard/domain/models/duplicate_action.dart';
@@ -863,6 +865,9 @@ class UniversalAdapter implements ImportSourceAdapter {
       defaultStartPressure: settings.defaultStartPressure,
       applyDefaultTankToImports: settings.applyDefaultTankToImports,
       placeNameLanguage: settings.placeNameLanguage,
+      shareCustomAgenciesByDefault: await _ref.read(
+        shareByDefaultProvider.future,
+      ),
     );
   }
 
@@ -1294,6 +1299,7 @@ class UniversalAdapter implements ImportSourceAdapter {
             importedDives: importedByFileId['f$i'] ?? 0,
             error: f.error,
             isNavTrackRoute: f.detection.format == ui.ImportFormat.navTrack,
+            isSuuntoJson: f.detection.format == ui.ImportFormat.suuntoJson,
             filePath: f.path,
           ),
       ];
@@ -2025,7 +2031,21 @@ class UniversalAdapter implements ImportSourceAdapter {
                 const [])
           if (type is Map<String, dynamic>) type,
       ],
+      // Certification currency (issue #2267), metadata for the same reason.
+      currencyRules: _metadataRows(payload, ImportPayload.currencyRulesKey),
+      currencyPrefs: _metadataRows(payload, ImportPayload.currencyPrefsKey),
+      currencyEvents: _metadataRows(payload, ImportPayload.currencyEventsKey),
     );
+  }
+
+  static List<Map<String, dynamic>> _metadataRows(
+    ImportPayload payload,
+    String key,
+  ) {
+    return [
+      for (final row in (payload.metadata[key] as List?) ?? const [])
+        if (row is Map<String, dynamic>) row,
+    ];
   }
 }
 
@@ -2064,6 +2084,12 @@ ImportRepositories universalImportRepositories(WidgetRef ref) {
     // Equipment tags (issue #1942); without it imported gear arrives with
     // none of its tags.
     equipmentTagRepository: ref.read(equipmentTagRepositoryProvider),
+    // Equipment locations (v268); without both, a CSV's Location column is
+    // dropped.
+    equipmentLocationRepository: ref.read(equipmentLocationRepositoryProvider),
+    equipmentLocationMoveRepository: ref.read(
+      equipmentLocationMoveRepositoryProvider,
+    ),
     // Site features (issue #2200); without it every feature in the file is
     // dropped and the site arrives with none of its markers.
     siteFeatureRepository: ref.read(siteFeatureRepositoryProvider),
@@ -2071,5 +2097,10 @@ ImportRepositories universalImportRepositories(WidgetRef ref) {
     // fills CSV is skipped.
     cylinderFillRepository: ref.read(cylinderFillRepositoryProvider),
     cylinderPassportRepository: ref.read(cylinderPassportRepositoryProvider),
+    // Certification currency (issue #2267); without it a backup's custom
+    // rules, prefs and refresher history are skipped.
+    certificationCurrencyRepository: ref.read(
+      certificationCurrencyRepositoryProvider,
+    ),
   );
 }

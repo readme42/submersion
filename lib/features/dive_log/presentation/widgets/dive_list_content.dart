@@ -42,6 +42,8 @@ import 'package:submersion/features/settings/presentation/providers/csv_unit_mod
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/export_providers.dart';
 import 'package:submersion/features/dive_log/presentation/formatters/dive_type_label_resolver.dart';
+import 'package:submersion/features/dive_roles/domain/entities/dive_role.dart';
+import 'package:submersion/features/dive_roles/presentation/providers/dive_role_providers.dart';
 import 'package:submersion/features/dive_types/domain/entities/dive_type_entity.dart';
 import 'package:submersion/features/dive_types/presentation/providers/dive_type_providers.dart';
 import 'package:submersion/features/dive_log/data/services/dive_merge_service.dart';
@@ -68,6 +70,7 @@ import 'package:submersion/shared/widgets/feature_accent.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_list_count_providers.dart';
 import 'package:submersion/features/equipment/data/services/sensor_summary_scheduler.dart';
 import 'package:submersion/shared/models/subtitle_text.dart';
+import 'package:submersion/features/certification_agencies/presentation/providers/certification_catalog_providers.dart';
 
 /// True if [d]'s date falls within [r], inclusive of the end calendar day.
 bool inDateRange(DiveSummary d, DateTimeRange r) {
@@ -887,6 +890,9 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
       final diveTypesById = format == _BulkExportFormat.uddf
           ? const <String, DiveTypeEntity>{}
           : await diveTypesByIdOrEmpty(ref.read(diveTypesByIdProvider.future));
+      final diveRolesById = format == _BulkExportFormat.pdf
+          ? await diveRoleMapOrEmpty(ref.read(diveRoleMapProvider.future))
+          : const <String, DiveRole>{};
       if (!mounted) return BulkActionOutcome.cancelled;
 
       if (!keepDialogForDelivery) {
@@ -908,6 +914,7 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
                   diver: diver,
                   diverPhoto: diverPhoto,
                   diveTypesById: diveTypesById,
+                  diveRolesById: diveRolesById,
                 )
               : await exportService.saveDivesToPdfFile(
                   selectedDives,
@@ -918,6 +925,7 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
                   diver: diver,
                   diverPhoto: diverPhoto,
                   diveTypesById: diveTypesById,
+                  diveRolesById: diveRolesById,
                 ),
         _BulkExportFormat.csv =>
           sharing
@@ -946,6 +954,9 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
                     selectedDives.map((d) => d.id).toList(growable: false),
                     uddfOptions,
                   ),
+                  certificationCatalog: await ref.read(
+                    allCustomCertificationsCatalogProvider.future,
+                  ),
                 )
               : await exportService.saveDivesToUddfFile(
                   selectedDives,
@@ -958,6 +969,9 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
                   extras: await ref.read(uddfDivesExtrasFetchProvider)(
                     selectedDives.map((d) => d.id).toList(growable: false),
                     uddfOptions,
+                  ),
+                  certificationCatalog: await ref.read(
+                    allCustomCertificationsCatalogProvider.future,
                   ),
                 ),
       };

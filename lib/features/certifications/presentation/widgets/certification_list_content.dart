@@ -26,7 +26,7 @@ import 'package:submersion/features/certifications/domain/entities/certification
 import 'package:submersion/features/certifications/presentation/providers/certification_providers.dart';
 import 'package:submersion/shared/widgets/feature_accent.dart';
 import 'package:submersion/features/certifications/presentation/certification_title_l10n.dart';
-import 'package:submersion/features/certifications/presentation/certification_agency_display.dart';
+import 'package:submersion/features/certifications/presentation/widgets/certification_attention_filter_bar.dart';
 import 'package:submersion/features/certifications/presentation/widgets/certification_search_delegate.dart';
 import 'package:submersion/core/query/domain/query_node.dart';
 import 'package:submersion/core/query/domain/query_subject.dart';
@@ -36,6 +36,9 @@ import 'package:submersion/features/query/presentation/widgets/query_chips_frame
 import 'package:submersion/features/query/presentation/providers/query_id_set_providers.dart';
 import 'package:submersion/features/query/presentation/widgets/query_filter_sheet.dart';
 import 'package:submersion/features/certifications/presentation/providers/certification_list_count_provider.dart';
+import 'package:submersion/features/certification_agencies/presentation/certification_entry_display.dart';
+import 'package:submersion/features/certification_agencies/presentation/providers/certification_catalog_context.dart';
+import 'package:submersion/features/certification_agencies/presentation/providers/certification_catalog_providers.dart';
 
 /// Content widget for the certification list, used in master-detail layout.
 class CertificationListContent extends ConsumerStatefulWidget {
@@ -162,13 +165,26 @@ class _CertificationListContentState
   void _setQuery(QueryNode? query) =>
       ref.read(certificationQueryProvider.notifier).state = query;
 
-  /// The list body with the query's chips above it (#2365).
-  Widget _withQueryChips(Widget child) => QueryChipsFrame(
-    root: certificationQueryEntity,
-    query: ref.watch(certificationQueryProvider),
-    onChanged: _setQuery,
-    child: child,
-  );
+  /// The list body with the query's chips above it (#2365) and, while the
+  /// home chip's needs-attention scope is on, its indicator (issue #2267).
+  Widget _withQueryChips(Widget child) {
+    final framed = QueryChipsFrame(
+      root: certificationQueryEntity,
+      query: ref.watch(certificationQueryProvider),
+      onChanged: _setQuery,
+      child: child,
+    );
+    if (!ref.watch(certificationAttentionFilterProvider)) return framed;
+    return Column(
+      children: [
+        const CertificationAttentionFilterBar(),
+        Expanded(child: framed),
+      ],
+    );
+  }
+
+  void _clearAttentionScope() =>
+      ref.read(certificationAttentionFilterProvider.notifier).state = false;
 
   @override
   Widget build(BuildContext context) {
@@ -185,6 +201,7 @@ class _CertificationListContentState
     final visibleCerts = applyCertificationSorting(
       certificationsAsync.value ?? const [],
       sort,
+      catalog: context.certificationCatalog,
     );
     final visibleIds = visibleCerts.map((c) => c.id).toList();
 
@@ -200,7 +217,11 @@ class _CertificationListContentState
       return _withQueryChips(
         certificationsAsync.when(
           data: (certifications) {
-            final sorted = applyCertificationSorting(certifications, sort);
+            final sorted = applyCertificationSorting(
+              certifications,
+              sort,
+              catalog: context.certificationCatalog,
+            );
             return sorted.isEmpty
                 ? _buildEmptyState(context)
                 : _buildCertificationList(context, ref, sorted);
@@ -457,7 +478,9 @@ class _CertificationListContentState
         return EntityTableView<Certification, CertificationField>(
           entities: certifications,
           idExtractor: (c) => c.id,
-          adapter: CertificationFieldAdapter.instance,
+          adapter: CertificationFieldAdapter.withCatalog(
+            context.certificationCatalog,
+          ),
           config: config,
           units: units,
           onSortFieldChanged: notifier.setSortField,
@@ -704,6 +727,46 @@ class _CertificationListContentState
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    // The needs-attention scope with nothing left in it says so, and offers
+    // the way out, rather than reading as an empty logbook.
+    if (ref.watch(certificationAttentionFilterProvider)) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.verified_outlined,
+                size: 64,
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                context.l10n.certifications_list_needsAttention_empty,
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                context.l10n.certifications_list_needsAttention_emptySubtitle,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: _clearAttentionScope,
+                child: Text(context.l10n.certifications_list_filter_clear),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     // A query that hid every row is not "nothing here yet".
     if (ref.watch(certificationQueryProvider) != null) {
       return QueryNoMatchState(onClear: () => _setQuery(null));
@@ -794,6 +857,7 @@ class CertificationListTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(certificationCatalogSyncProvider);
     final theme = Theme.of(context);
     final units = UnitFormatter(ref.watch(settingsProvider));
 
@@ -807,7 +871,11 @@ class CertificationListTile extends ConsumerWidget {
         : '';
     // Only non-null when a custom name owns the title, so the level is spoken
     // exactly once either way.
-    final level = certificationSubtitleL10n(certification, context.l10n);
+    final level = certificationSubtitleL10n(
+      certification,
+      context.l10n,
+      catalog: context.certificationCatalog,
+    );
     final levelLabel = level != null ? ', $level' : '';
 
     return Semantics(
@@ -815,8 +883,8 @@ class CertificationListTile extends ConsumerWidget {
       // it would leave "Open Water" with no issuing agency. The title is
       // derived rather than raw so the agency is not said twice.
       label:
-          '${certification.agency.localizedName(context.l10n)} '
-          '${certificationTitleL10n(certification, context.l10n)}'
+          '${context.certificationCatalog.agency(certification.agency).localizedName(context.l10n)} '
+          '${certificationTitleL10n(certification, context.l10n, catalog: context.certificationCatalog)}'
           '$levelLabel$issueDateLabel$statusLabel',
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -831,7 +899,13 @@ class CertificationListTile extends ConsumerWidget {
             onChanged: onCheckChanged,
             child: _buildLeadingIcon(context),
           ),
-          title: Text(certificationTitleL10n(certification, context.l10n)),
+          title: Text(
+            certificationTitleL10n(
+              certification,
+              context.l10n,
+              catalog: context.certificationCatalog,
+            ),
+          ),
           subtitle: _buildSubtitle(context, units),
           trailing: _buildTrailing(context),
         ),
@@ -849,14 +923,11 @@ class CertificationListTile extends ConsumerWidget {
       ),
       child: Center(
         child: Text(
-          certification.agency
-              .localizedName(context.l10n)
-              .substring(
-                0,
-                certification.agency.localizedName(context.l10n).length > 4
-                    ? 4
-                    : certification.agency.localizedName(context.l10n).length,
-              ),
+          _agencyBadge(
+            context.certificationCatalog
+                .agency(certification.agency)
+                .localizedName(context.l10n),
+          ),
           style: TextStyle(
             color: Theme.of(context).colorScheme.onPrimaryContainer,
             fontWeight: FontWeight.bold,
@@ -871,7 +942,13 @@ class CertificationListTile extends ConsumerWidget {
     final parts = <String>[];
     // Carries the level too when the title is a custom name, which is the
     // only place the level can show on this tile.
-    parts.add(certificationCredentialsLineL10n(certification, context.l10n));
+    parts.add(
+      certificationCredentialsLineL10n(
+        certification,
+        context.l10n,
+        catalog: context.certificationCatalog,
+      ),
+    );
     if (certification.issueDate != null) {
       parts.add(units.formatDate(certification.issueDate));
     }
@@ -915,4 +992,8 @@ class CertificationListTile extends ConsumerWidget {
     }
     return const Icon(Icons.chevron_right);
   }
+
+  /// The first four characters of an agency name, for the badge.
+  String _agencyBadge(String name) =>
+      name.length > 4 ? name.substring(0, 4) : name;
 }

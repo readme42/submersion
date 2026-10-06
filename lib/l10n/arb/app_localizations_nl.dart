@@ -3095,6 +3095,126 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get certifications_list_filter_needsAttention => 'Vraagt aandacht';
+
+  @override
+  String get certifications_list_filter_clear => 'Wissen';
+
+  @override
+  String get certifications_list_needsAttention_empty =>
+      'Geen certificeringen vragen aandacht';
+
+  @override
+  String get certifications_list_needsAttention_emptySubtitle =>
+      'Alle certificeringen zijn actueel of gedempt.';
+
+  @override
+  String get currencyRule_padi_reactivate_name =>
+      'PADI-opfrissing (ReActivate)';
+
+  @override
+  String get currencyRule_ssi_skills_update_name => 'SSI Scuba Skills Update';
+
+  @override
+  String get currencyRule_generic_refresher_name => 'Opfrissing';
+
+  @override
+  String get currencyRule_first_aid_24mo_name =>
+      'Verlenging eerste hulp en reanimatie';
+
+  @override
+  String get currencyRule_pro_membership_annual_name =>
+      'Verlenging professioneel lidmaatschap';
+
+  @override
+  String get currencyRule_gue_revalidation_name => 'GUE-hervalidatie';
+
+  @override
+  String get currencyRule_ffessm_licence_annual_name =>
+      'FFESSM-licentie en medische verklaring';
+
+  @override
+  String get currencyRule_cave_currency_name => 'Grotduikpraktijk';
+
+  @override
+  String get currencyRule_rebreather_currency_name => 'Rebreatherpraktijk';
+
+  @override
+  String get currencyRule_deco_currency_name => 'Decompressiepraktijk';
+
+  @override
+  String get currencyRule_card_expiry_name => 'Vervaldatum kaart';
+
+  @override
+  String get currencyRule_padi_reactivate_advisory =>
+      'PADI raadt een ReActivate-opfrissing aan na zes tot twaalf maanden niet duiken.';
+
+  @override
+  String get currencyRule_ssi_skills_update_advisory =>
+      'SSI raadt een Scuba Skills Update aan na zes tot twaalf maanden niet duiken.';
+
+  @override
+  String get currencyRule_generic_refresher_advisory =>
+      'De meeste organisaties raden een opfrissing aan na zes tot twaalf maanden niet duiken.';
+
+  @override
+  String get currencyRule_first_aid_advisory =>
+      'Eerstehulp-, reanimatie- en zuurstofbrevetten worden meestal om de twee jaar verlengd.';
+
+  @override
+  String get currencyRule_pro_membership_advisory =>
+      'Professionele lidmaatschappen worden meestal jaarlijks verlengd om de instructeursstatus actief te houden.';
+
+  @override
+  String get currencyRule_gue_revalidation_advisory =>
+      'GUE-brevetten worden meestal om de drie jaar gehervalideerd.';
+
+  @override
+  String get currencyRule_ffessm_licence_advisory =>
+      'De FFESSM-licentie en de medische verklaring worden elk jaar verlengd.';
+
+  @override
+  String get currencyRule_cave_currency_advisory =>
+      'Grotvaardigheden vervagen zonder oefening; na een jaar pauze wordt meestal een controleduik aangeraden.';
+
+  @override
+  String get currencyRule_rebreather_currency_advisory =>
+      'Rebreathervaardigheden vervagen snel; veel organisaties raden na zes maanden pauze een opfrissing aan.';
+
+  @override
+  String get currencyRule_deco_currency_advisory =>
+      'Decompressieprocedures worden meestal opgefrist na een jaar zonder decompressieduik.';
+
+  @override
+  String get currencyRule_card_expiry_advisory =>
+      'De vervaldatum die op deze kaart staat.';
+
+  @override
+  String get certifications_currency_status_current => 'Actueel';
+
+  @override
+  String get certifications_currency_status_dueSoon => 'Binnenkort';
+
+  @override
+  String get certifications_currency_status_lapsed => 'Verlopen';
+
+  @override
+  String get certifications_currency_eventType_refresher => 'Opfrissing';
+
+  @override
+  String get certifications_currency_eventType_renewal => 'Verlenging';
+
+  @override
+  String get certifications_currency_eventType_revalidation => 'Hervalidatie';
+
+  @override
+  String get certifications_currency_eventType_skillsUpdate =>
+      'Vaardigheden-update';
+
+  @override
+  String get certifications_currency_eventType_other => 'Overig';
+
+  @override
   String get certifications_detail_action_delete => 'Verwijderen';
 
   @override
@@ -3180,6 +3300,140 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get certifications_detail_sectionTitle_dates => 'Datums';
+
+  @override
+  String get certifications_detail_sectionTitle_currency => 'Geldigheid';
+
+  @override
+  String certifications_currency_dueOn(String date) {
+    return 'Vervalt op $date';
+  }
+
+  @override
+  String certifications_currency_lapsedSince(String date) {
+    return 'Verlopen sinds $date';
+  }
+
+  @override
+  String certifications_currency_anchor_lastDive(String date) {
+    return 'Laatste duik $date';
+  }
+
+  @override
+  String certifications_currency_anchor_lastQualifyingDive(String date) {
+    return 'Laatste meetellende duik $date';
+  }
+
+  @override
+  String certifications_currency_anchor_cardExpiry(String date) {
+    return 'Vervaldatum kaart $date';
+  }
+
+  @override
+  String certifications_currency_anchor_cardIssue(String date) {
+    return 'Uitgegeven $date';
+  }
+
+  @override
+  String certifications_currency_anchor_ledgerEvent(String event, String date) {
+    return '$event vastgelegd op $date';
+  }
+
+  @override
+  String certifications_currency_alsoCovers(String names) {
+    return 'Geldt ook voor $names';
+  }
+
+  @override
+  String get certifications_currency_muted => 'Gedempt';
+
+  @override
+  String get certifications_currency_noCountedDive =>
+      'Nog geen meetellende duik vastgelegd';
+
+  @override
+  String get certifications_currency_action_log => 'Opfrissing vastleggen';
+
+  @override
+  String get certifications_currency_action_interval => 'Interval bewerken';
+
+  @override
+  String get certifications_currency_action_mapping => 'Welke duiken tellen';
+
+  @override
+  String get certifications_currency_action_mute => 'Dempen';
+
+  @override
+  String get certifications_currency_action_unmute => 'Dempen opheffen';
+
+  @override
+  String get certifications_currency_history => 'Geschiedenis';
+
+  @override
+  String get certifications_currency_deleteEvent_title => 'Item verwijderen?';
+
+  @override
+  String certifications_currency_deleteEvent_content(
+    String event,
+    String date,
+  ) {
+    return 'Hiermee wordt $event van $date verwijderd.';
+  }
+
+  @override
+  String get certifications_currency_eventDialog_title =>
+      'Opfrissing of verlenging vastleggen';
+
+  @override
+  String get certifications_currency_eventDialog_type => 'Type';
+
+  @override
+  String get certifications_currency_eventDialog_date => 'Datum';
+
+  @override
+  String get certifications_currency_eventDialog_provider =>
+      'Duikschool, club of instructeur';
+
+  @override
+  String get certifications_currency_eventDialog_notes => 'Notities';
+
+  @override
+  String get certifications_currency_intervalDialog_title => 'Interval';
+
+  @override
+  String get certifications_currency_intervalDialog_lapse =>
+      'Verloopt na (dagen)';
+
+  @override
+  String get certifications_currency_intervalDialog_lead =>
+      'Zoveel dagen vooraf waarschuwen';
+
+  @override
+  String certifications_currency_intervalDialog_inheritHint(String days) {
+    return 'Leeg gebruikt de waarde van de regel ($days)';
+  }
+
+  @override
+  String get certifications_currency_intervalDialog_leadTooLong =>
+      'De waarschuwing kan niet vóór het interval beginnen';
+
+  @override
+  String get certifications_currency_mappingDialog_title =>
+      'Welke duiken tellen';
+
+  @override
+  String get certifications_currency_mappingDialog_types => 'Duiktypes';
+
+  @override
+  String get certifications_currency_mappingDialog_modes => 'Duikmodi';
+
+  @override
+  String get certifications_currency_mappingDialog_anyHint =>
+      'Zonder selectie telt elke duik';
+
+  @override
+  String get certifications_currency_mappingDialog_reset =>
+      'Standaard van de regel gebruiken';
 
   @override
   String get certifications_detail_sectionTitle_details =>
@@ -3348,6 +3602,123 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get certifications_edit_label_agency => 'Organisatie *';
+
+  @override
+  String get certificationAgencies_unknownAgency => 'Onbekende organisatie';
+
+  @override
+  String get certificationAgencies_unknownCertification =>
+      'Onbekende certificering';
+
+  @override
+  String get certificationAgencies_addCustomAgency =>
+      'Eigen organisatie toevoegen...';
+
+  @override
+  String get certificationAgencies_addCustomCertification =>
+      'Eigen certificering toevoegen...';
+
+  @override
+  String get certificationAgencies_dialog_newAgencyTitle =>
+      'Nieuwe organisatie';
+
+  @override
+  String get certificationAgencies_dialog_editAgencyTitle =>
+      'Organisatie bewerken';
+
+  @override
+  String get certificationAgencies_dialog_newCertificationTitle =>
+      'Nieuwe certificering';
+
+  @override
+  String get certificationAgencies_dialog_editCertificationTitle =>
+      'Certificering bewerken';
+
+  @override
+  String get certificationAgencies_dialog_nameLabel => 'Naam';
+
+  @override
+  String get certificationAgencies_dialog_colorLabel => 'Kaartkleur';
+
+  @override
+  String get certificationAgencies_dialog_specialty => 'Specialisatie';
+
+  @override
+  String get certificationAgencies_error_nameRequired => 'Voer een naam in';
+
+  @override
+  String get certificationAgencies_error_nameTaken =>
+      'Deze naam is al in gebruik';
+
+  @override
+  String get settings_manage_certificationAgencies =>
+      'Certificeringsorganisaties';
+
+  @override
+  String get settings_manage_certificationAgencies_subtitle =>
+      'Eigen organisaties en certificeringen beheren';
+
+  @override
+  String get certificationAgencies_section_yours => 'Jouw organisaties';
+
+  @override
+  String get certificationAgencies_section_builtIn => 'Ingebouwde organisaties';
+
+  @override
+  String get certificationAgencies_addAgency => 'Organisatie toevoegen';
+
+  @override
+  String certificationAgencies_sharedBy(String name) {
+    return 'Gedeeld door $name';
+  }
+
+  @override
+  String get certificationAgencies_editor_addCertification =>
+      'Certificering toevoegen';
+
+  @override
+  String get certificationAgencies_editor_builtInHint =>
+      'Ingebouwde certificeringen kun je niet wijzigen. Je kunt er zelf toevoegen.';
+
+  @override
+  String certificationAgencies_delete_confirmTitle(String name) {
+    return '$name verwijderen?';
+  }
+
+  @override
+  String get certificationAgencies_delete_refusedTitle => 'Nog in gebruik';
+
+  @override
+  String certificationAgencies_delete_refusedBody(String usage) {
+    return 'Gebruikt door $usage. Pas die eerst aan.';
+  }
+
+  @override
+  String certificationAgencies_usage_certifications(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count certificeringen',
+      one: '1 certificering',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String certificationAgencies_usage_courses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cursussen',
+      one: '1 cursus',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String certificationAgencies_usage_and(String first, String second) {
+    return '$first en $second';
+  }
 
   @override
   String get certifications_edit_addRecognition =>
@@ -5042,7 +5413,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settings_homeChips_lastDive => 'Duikactualiteit';
 
   @override
-  String get settings_homeChips_certifications => 'Verloop van certificeringen';
+  String get settings_homeChips_certifications => 'Geldigheid certificeringen';
 
   @override
   String get settings_homeChips_trip => 'Aankomende reis';
@@ -5066,8 +5437,14 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settings_homeChips_dataQuality => 'Datakwaliteit';
 
   @override
-  String dashboard_gauges_certsExpiring(int count) {
-    return '$count certificeringen verlopen bijna';
+  String dashboard_gauges_certsNeedAttention(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count certificeringen vragen aandacht',
+      one: '$count certificering vraagt aandacht',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -6799,6 +7176,12 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get diveLog_edit_label_waterType => 'Watertype';
+
+  @override
+  String get diveLog_edit_label_weightName => 'Naam (optioneel)';
+
+  @override
+  String get diveLog_edit_hint_weightName => 'bijv. bovenste zak';
 
   @override
   String get diveLog_edit_marineLifeHint =>
@@ -11551,6 +11934,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get enum_certificationAgency_ffessm => 'FFESSM';
 
   @override
+  String get enum_certificationAgency_acuc => 'ACUC';
+
+  @override
+  String get enum_certificationAgency_dan => 'DAN';
+
+  @override
   String get enum_certificationAgency_gue => 'GUE';
 
   @override
@@ -11631,6 +12020,13 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get enum_certificationLevel_techDiver => 'Technisch duiker';
+
+  @override
+  String get enum_certificationLevel_firstAid => 'Eerste hulp / reanimatie';
+
+  @override
+  String get enum_certificationLevel_oxygenProvider =>
+      'Noodzuurstof-verstrekker';
 
   @override
   String get enum_certificationLevel_trimix => 'Trimix';
@@ -14465,6 +14861,244 @@ class AppLocalizationsNl extends AppLocalizations {
   String get equipment_filter_section_category => 'Categorie';
 
   @override
+  String get equipment_location_kind_storage => 'Opslag';
+
+  @override
+  String get equipment_location_kind_serviceShop => 'Servicewerkplaats';
+
+  @override
+  String get equipment_location_kind_person => 'Persoon';
+
+  @override
+  String get equipment_location_kind_other => 'Overig';
+
+  @override
+  String get equipment_location_noLocation => 'Geen locatie';
+
+  @override
+  String get equipment_location_picker_title => 'Kies een plek';
+
+  @override
+  String get equipment_location_picker_search => 'Plekken zoeken';
+
+  @override
+  String get equipment_location_picker_newPlace => 'Nieuwe plek';
+
+  @override
+  String equipment_location_move_title(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items verplaatsen',
+      one: '$count item verplaatsen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_move_to => 'Naar';
+
+  @override
+  String get equipment_location_move_choose => 'Kies een plek';
+
+  @override
+  String get equipment_location_move_date => 'Datum';
+
+  @override
+  String get equipment_location_move_time => 'Tijd';
+
+  @override
+  String get equipment_location_move_note => 'Notitie';
+
+  @override
+  String get equipment_location_move_noteHint =>
+      'bv. jaarlijkse ademautomaatservice';
+
+  @override
+  String get equipment_location_move_confirm => 'Verplaatsen';
+
+  @override
+  String get equipment_location_parts_title => 'Onderdelen ook verplaatsen?';
+
+  @override
+  String equipment_location_parts_body(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Ook de $count onderdelen naar dezelfde plek verplaatsen?',
+      one: 'Ook het $count onderdeel naar dezelfde plek verplaatsen?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_parts_yes => 'Onderdelen verplaatsen';
+
+  @override
+  String get equipment_location_parts_no => 'Alleen dit';
+
+  @override
+  String get equipment_location_status_title => 'Status bijwerken?';
+
+  @override
+  String equipment_location_status_body(int count, String status) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Ook $count items markeren als $status?',
+      one: 'Ook $count item markeren als $status?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_status_yes => 'Bijwerken';
+
+  @override
+  String get equipment_location_status_no => 'Status behouden';
+
+  @override
+  String equipment_location_moved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items verplaatst',
+      one: '$count item verplaatst',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_card_title => 'Locatie';
+
+  @override
+  String get equipment_location_none => 'Geen locatie ingesteld';
+
+  @override
+  String equipment_location_since(String date) {
+    return 'Sinds $date';
+  }
+
+  @override
+  String get equipment_location_moveButton => 'Verplaatsen';
+
+  @override
+  String get equipment_location_showAll => 'Alles tonen';
+
+  @override
+  String get equipment_location_history_cleared => 'Locatie gewist';
+
+  @override
+  String get equipment_location_editMove_title => 'Verplaatsing bewerken';
+
+  @override
+  String get equipment_location_editMove_delete => 'Verplaatsing verwijderen';
+
+  @override
+  String get equipment_location_deleteMoveConfirm =>
+      'Dit item uit de geschiedenis verwijderen? De locatie van het item wordt opnieuw bepaald uit de resterende verplaatsingen.';
+
+  @override
+  String get equipment_location_bulkAction => 'Naar locatie verplaatsen';
+
+  @override
+  String equipment_location_groupCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '$count item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_activeFilter => 'Locatie';
+
+  @override
+  String get equipment_filter_section_location => 'Locatie';
+
+  @override
+  String get equipment_arrange_groupByLocation => 'Groeperen op locatie';
+
+  @override
+  String get equipment_arrange_groupByLocationSubtitle =>
+      'Eén kop per plek, alleen op deze pagina';
+
+  @override
+  String get equipment_edit_locationLabel => 'Locatie';
+
+  @override
+  String get equipment_edit_locationNone => 'Niet ingesteld';
+
+  @override
+  String get equipment_edit_locationFailed =>
+      'Opgeslagen, maar de locatie kon niet worden ingesteld. Gebruik Verplaatsen bij het item om die in te stellen.';
+
+  @override
+  String get equipment_locations_title => 'Locaties';
+
+  @override
+  String get equipment_locations_empty =>
+      'Nog geen plekken. Voeg er een toe om bij te houden waar je uitrusting is.';
+
+  @override
+  String get equipment_locations_add => 'Plek toevoegen';
+
+  @override
+  String equipment_locations_archivedSection(int count) {
+    return 'Gearchiveerd ($count)';
+  }
+
+  @override
+  String get equipment_locations_archive => 'Archiveren';
+
+  @override
+  String get equipment_locations_restore => 'Herstellen';
+
+  @override
+  String get equipment_locations_delete => 'Verwijderen';
+
+  @override
+  String equipment_locations_deleteConfirm(String name) {
+    return '$name verwijderen?';
+  }
+
+  @override
+  String get equipment_locations_itemsHere => 'Items hier';
+
+  @override
+  String get equipment_locations_noItemsHere => 'Er is hier nu niets.';
+
+  @override
+  String get equipment_locations_moveItems => 'Items hier verplaatsen';
+
+  @override
+  String get equipment_locations_newTitle => 'Nieuwe plek';
+
+  @override
+  String get equipment_locations_editTitle => 'Plek bewerken';
+
+  @override
+  String get equipment_locations_nameLabel => 'Naam';
+
+  @override
+  String get equipment_locations_nameRequired => 'Voer een naam in';
+
+  @override
+  String get equipment_locations_duplicateWarning =>
+      'Je hebt al een plek met deze naam';
+
+  @override
+  String get equipment_locations_kindLabel => 'Soort';
+
+  @override
+  String get equipment_locations_notesLabel => 'Notities';
+
+  @override
+  String get equipment_locations_notesHint => 'Adres, telefoon, kluisjesnummer';
+
+  @override
   String get equipment_list_retryButton => 'Opnieuw proberen';
 
   @override
@@ -15106,7 +15740,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get equipment_tab_sets => 'Sets';
 
   @override
-  String get formatter_connector_at => 'op';
+  String get formatter_connector_at => 'om';
 
   @override
   String get formatter_connector_from => 'Van';
@@ -15628,6 +16262,15 @@ class AppLocalizationsNl extends AppLocalizations {
       'Kan die fles niet openen. Probeer het opnieuw.';
 
   @override
+  String gasCalculators_blender_cylinderNoVolume(String name) {
+    return 'Geen waterinhoud geregistreerd voor $name';
+  }
+
+  @override
+  String get gasCalculators_blender_noCylinders =>
+      'Nog geen flessen in je uitrusting. Vul in plaats daarvan de waterinhoud in.';
+
+  @override
   String gasCalculators_blender_filledFrom(String name, String mix) {
     return '$name: $mix';
   }
@@ -15799,15 +16442,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get gasCalculators_blender_cylinderVolume => 'Waterinhoud van de fles';
 
   @override
-  String get gasCalculators_blender_cylinderPresets => 'Voorinstellingen';
-
-  @override
   String gasCalculators_blender_unitPrice(String unit) {
     return 'Prijs per 100 $unit';
   }
-
-  @override
-  String get gasCalculators_blender_manageCylinderSizes => 'Flesmaten beheren';
 
   @override
   String get gasCalculators_blender_costTotal => 'Totaal';
@@ -19968,6 +20605,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settings_conflict_field_additionalCredentials => 'Extra brevetten';
 
   @override
+  String get settings_conflict_field_advisoryKey => 'Ingebouwd advies';
+
+  @override
   String get settings_conflict_field_airBreakBreakSeconds =>
       'Duur van de luchtpauze';
 
@@ -20934,6 +21574,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settings_conflict_field_intervalHours => 'Interval in uren';
 
   @override
+  String get settings_conflict_field_isArchived => 'Gearchiveerd';
+
+  @override
   String get settings_conflict_field_isBuiltIn => 'Ingebouwd';
 
   @override
@@ -21087,6 +21730,9 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get settings_conflict_field_mode => 'Ademmodus';
+
+  @override
+  String get settings_conflict_field_movedAt => 'Verplaatst op';
 
   @override
   String get settings_conflict_field_name => 'Naam';
@@ -21645,6 +22291,10 @@ class AppLocalizationsNl extends AppLocalizations {
       'Geplande tijd tot de oppervlakte';
 
   @override
+  String get settings_conflict_field_supersedesRuleId =>
+      'Vervangt ingebouwde regel';
+
+  @override
   String get settings_conflict_field_surfaceConditions =>
       'Omstandigheden aan de oppervlakte';
 
@@ -22009,6 +22659,9 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get settings_conflict_ref_equipment => 'Uitrusting';
+
+  @override
+  String get settings_conflict_ref_equipmentLocation => 'Uitrustingslocatie';
 
   @override
   String get settings_conflict_ref_equipmentSet => 'Uitrustingsset';
@@ -22934,6 +23587,115 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get settings_manage_serviceTypes_subtitle =>
       'Welk onderhoud je uitrusting nodig heeft, en hoe vaak';
+
+  @override
+  String get settings_manage_locations => 'Locaties';
+
+  @override
+  String get settings_manage_locations_subtitle =>
+      'Waar je uitrusting ligt, in onderhoud is of is uitgeleend';
+
+  @override
+  String get settings_manage_currencyRules => 'Geldigheid certificeringen';
+
+  @override
+  String get settings_manage_currencyRules_subtitle =>
+      'Regels voor opfrissing en verlenging';
+
+  @override
+  String get currencyRules_title => 'Geldigheid certificeringen';
+
+  @override
+  String get currencyRules_addTooltip => 'Regel toevoegen';
+
+  @override
+  String get currencyRules_editTooltip => 'Regel bewerken';
+
+  @override
+  String get currencyRules_deleteTooltip => 'Regel verwijderen';
+
+  @override
+  String get currencyRules_builtIn => 'Ingebouwd';
+
+  @override
+  String get currencyRules_custom => 'Jouw regels';
+
+  @override
+  String currencyRules_replaces(String name) {
+    return 'Vervangt $name';
+  }
+
+  @override
+  String currencyRules_replacedBy(String name) {
+    return 'Vervangen door $name';
+  }
+
+  @override
+  String currencyRules_summary_activity(int lapse) {
+    String _temp0 = intl.Intl.pluralLogic(
+      lapse,
+      locale: localeName,
+      other: 'Verloopt $lapse dagen na de laatste meetellende duik',
+      one: 'Verloopt $lapse dag na de laatste meetellende duik',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String currencyRules_summary_date(int lapse) {
+    String _temp0 = intl.Intl.pluralLogic(
+      lapse,
+      locale: localeName,
+      other: 'Verloopt $lapse dagen na de datum op de kaart',
+      one: 'Verloopt $lapse dag na de datum op de kaart',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get currencyRules_deleteDialog_title => 'Regel verwijderen?';
+
+  @override
+  String currencyRules_deleteDialog_content(String name) {
+    return '$name wordt verwijderd. Vastgelegde opfrissingen blijven in de geschiedenis van elke kaart.';
+  }
+
+  @override
+  String get currencyRules_dialog_addTitle => 'Nieuwe regel';
+
+  @override
+  String get currencyRules_dialog_editTitle => 'Regel bewerken';
+
+  @override
+  String get currencyRules_dialog_copyNote =>
+      'Opslaan maakt een eigen kopie die deze ingebouwde regel vervangt.';
+
+  @override
+  String get currencyRules_dialog_name => 'Naam';
+
+  @override
+  String get currencyRules_dialog_nameRequired => 'Voer een naam in';
+
+  @override
+  String get currencyRules_dialog_clock => 'Telt vanaf';
+
+  @override
+  String get currencyRules_dialog_clock_activity => 'Laatste meetellende duik';
+
+  @override
+  String get currencyRules_dialog_clock_date => 'Een datum op de kaart';
+
+  @override
+  String get currencyRules_dialog_agencies => 'Organisaties';
+
+  @override
+  String get currencyRules_dialog_levels => 'Niveaus';
+
+  @override
+  String get currencyRules_dialog_anyHint => 'Zonder selectie geldt alles';
+
+  @override
+  String get currencyRules_dialog_note => 'Notitie';
 
   @override
   String get settings_migrationProgress_doNotClose => 'Sluit de app niet';
@@ -24231,12 +24993,25 @@ class AppLocalizationsNl extends AppLocalizations {
     String group,
     String overall,
   ) {
-    return '$count van $total duiken, groepsgemiddelde $group tegenover $overall in totaal';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total duiken',
+      one: '1 duik',
+    );
+    return '$count van $_temp0, groepsgemiddelde $group tegenover $overall in totaal';
   }
 
   @override
   String insights_focus_summary_allShown(int total) {
-    return 'Slechts $total duiken hebben deze waarde, dus ze worden allemaal getoond';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other:
+          'Slechts $total duiken hebben deze waarde, dus ze worden allemaal getoond',
+      one: 'Slechts 1 duik heeft deze waarde, dus die wordt getoond',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -24346,7 +25121,13 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String insights_focus_factors_coverage(int covered, int total) {
-    return '$covered van $total duiken';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total duiken',
+      one: '1 duik',
+    );
+    return '$covered van $_temp0';
   }
 
   @override
@@ -28428,6 +29209,11 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get universalImport_triage_excludedCsv =>
       'Afzonderlijk importeren (CSV)';
+
+  @override
+  String universalImport_triage_excludedHandoff(String format) {
+    return 'Afzonderlijk importeren ($format)';
+  }
 
   @override
   String get universalImport_triage_unsupported => 'Niet-ondersteund formaat';
@@ -47115,6 +47901,58 @@ class AppLocalizationsNl extends AppLocalizations {
   String get navTrack_handoff_reviewTrackButton => 'Onderwatertrack bekijken';
 
   @override
+  String get suuntoJson_handoff_recognized => 'Suunto-duikexport herkend';
+
+  @override
+  String get suuntoJson_handoff_description =>
+      'Dit bestand is geëxporteerd uit de Suunto-app. De Suunto-import leest het op dezelfde manier als de Suunto Cloud-import, inclusief de opgenomen route van de duik.';
+
+  @override
+  String get suuntoJson_handoff_importButton => 'Suunto-duik importeren';
+
+  @override
+  String get suuntoFile_step_title => 'Suunto-app-exports';
+
+  @override
+  String get suuntoFile_step_description =>
+      'Kies een of meer duiken die als JSON uit de Suunto-app zijn geëxporteerd. Duiken die met een route zijn opgenomen, nemen die mee.';
+
+  @override
+  String get suuntoFile_step_chooseFiles => 'Bestanden kiezen';
+
+  @override
+  String suuntoFile_step_readyCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count duiken klaar om te importeren',
+      one: '$count duik klaar om te importeren',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suuntoFile_step_routeIncluded => 'Inclusief opgenomen route';
+
+  @override
+  String get suuntoFile_step_noRoute => 'Geen opgenomen route';
+
+  @override
+  String get suuntoFile_rejection_notJson => 'Geen JSON-bestand';
+
+  @override
+  String get suuntoFile_rejection_notSuuntoExport =>
+      'Geen export uit de Suunto-app';
+
+  @override
+  String get suuntoFile_rejection_notADive =>
+      'Geen duik (ander activiteitstype)';
+
+  @override
+  String get universalImport_summary_importWithSuunto =>
+      'Importeren met de Suunto-import';
+
+  @override
   String get navTrack_section_trackTitle => 'Onderwatertrack';
 
   @override
@@ -47841,6 +48679,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get query_equipment_lastDived => 'Laatst gebruikt';
 
   @override
+  String get query_equipment_location => 'Locatie';
+
+  @override
   String get query_equipment_model => 'Model';
 
   @override
@@ -48046,6 +48887,9 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get query_weights_amount => 'Hoeveelheid';
+
+  @override
+  String get query_weights_label => 'Naam';
 
   @override
   String get query_weights_notes => 'Notities';
@@ -48481,4 +49325,19 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get query_saveNeedsDiver =>
       'Maak een duikersprofiel aan om query\'s op te slaan';
+
+  @override
+  String get builtIns_showColumnLabel => 'Tonen';
+
+  @override
+  String get builtIns_showInPickers => 'Tonen in kiezers';
+
+  @override
+  String preDive_start_allTemplatesHidden(String path) {
+    return 'Alle checklists zijn verborgen. Toon er weer een via $path.';
+  }
+
+  @override
+  String get settings_conflict_field_hiddenBuiltInIds =>
+      'Verborgen ingebouwde items';
 }

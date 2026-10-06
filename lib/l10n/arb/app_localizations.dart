@@ -4781,6 +4781,210 @@ abstract class AppLocalizations {
   /// **'{shown} of {total, plural, =1{{total} certification} other{{total} certifications}}'**
   String certifications_list_countFiltered(int shown, int total);
 
+  /// Label of the certification list filter chip that limits the list to certifications needing a refresher or renewal
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get certifications_list_filter_needsAttention;
+
+  /// Button that removes the needs-attention filter from the certification list
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get certifications_list_filter_clear;
+
+  /// Empty state title when the needs-attention filter matches no certification
+  ///
+  /// In en, this message translates to:
+  /// **'No certifications need attention'**
+  String get certifications_list_needsAttention_empty;
+
+  /// Empty state subtitle when the needs-attention filter matches no certification
+  ///
+  /// In en, this message translates to:
+  /// **'Every certification is current or muted.'**
+  String get certifications_list_needsAttention_emptySubtitle;
+
+  /// Name of the built-in PADI refresher currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'PADI refresher (ReActivate)'**
+  String get currencyRule_padi_reactivate_name;
+
+  /// Name of the built-in SSI Scuba Skills Update currency rule; the program name is not translated
+  ///
+  /// In en, this message translates to:
+  /// **'SSI Scuba Skills Update'**
+  String get currencyRule_ssi_skills_update_name;
+
+  /// Name of the built-in generic refresher currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'Refresher'**
+  String get currencyRule_generic_refresher_name;
+
+  /// Name of the built-in first aid and CPR renewal currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'First aid and CPR renewal'**
+  String get currencyRule_first_aid_24mo_name;
+
+  /// Name of the built-in professional membership renewal currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'Professional membership renewal'**
+  String get currencyRule_pro_membership_annual_name;
+
+  /// Name of the built-in GUE revalidation currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'GUE revalidation'**
+  String get currencyRule_gue_revalidation_name;
+
+  /// Name of the built-in FFESSM licence currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'FFESSM licence and medical certificate'**
+  String get currencyRule_ffessm_licence_annual_name;
+
+  /// Name of the built-in cave currency rule: recent cave diving practice
+  ///
+  /// In en, this message translates to:
+  /// **'Cave currency'**
+  String get currencyRule_cave_currency_name;
+
+  /// Name of the built-in rebreather currency rule: recent rebreather practice
+  ///
+  /// In en, this message translates to:
+  /// **'Rebreather currency'**
+  String get currencyRule_rebreather_currency_name;
+
+  /// Name of the built-in decompression currency rule: recent decompression diving practice
+  ///
+  /// In en, this message translates to:
+  /// **'Decompression currency'**
+  String get currencyRule_deco_currency_name;
+
+  /// Name of the currency status that follows the expiry date printed on a card
+  ///
+  /// In en, this message translates to:
+  /// **'Card expiry'**
+  String get currencyRule_card_expiry_name;
+
+  /// Advisory sentence of the PADI refresher rule; guidance, never a requirement
+  ///
+  /// In en, this message translates to:
+  /// **'PADI suggests a ReActivate refresher after six to twelve months out of the water.'**
+  String get currencyRule_padi_reactivate_advisory;
+
+  /// Advisory sentence of the SSI Scuba Skills Update rule
+  ///
+  /// In en, this message translates to:
+  /// **'SSI suggests a Scuba Skills Update after six to twelve months without diving.'**
+  String get currencyRule_ssi_skills_update_advisory;
+
+  /// Advisory sentence of the generic refresher rule
+  ///
+  /// In en, this message translates to:
+  /// **'Most agencies suggest a refresher after six to twelve months without diving.'**
+  String get currencyRule_generic_refresher_advisory;
+
+  /// Advisory sentence of the first aid renewal rule
+  ///
+  /// In en, this message translates to:
+  /// **'First aid, CPR and oxygen provider credentials typically renew every two years.'**
+  String get currencyRule_first_aid_advisory;
+
+  /// Advisory sentence of the professional membership rule
+  ///
+  /// In en, this message translates to:
+  /// **'Professional memberships typically renew every year to keep teaching status active.'**
+  String get currencyRule_pro_membership_advisory;
+
+  /// Advisory sentence of the GUE revalidation rule
+  ///
+  /// In en, this message translates to:
+  /// **'GUE ratings are typically revalidated every three years.'**
+  String get currencyRule_gue_revalidation_advisory;
+
+  /// Advisory sentence of the FFESSM licence rule
+  ///
+  /// In en, this message translates to:
+  /// **'The FFESSM licence and its medical certificate are renewed every year.'**
+  String get currencyRule_ffessm_licence_advisory;
+
+  /// Advisory sentence of the cave currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'Cave skills fade without practice; a check-out dive is commonly advised after a year away.'**
+  String get currencyRule_cave_currency_advisory;
+
+  /// Advisory sentence of the rebreather currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'Rebreather skills fade quickly; many agencies advise a refresher after six months away.'**
+  String get currencyRule_rebreather_currency_advisory;
+
+  /// Advisory sentence of the decompression currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'Decompression procedures are commonly refreshed after a year without a decompression dive.'**
+  String get currencyRule_deco_currency_advisory;
+
+  /// Advisory sentence of the card expiry status
+  ///
+  /// In en, this message translates to:
+  /// **'The expiry date printed on this card.'**
+  String get currencyRule_card_expiry_advisory;
+
+  /// Currency severity: the credential is current
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get certifications_currency_status_current;
+
+  /// Currency severity: a refresher or renewal is due soon
+  ///
+  /// In en, this message translates to:
+  /// **'Due soon'**
+  String get certifications_currency_status_dueSoon;
+
+  /// Currency severity: the refresher or renewal interval has passed
+  ///
+  /// In en, this message translates to:
+  /// **'Lapsed'**
+  String get certifications_currency_status_lapsed;
+
+  /// Currency ledger event type: a refresher course or dive
+  ///
+  /// In en, this message translates to:
+  /// **'Refresher'**
+  String get certifications_currency_eventType_refresher;
+
+  /// Currency ledger event type: a renewal
+  ///
+  /// In en, this message translates to:
+  /// **'Renewal'**
+  String get certifications_currency_eventType_renewal;
+
+  /// Currency ledger event type: an agency revalidation
+  ///
+  /// In en, this message translates to:
+  /// **'Revalidation'**
+  String get certifications_currency_eventType_revalidation;
+
+  /// Currency ledger event type: a skills update
+  ///
+  /// In en, this message translates to:
+  /// **'Skills update'**
+  String get certifications_currency_eventType_skillsUpdate;
+
+  /// Currency ledger event type: anything else
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get certifications_currency_eventType_other;
+
   /// No description provided for @certifications_detail_action_delete.
   ///
   /// In en, this message translates to:
@@ -4936,6 +5140,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dates'**
   String get certifications_detail_sectionTitle_dates;
+
+  /// Certification detail section title for refresher and renewal currency
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get certifications_detail_sectionTitle_currency;
+
+  /// When a refresher or renewal falls due; date is preformatted
+  ///
+  /// In en, this message translates to:
+  /// **'Due {date}'**
+  String certifications_currency_dueOn(String date);
+
+  /// When a refresher or renewal lapsed; date is preformatted
+  ///
+  /// In en, this message translates to:
+  /// **'Lapsed since {date}'**
+  String certifications_currency_lapsedSince(String date);
+
+  /// What a currency clock counts from: the last dive
+  ///
+  /// In en, this message translates to:
+  /// **'Last dive {date}'**
+  String certifications_currency_anchor_lastDive(String date);
+
+  /// What a currency clock counts from: the last dive of a counted type or mode
+  ///
+  /// In en, this message translates to:
+  /// **'Last qualifying dive {date}'**
+  String certifications_currency_anchor_lastQualifyingDive(String date);
+
+  /// What a currency clock counts from: the card's expiry date
+  ///
+  /// In en, this message translates to:
+  /// **'Card expiry {date}'**
+  String certifications_currency_anchor_cardExpiry(String date);
+
+  /// What a currency clock counts from: the card's issue date
+  ///
+  /// In en, this message translates to:
+  /// **'Issued {date}'**
+  String certifications_currency_anchor_cardIssue(String date);
+
+  /// What a currency clock counts from: a logged refresher or renewal; event is its type
+  ///
+  /// In en, this message translates to:
+  /// **'{event} logged {date}'**
+  String certifications_currency_anchor_ledgerEvent(String event, String date);
+
+  /// The other cards a collapsed currency row stands for; names is a list
+  ///
+  /// In en, this message translates to:
+  /// **'Also covers {names}'**
+  String certifications_currency_alsoCovers(String names);
+
+  /// A currency rule the diver muted for this card
+  ///
+  /// In en, this message translates to:
+  /// **'Muted'**
+  String get certifications_currency_muted;
+
+  /// A currency rule applies to the card but no counted dive or refresher has been logged yet; it never warns
+  ///
+  /// In en, this message translates to:
+  /// **'No counted dive logged yet'**
+  String get certifications_currency_noCountedDive;
+
+  /// Action: log a refresher, renewal or revalidation
+  ///
+  /// In en, this message translates to:
+  /// **'Log refresher'**
+  String get certifications_currency_action_log;
+
+  /// Action: edit a currency rule's interval for this card
+  ///
+  /// In en, this message translates to:
+  /// **'Edit interval'**
+  String get certifications_currency_action_interval;
+
+  /// Action: choose which dive types and modes count toward a currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'Which dives count'**
+  String get certifications_currency_action_mapping;
+
+  /// Action: mute a currency rule for this card
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get certifications_currency_action_mute;
+
+  /// Action: unmute a currency rule for this card
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute'**
+  String get certifications_currency_action_unmute;
+
+  /// Heading of a certification's logged refreshers and renewals
+  ///
+  /// In en, this message translates to:
+  /// **'Currency history'**
+  String get certifications_currency_history;
+
+  /// Title of the dialog confirming a refresher entry deletion
+  ///
+  /// In en, this message translates to:
+  /// **'Delete entry?'**
+  String get certifications_currency_deleteEvent_title;
+
+  /// Body of the dialog confirming a refresher entry deletion
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the {event} logged {date}.'**
+  String certifications_currency_deleteEvent_content(String event, String date);
+
+  /// Title of the dialog that logs a refresher or renewal
+  ///
+  /// In en, this message translates to:
+  /// **'Log refresher or renewal'**
+  String get certifications_currency_eventDialog_title;
+
+  /// Field label: the kind of refresher or renewal
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get certifications_currency_eventDialog_type;
+
+  /// Field label: when the refresher or renewal took place
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get certifications_currency_eventDialog_date;
+
+  /// Field label: who ran the refresher
+  ///
+  /// In en, this message translates to:
+  /// **'Shop, club or instructor'**
+  String get certifications_currency_eventDialog_provider;
+
+  /// Field label: notes on the refresher
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get certifications_currency_eventDialog_notes;
+
+  /// Title of the dialog that tunes a currency rule's interval for one card
+  ///
+  /// In en, this message translates to:
+  /// **'Interval'**
+  String get certifications_currency_intervalDialog_title;
+
+  /// Field label: days until the rule lapses
+  ///
+  /// In en, this message translates to:
+  /// **'Lapses after (days)'**
+  String get certifications_currency_intervalDialog_lapse;
+
+  /// Field label: days of warning before the rule lapses
+  ///
+  /// In en, this message translates to:
+  /// **'Warn this many days before'**
+  String get certifications_currency_intervalDialog_lead;
+
+  /// Hint under an interval field: leaving it blank uses the rule's own value
+  ///
+  /// In en, this message translates to:
+  /// **'Blank uses the rule\'s value ({days})'**
+  String certifications_currency_intervalDialog_inheritHint(String days);
+
+  /// Validation: the warning window is longer than the interval
+  ///
+  /// In en, this message translates to:
+  /// **'The warning cannot start before the interval does'**
+  String get certifications_currency_intervalDialog_leadTooLong;
+
+  /// Title of the dialog choosing which dives count toward a currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'Which dives count'**
+  String get certifications_currency_mappingDialog_title;
+
+  /// Field label: dive types that count
+  ///
+  /// In en, this message translates to:
+  /// **'Dive types'**
+  String get certifications_currency_mappingDialog_types;
+
+  /// Field label: dive modes that count
+  ///
+  /// In en, this message translates to:
+  /// **'Dive modes'**
+  String get certifications_currency_mappingDialog_modes;
+
+  /// Hint: selecting nothing means any dive counts
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing selected means any dive counts'**
+  String get certifications_currency_mappingDialog_anyHint;
+
+  /// Button: go back to the rule's own dive mapping
+  ///
+  /// In en, this message translates to:
+  /// **'Use the rule\'s default'**
+  String get certifications_currency_mappingDialog_reset;
 
   /// No description provided for @certifications_detail_sectionTitle_details.
   ///
@@ -5215,6 +5623,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Agency *'**
   String get certifications_edit_label_agency;
+
+  /// Shown for a certification agency id that matches no built-in or custom agency (not yet synced, or deleted).
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown agency'**
+  String get certificationAgencies_unknownAgency;
+
+  /// Shown for a certification level id that matches nothing known.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown certification'**
+  String get certificationAgencies_unknownCertification;
+
+  /// No description provided for @certificationAgencies_addCustomAgency.
+  ///
+  /// In en, this message translates to:
+  /// **'Add custom agency...'**
+  String get certificationAgencies_addCustomAgency;
+
+  /// No description provided for @certificationAgencies_addCustomCertification.
+  ///
+  /// In en, this message translates to:
+  /// **'Add custom certification...'**
+  String get certificationAgencies_addCustomCertification;
+
+  /// No description provided for @certificationAgencies_dialog_newAgencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New agency'**
+  String get certificationAgencies_dialog_newAgencyTitle;
+
+  /// No description provided for @certificationAgencies_dialog_editAgencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit agency'**
+  String get certificationAgencies_dialog_editAgencyTitle;
+
+  /// No description provided for @certificationAgencies_dialog_newCertificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New certification'**
+  String get certificationAgencies_dialog_newCertificationTitle;
+
+  /// No description provided for @certificationAgencies_dialog_editCertificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit certification'**
+  String get certificationAgencies_dialog_editCertificationTitle;
+
+  /// No description provided for @certificationAgencies_dialog_nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get certificationAgencies_dialog_nameLabel;
+
+  /// No description provided for @certificationAgencies_dialog_colorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Card color'**
+  String get certificationAgencies_dialog_colorLabel;
+
+  /// No description provided for @certificationAgencies_dialog_specialty.
+  ///
+  /// In en, this message translates to:
+  /// **'Specialty'**
+  String get certificationAgencies_dialog_specialty;
+
+  /// No description provided for @certificationAgencies_error_nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name'**
+  String get certificationAgencies_error_nameRequired;
+
+  /// No description provided for @certificationAgencies_error_nameTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'That name is already in use'**
+  String get certificationAgencies_error_nameTaken;
+
+  /// No description provided for @settings_manage_certificationAgencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Certification Agencies'**
+  String get settings_manage_certificationAgencies;
+
+  /// No description provided for @settings_manage_certificationAgencies_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage custom agencies and certifications'**
+  String get settings_manage_certificationAgencies_subtitle;
+
+  /// No description provided for @certificationAgencies_section_yours.
+  ///
+  /// In en, this message translates to:
+  /// **'Your agencies'**
+  String get certificationAgencies_section_yours;
+
+  /// No description provided for @certificationAgencies_section_builtIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in agencies'**
+  String get certificationAgencies_section_builtIn;
+
+  /// No description provided for @certificationAgencies_addAgency.
+  ///
+  /// In en, this message translates to:
+  /// **'Add agency'**
+  String get certificationAgencies_addAgency;
+
+  /// No description provided for @certificationAgencies_sharedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared by {name}'**
+  String certificationAgencies_sharedBy(String name);
+
+  /// No description provided for @certificationAgencies_editor_addCertification.
+  ///
+  /// In en, this message translates to:
+  /// **'Add certification'**
+  String get certificationAgencies_editor_addCertification;
+
+  /// No description provided for @certificationAgencies_editor_builtInHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in certifications cannot be changed. You can add your own.'**
+  String get certificationAgencies_editor_builtInHint;
+
+  /// No description provided for @certificationAgencies_delete_confirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}?'**
+  String certificationAgencies_delete_confirmTitle(String name);
+
+  /// No description provided for @certificationAgencies_delete_refusedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Still in use'**
+  String get certificationAgencies_delete_refusedTitle;
+
+  /// No description provided for @certificationAgencies_delete_refusedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Used by {usage}. Change those first.'**
+  String certificationAgencies_delete_refusedBody(String usage);
+
+  /// No description provided for @certificationAgencies_usage_certifications.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 certification} other{{count} certifications}}'**
+  String certificationAgencies_usage_certifications(int count);
+
+  /// No description provided for @certificationAgencies_usage_courses.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 course} other{{count} courses}}'**
+  String certificationAgencies_usage_courses(int count);
+
+  /// No description provided for @certificationAgencies_usage_and.
+  ///
+  /// In en, this message translates to:
+  /// **'{first} and {second}'**
+  String certificationAgencies_usage_and(String first, String second);
 
   /// No description provided for @certifications_edit_addRecognition.
   ///
@@ -8025,7 +8595,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_homeChips_certifications.
   ///
   /// In en, this message translates to:
-  /// **'Certification expiry'**
+  /// **'Certification currency'**
   String get settings_homeChips_certifications;
 
   /// No description provided for @settings_homeChips_trip.
@@ -8070,11 +8640,11 @@ abstract class AppLocalizations {
   /// **'Data quality'**
   String get settings_homeChips_dataQuality;
 
-  /// No description provided for @dashboard_gauges_certsExpiring.
+  /// Home strip chip: how many certifications need a refresher or renewal
   ///
   /// In en, this message translates to:
-  /// **'{count} certifications expiring'**
-  String dashboard_gauges_certsExpiring(int count);
+  /// **'{count, plural, =1{{count} certification needs attention} other{{count} certifications need attention}}'**
+  String dashboard_gauges_certsNeedAttention(int count);
 
   /// No description provided for @dashboard_gauges_tripCountdown.
   ///
@@ -10872,6 +11442,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Water Type'**
   String get diveLog_edit_label_waterType;
+
+  /// Label of the optional name field under a weight row in the dive and weight preset editors
+  ///
+  /// In en, this message translates to:
+  /// **'Name (optional)'**
+  String get diveLog_edit_label_weightName;
+
+  /// Example name shown in the empty weight name field
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Top pocket'**
+  String get diveLog_edit_hint_weightName;
 
   /// No description provided for @diveLog_edit_marineLifeHint.
   ///
@@ -18679,6 +19261,18 @@ abstract class AppLocalizations {
   /// **'FFESSM'**
   String get enum_certificationAgency_ffessm;
 
+  /// No description provided for @enum_certificationAgency_acuc.
+  ///
+  /// In en, this message translates to:
+  /// **'ACUC'**
+  String get enum_certificationAgency_acuc;
+
+  /// No description provided for @enum_certificationAgency_dan.
+  ///
+  /// In en, this message translates to:
+  /// **'DAN'**
+  String get enum_certificationAgency_dan;
+
   /// No description provided for @enum_certificationAgency_gue.
   ///
   /// In en, this message translates to:
@@ -18840,6 +19434,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tech Diver'**
   String get enum_certificationLevel_techDiver;
+
+  /// Certification level: a first aid and CPR credential
+  ///
+  /// In en, this message translates to:
+  /// **'First Aid / CPR'**
+  String get enum_certificationLevel_firstAid;
+
+  /// Certification level: an emergency oxygen provider credential
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency Oxygen Provider'**
+  String get enum_certificationLevel_oxygenProvider;
 
   /// No description provided for @enum_certificationLevel_trimix.
   ///
@@ -23597,6 +24203,378 @@ abstract class AppLocalizations {
   /// **'Category'**
   String get equipment_filter_section_category;
 
+  /// Kind of place where gear is kept: a shelf, bin, locker or room
+  ///
+  /// In en, this message translates to:
+  /// **'Storage'**
+  String get equipment_location_kind_storage;
+
+  /// Kind of place: a shop or technician servicing gear
+  ///
+  /// In en, this message translates to:
+  /// **'Service shop'**
+  String get equipment_location_kind_serviceShop;
+
+  /// Kind of place: a person the gear is lent to
+  ///
+  /// In en, this message translates to:
+  /// **'Person'**
+  String get equipment_location_kind_person;
+
+  /// Kind of place that is none of the others
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get equipment_location_kind_other;
+
+  /// Choice and heading for gear with no recorded location
+  ///
+  /// In en, this message translates to:
+  /// **'No location'**
+  String get equipment_location_noLocation;
+
+  /// Title of the sheet that picks where gear is
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a place'**
+  String get equipment_location_picker_title;
+
+  /// Hint of the search field in the place picker
+  ///
+  /// In en, this message translates to:
+  /// **'Search places'**
+  String get equipment_location_picker_search;
+
+  /// Row in the place picker that creates a new place
+  ///
+  /// In en, this message translates to:
+  /// **'New place'**
+  String get equipment_location_picker_newPlace;
+
+  /// Title of the sheet that moves gear to a place
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Move {count} item} other{Move {count} items}}'**
+  String equipment_location_move_title(int count);
+
+  /// Label of the destination place in the move sheet
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get equipment_location_move_to;
+
+  /// Shown in the move sheet before a destination is chosen
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a place'**
+  String get equipment_location_move_choose;
+
+  /// Label of the move date in the move sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get equipment_location_move_date;
+
+  /// Label of the move time in the move sheet and the history editor; sets where a move falls among same-day moves
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get equipment_location_move_time;
+
+  /// Label of the optional note on a move
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get equipment_location_move_note;
+
+  /// Hint of the note field on a move
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. annual regulator service'**
+  String get equipment_location_move_noteHint;
+
+  /// Button that records the move
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get equipment_location_move_confirm;
+
+  /// Title of the prompt offering to move an assembly's parts with it
+  ///
+  /// In en, this message translates to:
+  /// **'Move parts too?'**
+  String get equipment_location_parts_title;
+
+  /// Body of the parts prompt
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Also move its {count} part to the same place?} other{Also move its {count} parts to the same place?}}'**
+  String equipment_location_parts_body(int count);
+
+  /// Accepts moving the parts too
+  ///
+  /// In en, this message translates to:
+  /// **'Move parts'**
+  String get equipment_location_parts_yes;
+
+  /// Declines moving the parts
+  ///
+  /// In en, this message translates to:
+  /// **'Just this'**
+  String get equipment_location_parts_no;
+
+  /// Title of the prompt offering a status change after a move
+  ///
+  /// In en, this message translates to:
+  /// **'Update status?'**
+  String get equipment_location_status_title;
+
+  /// Body of the status offer; status is a status name such as In Service
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Also mark {count} item as {status}?} other{Also mark {count} items as {status}?}}'**
+  String equipment_location_status_body(int count, String status);
+
+  /// Accepts the status change
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get equipment_location_status_yes;
+
+  /// Declines the status change
+  ///
+  /// In en, this message translates to:
+  /// **'Keep status'**
+  String get equipment_location_status_no;
+
+  /// Snackbar after a move
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Moved {count} item} other{Moved {count} items}}'**
+  String equipment_location_moved(int count);
+
+  /// Title of the card showing where an item is
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get equipment_location_card_title;
+
+  /// Shown when an item has no recorded location
+  ///
+  /// In en, this message translates to:
+  /// **'No location set'**
+  String get equipment_location_none;
+
+  /// When the item arrived at its current place
+  ///
+  /// In en, this message translates to:
+  /// **'Since {date}'**
+  String equipment_location_since(String date);
+
+  /// Button on the location card that moves the item
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get equipment_location_moveButton;
+
+  /// Expands the location history to every move
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get equipment_location_showAll;
+
+  /// A history entry recording that the location was cleared
+  ///
+  /// In en, this message translates to:
+  /// **'Location cleared'**
+  String get equipment_location_history_cleared;
+
+  /// Title of the dialog editing one history entry
+  ///
+  /// In en, this message translates to:
+  /// **'Edit move'**
+  String get equipment_location_editMove_title;
+
+  /// Deletes one history entry
+  ///
+  /// In en, this message translates to:
+  /// **'Delete move'**
+  String get equipment_location_editMove_delete;
+
+  /// Confirmation before deleting one entry of an item's location history
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this history entry? The item\'s location is worked out again from the moves that are left.'**
+  String get equipment_location_deleteMoveConfirm;
+
+  /// Bulk action moving the selected gear to a place
+  ///
+  /// In en, this message translates to:
+  /// **'Move to location'**
+  String get equipment_location_bulkAction;
+
+  /// Item count beside a location heading and on the Locations page
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} item} other{{count} items}}'**
+  String equipment_location_groupCount(int count);
+
+  /// Chip in the active filters bar when the list is filtered by location
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get equipment_location_activeFilter;
+
+  /// Heading of the location section in the equipment filter
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get equipment_filter_section_location;
+
+  /// Switch on the Equipment page's sort sheet grouping the list under one heading per place
+  ///
+  /// In en, this message translates to:
+  /// **'Group by location'**
+  String get equipment_arrange_groupByLocation;
+
+  /// Subtitle of the group by location switch
+  ///
+  /// In en, this message translates to:
+  /// **'One heading per place, on this page only'**
+  String get equipment_arrange_groupByLocationSubtitle;
+
+  /// Label of the optional place picker on the new equipment form
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get equipment_edit_locationLabel;
+
+  /// Shown in the new equipment form's location picker when none is chosen
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get equipment_edit_locationNone;
+
+  /// Shown after a new item saved but its chosen first location failed to save
+  ///
+  /// In en, this message translates to:
+  /// **'Saved, but its location could not be set. Use Move on the item to set it.'**
+  String get equipment_edit_locationFailed;
+
+  /// Title of the page listing places where gear is kept
+  ///
+  /// In en, this message translates to:
+  /// **'Locations'**
+  String get equipment_locations_title;
+
+  /// Empty state of the Locations page
+  ///
+  /// In en, this message translates to:
+  /// **'No places yet. Add one to start tracking where your gear is.'**
+  String get equipment_locations_empty;
+
+  /// Button adding a place on the Locations page
+  ///
+  /// In en, this message translates to:
+  /// **'Add place'**
+  String get equipment_locations_add;
+
+  /// Collapsed section of archived places
+  ///
+  /// In en, this message translates to:
+  /// **'Archived ({count})'**
+  String equipment_locations_archivedSection(int count);
+
+  /// Archives a place that history still names
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get equipment_locations_archive;
+
+  /// Restores an archived place
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get equipment_locations_restore;
+
+  /// Deletes a place no item has ever been at
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get equipment_locations_delete;
+
+  /// Confirmation before deleting a place where gear is kept
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}?'**
+  String equipment_locations_deleteConfirm(String name);
+
+  /// Heading of the list of items currently at a place
+  ///
+  /// In en, this message translates to:
+  /// **'Items here'**
+  String get equipment_locations_itemsHere;
+
+  /// Shown when no item is currently at a place
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is here right now.'**
+  String get equipment_locations_noItemsHere;
+
+  /// Tooltip of the action on a place's page that moves every item currently there
+  ///
+  /// In en, this message translates to:
+  /// **'Move the items here'**
+  String get equipment_locations_moveItems;
+
+  /// Title of the dialog creating a place where gear is kept
+  ///
+  /// In en, this message translates to:
+  /// **'New place'**
+  String get equipment_locations_newTitle;
+
+  /// Title of the dialog editing a place where gear is kept
+  ///
+  /// In en, this message translates to:
+  /// **'Edit place'**
+  String get equipment_locations_editTitle;
+
+  /// Label of a place's name field
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get equipment_locations_nameLabel;
+
+  /// Validation error when a place has no name
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name'**
+  String get equipment_locations_nameRequired;
+
+  /// Warning under a place name that matches another of the diver's places; saving is still allowed
+  ///
+  /// In en, this message translates to:
+  /// **'You already have a place with this name'**
+  String get equipment_locations_duplicateWarning;
+
+  /// Label of a place's kind selector
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get equipment_locations_kindLabel;
+
+  /// Label of a place's notes field
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get equipment_locations_notesLabel;
+
+  /// Hint of a place's notes field
+  ///
+  /// In en, this message translates to:
+  /// **'Address, phone, locker number'**
+  String get equipment_locations_notesHint;
+
   /// No description provided for @equipment_list_retryButton.
   ///
   /// In en, this message translates to:
@@ -25497,6 +26475,18 @@ abstract class AppLocalizations {
   /// **'Could not open that cylinder. Try again.'**
   String get gasCalculators_blender_cylinderFailed;
 
+  /// Choosing a cylinder whose equipment entry has no volume attribute, in a spot that only reads the volume (the cost card, a billed line).
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has no recorded water volume'**
+  String gasCalculators_blender_cylinderNoVolume(String name);
+
+  /// Choose cylinder tapped on the cost card or a billed gas line while the diver has no tanks in their gear; the cylinder picker is not opened. Points at the water-capacity field next to the button.
+  ///
+  /// In en, this message translates to:
+  /// **'No cylinders in your gear yet. Type the water capacity instead.'**
+  String get gasCalculators_blender_noCylinders;
+
   /// After Choose cylinder: the cylinder chosen and the mix of its last fill, now what is in it.
   ///
   /// In en, this message translates to:
@@ -25773,23 +26763,11 @@ abstract class AppLocalizations {
   /// **'Cylinder water capacity'**
   String get gasCalculators_blender_cylinderVolume;
 
-  /// No description provided for @gasCalculators_blender_cylinderPresets.
-  ///
-  /// In en, this message translates to:
-  /// **'Presets'**
-  String get gasCalculators_blender_cylinderPresets;
-
   /// No description provided for @gasCalculators_blender_unitPrice.
   ///
   /// In en, this message translates to:
   /// **'Price per 100 {unit}'**
   String gasCalculators_blender_unitPrice(String unit);
-
-  /// No description provided for @gasCalculators_blender_manageCylinderSizes.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage cylinder sizes'**
-  String get gasCalculators_blender_manageCylinderSizes;
 
   /// No description provided for @gasCalculators_blender_costTotal.
   ///
@@ -32108,6 +33086,12 @@ abstract class AppLocalizations {
   /// **'Additional credentials'**
   String get settings_conflict_field_additionalCredentials;
 
+  /// Sync conflict field label: which built-in advice text a certification currency rule shows.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in advice'**
+  String get settings_conflict_field_advisoryKey;
+
   /// No description provided for @settings_conflict_field_airBreakBreakSeconds.
   ///
   /// In en, this message translates to:
@@ -33794,6 +34778,12 @@ abstract class AppLocalizations {
   /// **'Interval in hours'**
   String get settings_conflict_field_intervalHours;
 
+  /// No description provided for @settings_conflict_field_isArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get settings_conflict_field_isArchived;
+
   /// No description provided for @settings_conflict_field_isBuiltIn.
   ///
   /// In en, this message translates to:
@@ -34087,6 +35077,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Breathing mode'**
   String get settings_conflict_field_mode;
+
+  /// No description provided for @settings_conflict_field_movedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved on'**
+  String get settings_conflict_field_movedAt;
 
   /// No description provided for @settings_conflict_field_name.
   ///
@@ -35078,6 +36074,12 @@ abstract class AppLocalizations {
   /// **'Planned time to surface'**
   String get settings_conflict_field_summaryTtsSeconds;
 
+  /// Sync conflict field label: the built-in certification currency rule that a custom rule replaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaces built-in rule'**
+  String get settings_conflict_field_supersedesRuleId;
+
   /// No description provided for @settings_conflict_field_surfaceConditions.
   ///
   /// In en, this message translates to:
@@ -35743,6 +36745,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Equipment'**
   String get settings_conflict_ref_equipment;
+
+  /// No description provided for @settings_conflict_ref_equipmentLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment location'**
+  String get settings_conflict_ref_equipmentLocation;
 
   /// No description provided for @settings_conflict_ref_equipmentSet.
   ///
@@ -37365,6 +38373,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Maintenance your gear needs, and how often'**
   String get settings_manage_serviceTypes_subtitle;
+
+  /// Settings > Manage tile opening the list of places where gear is kept
+  ///
+  /// In en, this message translates to:
+  /// **'Locations'**
+  String get settings_manage_locations;
+
+  /// Subtitle of the Locations tile in Settings > Manage
+  ///
+  /// In en, this message translates to:
+  /// **'Where your gear is kept, serviced or lent'**
+  String get settings_manage_locations_subtitle;
+
+  /// Settings > Manage tile: the certification currency rule catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Certification currency'**
+  String get settings_manage_currencyRules;
+
+  /// Subtitle of the certification currency Manage tile
+  ///
+  /// In en, this message translates to:
+  /// **'Refresher and renewal rules'**
+  String get settings_manage_currencyRules_subtitle;
+
+  /// Title of the certification currency rules page
+  ///
+  /// In en, this message translates to:
+  /// **'Certification currency'**
+  String get currencyRules_title;
+
+  /// Button and tooltip: add a custom currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'Add rule'**
+  String get currencyRules_addTooltip;
+
+  /// Tooltip: edit a custom currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'Edit rule'**
+  String get currencyRules_editTooltip;
+
+  /// Tooltip: delete a custom currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'Delete rule'**
+  String get currencyRules_deleteTooltip;
+
+  /// Section header: the built-in currency rules
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in'**
+  String get currencyRules_builtIn;
+
+  /// Section header: the diver's own currency rules
+  ///
+  /// In en, this message translates to:
+  /// **'Your rules'**
+  String get currencyRules_custom;
+
+  /// On a custom rule: the built-in rule it replaces
+  ///
+  /// In en, this message translates to:
+  /// **'Replaces {name}'**
+  String currencyRules_replaces(String name);
+
+  /// On a built-in rule: the custom rule that replaces it
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced by {name}'**
+  String currencyRules_replacedBy(String name);
+
+  /// Summary of an activity currency rule's interval
+  ///
+  /// In en, this message translates to:
+  /// **'{lapse, plural, =1{Lapses {lapse} day after the last qualifying dive} other{Lapses {lapse} days after the last qualifying dive}}'**
+  String currencyRules_summary_activity(int lapse);
+
+  /// Summary of a date currency rule's interval
+  ///
+  /// In en, this message translates to:
+  /// **'{lapse, plural, =1{Lapses {lapse} day after the date on the card} other{Lapses {lapse} days after the date on the card}}'**
+  String currencyRules_summary_date(int lapse);
+
+  /// Title of the dialog confirming a custom rule deletion
+  ///
+  /// In en, this message translates to:
+  /// **'Delete rule?'**
+  String get currencyRules_deleteDialog_title;
+
+  /// Body of the dialog confirming a custom rule deletion
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is removed. Logged refreshers stay in each card\'s history.'**
+  String currencyRules_deleteDialog_content(String name);
+
+  /// Title of the dialog creating a custom currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'New rule'**
+  String get currencyRules_dialog_addTitle;
+
+  /// Title of the dialog editing a currency rule
+  ///
+  /// In en, this message translates to:
+  /// **'Edit rule'**
+  String get currencyRules_dialog_editTitle;
+
+  /// Shown when editing a built-in rule: saving makes a custom copy
+  ///
+  /// In en, this message translates to:
+  /// **'Saving creates your own copy that replaces this built-in rule.'**
+  String get currencyRules_dialog_copyNote;
+
+  /// Field label: rule name
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get currencyRules_dialog_name;
+
+  /// Validation: a rule needs a name
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name'**
+  String get currencyRules_dialog_nameRequired;
+
+  /// Field label: what the rule's clock counts from
+  ///
+  /// In en, this message translates to:
+  /// **'Counts from'**
+  String get currencyRules_dialog_clock;
+
+  /// Clock option: the last qualifying dive
+  ///
+  /// In en, this message translates to:
+  /// **'Last qualifying dive'**
+  String get currencyRules_dialog_clock_activity;
+
+  /// Clock option: a date on the card
+  ///
+  /// In en, this message translates to:
+  /// **'A date on the card'**
+  String get currencyRules_dialog_clock_date;
+
+  /// Field label: agencies a rule applies to
+  ///
+  /// In en, this message translates to:
+  /// **'Agencies'**
+  String get currencyRules_dialog_agencies;
+
+  /// Field label: certification levels a rule applies to
+  ///
+  /// In en, this message translates to:
+  /// **'Levels'**
+  String get currencyRules_dialog_levels;
+
+  /// Hint: selecting nothing applies the rule to everything
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing selected means any'**
+  String get currencyRules_dialog_anyHint;
+
+  /// Field label: the diver's own note on a custom rule
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get currencyRules_dialog_note;
 
   /// No description provided for @settings_migrationProgress_doNotClose.
   ///
@@ -39616,7 +40792,7 @@ abstract class AppLocalizations {
   /// No description provided for @insights_focus_summary.
   ///
   /// In en, this message translates to:
-  /// **'{count} of {total} dives, group average {group} vs {overall} overall'**
+  /// **'{count} of {total, plural, =1{1 dive} other{{total} dives}}, group average {group} vs {overall} overall'**
   String insights_focus_summary(
     int count,
     int total,
@@ -39627,7 +40803,7 @@ abstract class AppLocalizations {
   /// No description provided for @insights_focus_summary_allShown.
   ///
   /// In en, this message translates to:
-  /// **'Only {total} dives have this value, so all of them are shown'**
+  /// **'{total, plural, =1{Only 1 dive has this value, so it is shown} other{Only {total} dives have this value, so all of them are shown}}'**
   String insights_focus_summary_allShown(int total);
 
   /// No description provided for @insights_focus_noMatch_above.
@@ -39819,7 +40995,7 @@ abstract class AppLocalizations {
   /// No description provided for @insights_focus_factors_coverage.
   ///
   /// In en, this message translates to:
-  /// **'{covered} of {total} dives'**
+  /// **'{covered} of {total, plural, =1{1 dive} other{{total} dives}}'**
   String insights_focus_factors_coverage(int covered, int total);
 
   /// No description provided for @insights_focus_factorGroup_diveShape.
@@ -45528,6 +46704,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Import individually (CSV)'**
   String get universalImport_triage_excludedCsv;
+
+  /// No description provided for @universalImport_triage_excludedHandoff.
+  ///
+  /// In en, this message translates to:
+  /// **'Import individually ({format})'**
+  String universalImport_triage_excludedHandoff(String format);
 
   /// Triage status for files whose format has no parser
   ///
@@ -75273,6 +76455,84 @@ abstract class AppLocalizations {
   /// **'Review underwater track'**
   String get navTrack_handoff_reviewTrackButton;
 
+  /// No description provided for @suuntoJson_handoff_recognized.
+  ///
+  /// In en, this message translates to:
+  /// **'Suunto dive export recognised'**
+  String get suuntoJson_handoff_recognized;
+
+  /// No description provided for @suuntoJson_handoff_description.
+  ///
+  /// In en, this message translates to:
+  /// **'This file was exported from the Suunto app. The Suunto importer reads it the same way as the Suunto Cloud import, including the dive\'s recorded route.'**
+  String get suuntoJson_handoff_description;
+
+  /// No description provided for @suuntoJson_handoff_importButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Suunto dive'**
+  String get suuntoJson_handoff_importButton;
+
+  /// No description provided for @suuntoFile_step_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Suunto app exports'**
+  String get suuntoFile_step_title;
+
+  /// No description provided for @suuntoFile_step_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one or more dives exported from the Suunto app as JSON. Dives recorded with a route bring it along.'**
+  String get suuntoFile_step_description;
+
+  /// No description provided for @suuntoFile_step_chooseFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose files'**
+  String get suuntoFile_step_chooseFiles;
+
+  /// No description provided for @suuntoFile_step_readyCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} dive ready to import} other{{count} dives ready to import}}'**
+  String suuntoFile_step_readyCount(num count);
+
+  /// No description provided for @suuntoFile_step_routeIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'Includes recorded route'**
+  String get suuntoFile_step_routeIncluded;
+
+  /// No description provided for @suuntoFile_step_noRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'No recorded route'**
+  String get suuntoFile_step_noRoute;
+
+  /// No description provided for @suuntoFile_rejection_notJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a JSON file'**
+  String get suuntoFile_rejection_notJson;
+
+  /// No description provided for @suuntoFile_rejection_notSuuntoExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a Suunto app export'**
+  String get suuntoFile_rejection_notSuuntoExport;
+
+  /// No description provided for @suuntoFile_rejection_notADive.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a dive (another activity type)'**
+  String get suuntoFile_rejection_notADive;
+
+  /// No description provided for @universalImport_summary_importWithSuunto.
+  ///
+  /// In en, this message translates to:
+  /// **'Import with Suunto importer'**
+  String get universalImport_summary_importWithSuunto;
+
   /// No description provided for @navTrack_section_trackTitle.
   ///
   /// In en, this message translates to:
@@ -76605,6 +77865,12 @@ abstract class AppLocalizations {
   /// **'Last used'**
   String get query_equipment_lastDived;
 
+  /// Field label in the query builder: the place an item is now
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get query_equipment_location;
+
   /// Field label in the query builder
   ///
   /// In en, this message translates to:
@@ -77018,6 +78284,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Amount'**
   String get query_weights_amount;
+
+  /// Field label in the query builder
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get query_weights_label;
 
   /// Field label in the query builder
   ///
@@ -77693,6 +78965,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create a diver profile to save queries'**
   String get query_saveNeedsDiver;
+
+  /// Column header above the switches that hide built-in entries from the pickers on the Manage pages
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get builtIns_showColumnLabel;
+
+  /// Tooltip on a built-in entry's show/hide switch on a Manage page
+  ///
+  /// In en, this message translates to:
+  /// **'Show in pickers'**
+  String get builtIns_showInPickers;
+
+  /// Helper under the start sheet's checklist field when the diver hid every checklist template; path is the localized Settings > Manage > Pre-Dive Checklists trail
+  ///
+  /// In en, this message translates to:
+  /// **'Every checklist is hidden. Show one again in {path}.'**
+  String preDive_start_allTemplatesHidden(String path);
+
+  /// Sync conflict dialog label for the built-in dive types, roles, site types, service types and checklists a diver hid from the pickers
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden built-in entries'**
+  String get settings_conflict_field_hiddenBuiltInIds;
 }
 
 class _AppLocalizationsDelegate

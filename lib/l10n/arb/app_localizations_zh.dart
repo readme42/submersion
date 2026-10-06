@@ -2964,6 +2964,113 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get certifications_list_filter_needsAttention => '需要关注';
+
+  @override
+  String get certifications_list_filter_clear => '清除';
+
+  @override
+  String get certifications_list_needsAttention_empty => '没有需要关注的证书';
+
+  @override
+  String get certifications_list_needsAttention_emptySubtitle => '所有证书均有效或已静音。';
+
+  @override
+  String get currencyRule_padi_reactivate_name => 'PADI 复习课程（ReActivate）';
+
+  @override
+  String get currencyRule_ssi_skills_update_name => 'SSI Scuba Skills Update';
+
+  @override
+  String get currencyRule_generic_refresher_name => '复习课程';
+
+  @override
+  String get currencyRule_first_aid_24mo_name => '急救与心肺复苏续证';
+
+  @override
+  String get currencyRule_pro_membership_annual_name => '专业会员续期';
+
+  @override
+  String get currencyRule_gue_revalidation_name => 'GUE 重新认证';
+
+  @override
+  String get currencyRule_ffessm_licence_annual_name => 'FFESSM 执照与体检证明';
+
+  @override
+  String get currencyRule_cave_currency_name => '洞穴潜水近期经验';
+
+  @override
+  String get currencyRule_rebreather_currency_name => '循环呼吸器近期经验';
+
+  @override
+  String get currencyRule_deco_currency_name => '减压潜水近期经验';
+
+  @override
+  String get currencyRule_card_expiry_name => '证卡到期';
+
+  @override
+  String get currencyRule_padi_reactivate_advisory =>
+      'PADI 建议在离开水下六到十二个月后参加 ReActivate 复习课程。';
+
+  @override
+  String get currencyRule_ssi_skills_update_advisory =>
+      'SSI 建议在六到十二个月未潜水后参加 Scuba Skills Update。';
+
+  @override
+  String get currencyRule_generic_refresher_advisory =>
+      '大多数潜水机构建议在六到十二个月未潜水后参加复习课程。';
+
+  @override
+  String get currencyRule_first_aid_advisory => '急救、心肺复苏和供氧员资质通常每两年更新一次。';
+
+  @override
+  String get currencyRule_pro_membership_advisory => '专业会员资格通常每年续期，以保持教学身份有效。';
+
+  @override
+  String get currencyRule_gue_revalidation_advisory => 'GUE 资质通常每三年重新认证一次。';
+
+  @override
+  String get currencyRule_ffessm_licence_advisory => 'FFESSM 执照及其体检证明每年更新。';
+
+  @override
+  String get currencyRule_cave_currency_advisory =>
+      '洞穴技能缺乏练习会退化；通常建议中断一年后进行一次检核潜水。';
+
+  @override
+  String get currencyRule_rebreather_currency_advisory =>
+      '循环呼吸器技能退化很快；许多机构建议中断六个月后参加复习课程。';
+
+  @override
+  String get currencyRule_deco_currency_advisory => '通常在一年未进行减压潜水后复习减压程序。';
+
+  @override
+  String get currencyRule_card_expiry_advisory => '此证卡上印的到期日期。';
+
+  @override
+  String get certifications_currency_status_current => '有效';
+
+  @override
+  String get certifications_currency_status_dueSoon => '即将到期';
+
+  @override
+  String get certifications_currency_status_lapsed => '已失效';
+
+  @override
+  String get certifications_currency_eventType_refresher => '复习课程';
+
+  @override
+  String get certifications_currency_eventType_renewal => '续证';
+
+  @override
+  String get certifications_currency_eventType_revalidation => '重新认证';
+
+  @override
+  String get certifications_currency_eventType_skillsUpdate => '技能更新';
+
+  @override
+  String get certifications_currency_eventType_other => '其他';
+
+  @override
   String get certifications_detail_action_delete => '删除';
 
   @override
@@ -3047,6 +3154,131 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get certifications_detail_sectionTitle_dates => '日期';
+
+  @override
+  String get certifications_detail_sectionTitle_currency => '有效性';
+
+  @override
+  String certifications_currency_dueOn(String date) {
+    return '到期日 $date';
+  }
+
+  @override
+  String certifications_currency_lapsedSince(String date) {
+    return '自 $date 起已失效';
+  }
+
+  @override
+  String certifications_currency_anchor_lastDive(String date) {
+    return '上次潜水 $date';
+  }
+
+  @override
+  String certifications_currency_anchor_lastQualifyingDive(String date) {
+    return '上次符合条件的潜水 $date';
+  }
+
+  @override
+  String certifications_currency_anchor_cardExpiry(String date) {
+    return '证卡到期 $date';
+  }
+
+  @override
+  String certifications_currency_anchor_cardIssue(String date) {
+    return '签发于 $date';
+  }
+
+  @override
+  String certifications_currency_anchor_ledgerEvent(String event, String date) {
+    return '$date 记录了$event';
+  }
+
+  @override
+  String certifications_currency_alsoCovers(String names) {
+    return '同时适用于 $names';
+  }
+
+  @override
+  String get certifications_currency_muted => '已静音';
+
+  @override
+  String get certifications_currency_noCountedDive => '尚未记录符合条件的潜水';
+
+  @override
+  String get certifications_currency_action_log => '记录复习';
+
+  @override
+  String get certifications_currency_action_interval => '编辑间隔';
+
+  @override
+  String get certifications_currency_action_mapping => '哪些潜水计入';
+
+  @override
+  String get certifications_currency_action_mute => '静音';
+
+  @override
+  String get certifications_currency_action_unmute => '取消静音';
+
+  @override
+  String get certifications_currency_history => '记录';
+
+  @override
+  String get certifications_currency_deleteEvent_title => '删除此记录？';
+
+  @override
+  String certifications_currency_deleteEvent_content(
+    String event,
+    String date,
+  ) {
+    return '这将删除 $date 记录的$event。';
+  }
+
+  @override
+  String get certifications_currency_eventDialog_title => '记录复习或续证';
+
+  @override
+  String get certifications_currency_eventDialog_type => '类型';
+
+  @override
+  String get certifications_currency_eventDialog_date => '日期';
+
+  @override
+  String get certifications_currency_eventDialog_provider => '潜店、俱乐部或教练';
+
+  @override
+  String get certifications_currency_eventDialog_notes => '备注';
+
+  @override
+  String get certifications_currency_intervalDialog_title => '间隔';
+
+  @override
+  String get certifications_currency_intervalDialog_lapse => '到期天数';
+
+  @override
+  String get certifications_currency_intervalDialog_lead => '提前提醒天数';
+
+  @override
+  String certifications_currency_intervalDialog_inheritHint(String days) {
+    return '留空则使用规则的值（$days）';
+  }
+
+  @override
+  String get certifications_currency_intervalDialog_leadTooLong => '提醒不能早于间隔开始';
+
+  @override
+  String get certifications_currency_mappingDialog_title => '哪些潜水计入';
+
+  @override
+  String get certifications_currency_mappingDialog_types => '潜水类型';
+
+  @override
+  String get certifications_currency_mappingDialog_modes => '潜水模式';
+
+  @override
+  String get certifications_currency_mappingDialog_anyHint => '不选择则任何潜水都计入';
+
+  @override
+  String get certifications_currency_mappingDialog_reset => '使用规则默认值';
 
   @override
   String get certifications_detail_sectionTitle_details => '证书详情';
@@ -3202,6 +3434,109 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get certifications_edit_label_agency => '机构 *';
+
+  @override
+  String get certificationAgencies_unknownAgency => '未知机构';
+
+  @override
+  String get certificationAgencies_unknownCertification => '未知证书';
+
+  @override
+  String get certificationAgencies_addCustomAgency => '添加自定义机构...';
+
+  @override
+  String get certificationAgencies_addCustomCertification => '添加自定义证书...';
+
+  @override
+  String get certificationAgencies_dialog_newAgencyTitle => '新建机构';
+
+  @override
+  String get certificationAgencies_dialog_editAgencyTitle => '编辑机构';
+
+  @override
+  String get certificationAgencies_dialog_newCertificationTitle => '新建证书';
+
+  @override
+  String get certificationAgencies_dialog_editCertificationTitle => '编辑证书';
+
+  @override
+  String get certificationAgencies_dialog_nameLabel => '名称';
+
+  @override
+  String get certificationAgencies_dialog_colorLabel => '卡片颜色';
+
+  @override
+  String get certificationAgencies_dialog_specialty => '专长';
+
+  @override
+  String get certificationAgencies_error_nameRequired => '请输入名称';
+
+  @override
+  String get certificationAgencies_error_nameTaken => '该名称已被使用';
+
+  @override
+  String get settings_manage_certificationAgencies => '认证机构';
+
+  @override
+  String get settings_manage_certificationAgencies_subtitle => '管理自定义机构和证书';
+
+  @override
+  String get certificationAgencies_section_yours => '你的机构';
+
+  @override
+  String get certificationAgencies_section_builtIn => '内置机构';
+
+  @override
+  String get certificationAgencies_addAgency => '添加机构';
+
+  @override
+  String certificationAgencies_sharedBy(String name) {
+    return '由 $name 共享';
+  }
+
+  @override
+  String get certificationAgencies_editor_addCertification => '添加证书';
+
+  @override
+  String get certificationAgencies_editor_builtInHint => '内置证书无法更改，你可以添加自己的证书。';
+
+  @override
+  String certificationAgencies_delete_confirmTitle(String name) {
+    return '删除 $name？';
+  }
+
+  @override
+  String get certificationAgencies_delete_refusedTitle => '仍在使用中';
+
+  @override
+  String certificationAgencies_delete_refusedBody(String usage) {
+    return '正被 $usage 使用。请先修改它们。';
+  }
+
+  @override
+  String certificationAgencies_usage_certifications(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个证书',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String certificationAgencies_usage_courses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 门课程',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String certificationAgencies_usage_and(String first, String second) {
+    return '$first和$second';
+  }
 
   @override
   String get certifications_edit_addRecognition => '添加其他认可';
@@ -4833,7 +5168,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_homeChips_lastDive => '潜水近期度';
 
   @override
-  String get settings_homeChips_certifications => '证书到期';
+  String get settings_homeChips_certifications => '证书有效性';
 
   @override
   String get settings_homeChips_trip => '即将出行';
@@ -4857,8 +5192,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_homeChips_dataQuality => '数据质量';
 
   @override
-  String dashboard_gauges_certsExpiring(int count) {
-    return '$count 个证书即将到期';
+  String dashboard_gauges_certsNeedAttention(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个证书需要关注',
+      one: '$count 个证书需要关注',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -6523,6 +6864,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_edit_label_waterType => '水类型';
+
+  @override
+  String get diveLog_edit_label_weightName => '名称（可选）';
+
+  @override
+  String get diveLog_edit_hint_weightName => '例如：上方口袋';
 
   @override
   String get diveLog_edit_marineLifeHint => '点击「添加」记录目击';
@@ -11094,6 +11441,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get enum_certificationAgency_ffessm => 'FFESSM';
 
   @override
+  String get enum_certificationAgency_acuc => 'ACUC';
+
+  @override
+  String get enum_certificationAgency_dan => 'DAN';
+
+  @override
   String get enum_certificationAgency_gue => 'GUE';
 
   @override
@@ -11173,6 +11526,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get enum_certificationLevel_techDiver => '技术潜水员';
+
+  @override
+  String get enum_certificationLevel_firstAid => '急救 / 心肺复苏';
+
+  @override
+  String get enum_certificationLevel_oxygenProvider => '紧急供氧员';
 
   @override
   String get enum_certificationLevel_trimix => '三混气';
@@ -13914,6 +14273,234 @@ class AppLocalizationsZh extends AppLocalizations {
   String get equipment_filter_section_category => '类别';
 
   @override
+  String get equipment_location_kind_storage => '存放处';
+
+  @override
+  String get equipment_location_kind_serviceShop => '维修店';
+
+  @override
+  String get equipment_location_kind_person => '个人';
+
+  @override
+  String get equipment_location_kind_other => '其他';
+
+  @override
+  String get equipment_location_noLocation => '无位置';
+
+  @override
+  String get equipment_location_picker_title => '选择地点';
+
+  @override
+  String get equipment_location_picker_search => '搜索地点';
+
+  @override
+  String get equipment_location_picker_newPlace => '新地点';
+
+  @override
+  String equipment_location_move_title(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '移动 $count 件装备',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_move_to => '移至';
+
+  @override
+  String get equipment_location_move_choose => '选择地点';
+
+  @override
+  String get equipment_location_move_date => '日期';
+
+  @override
+  String get equipment_location_move_time => '时间';
+
+  @override
+  String get equipment_location_move_note => '备注';
+
+  @override
+  String get equipment_location_move_noteHint => '例如：调节器年度保养';
+
+  @override
+  String get equipment_location_move_confirm => '移动';
+
+  @override
+  String get equipment_location_parts_title => '同时移动部件？';
+
+  @override
+  String equipment_location_parts_body(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '将其 $count 个部件也移至同一地点？',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_parts_yes => '移动部件';
+
+  @override
+  String get equipment_location_parts_no => '仅此项';
+
+  @override
+  String get equipment_location_status_title => '更新状态？';
+
+  @override
+  String equipment_location_status_body(int count, String status) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '同时将 $count 件装备标记为$status？',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_status_yes => '更新';
+
+  @override
+  String get equipment_location_status_no => '保持状态';
+
+  @override
+  String equipment_location_moved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已移动 $count 件装备',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_card_title => '位置';
+
+  @override
+  String get equipment_location_none => '未设置位置';
+
+  @override
+  String equipment_location_since(String date) {
+    return '自 $date 起';
+  }
+
+  @override
+  String get equipment_location_moveButton => '移动';
+
+  @override
+  String get equipment_location_showAll => '显示全部';
+
+  @override
+  String get equipment_location_history_cleared => '已清除位置';
+
+  @override
+  String get equipment_location_editMove_title => '编辑移动记录';
+
+  @override
+  String get equipment_location_editMove_delete => '删除移动记录';
+
+  @override
+  String get equipment_location_deleteMoveConfirm =>
+      '删除这条历史记录？将根据剩余的移动记录重新确定物品位置。';
+
+  @override
+  String get equipment_location_bulkAction => '移至位置';
+
+  @override
+  String equipment_location_groupCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_activeFilter => '位置';
+
+  @override
+  String get equipment_filter_section_location => '位置';
+
+  @override
+  String get equipment_arrange_groupByLocation => '按位置分组';
+
+  @override
+  String get equipment_arrange_groupByLocationSubtitle => '每个地点一个标题，仅限此页';
+
+  @override
+  String get equipment_edit_locationLabel => '位置';
+
+  @override
+  String get equipment_edit_locationNone => '未设置';
+
+  @override
+  String get equipment_edit_locationFailed => '已保存，但无法设置其位置。请在该物品上使用“移动”进行设置。';
+
+  @override
+  String get equipment_locations_title => '位置';
+
+  @override
+  String get equipment_locations_empty => '还没有地点。添加一个，开始记录你的装备在哪里。';
+
+  @override
+  String get equipment_locations_add => '添加地点';
+
+  @override
+  String equipment_locations_archivedSection(int count) {
+    return '已归档（$count）';
+  }
+
+  @override
+  String get equipment_locations_archive => '归档';
+
+  @override
+  String get equipment_locations_restore => '恢复';
+
+  @override
+  String get equipment_locations_delete => '删除';
+
+  @override
+  String equipment_locations_deleteConfirm(String name) {
+    return '删除 $name？';
+  }
+
+  @override
+  String get equipment_locations_itemsHere => '此处物品';
+
+  @override
+  String get equipment_locations_noItemsHere => '目前这里没有物品。';
+
+  @override
+  String get equipment_locations_moveItems => '移动此处的物品';
+
+  @override
+  String get equipment_locations_newTitle => '新地点';
+
+  @override
+  String get equipment_locations_editTitle => '编辑地点';
+
+  @override
+  String get equipment_locations_nameLabel => '名称';
+
+  @override
+  String get equipment_locations_nameRequired => '请输入名称';
+
+  @override
+  String get equipment_locations_duplicateWarning => '你已有同名地点';
+
+  @override
+  String get equipment_locations_kindLabel => '类型';
+
+  @override
+  String get equipment_locations_notesLabel => '备注';
+
+  @override
+  String get equipment_locations_notesHint => '地址、电话、储物柜编号';
+
+  @override
   String get equipment_list_retryButton => '重试';
 
   @override
@@ -15012,6 +15599,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gasCalculators_blender_cylinderFailed => '无法打开该气瓶，请重试。';
 
   @override
+  String gasCalculators_blender_cylinderNoVolume(String name) {
+    return '$name 未记录水容积';
+  }
+
+  @override
+  String get gasCalculators_blender_noCylinders => '你的装备中还没有气瓶。请直接输入水容积。';
+
+  @override
   String gasCalculators_blender_filledFrom(String name, String mix) {
     return '$name：$mix';
   }
@@ -15176,15 +15771,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gasCalculators_blender_cylinderVolume => '气瓶水容积';
 
   @override
-  String get gasCalculators_blender_cylinderPresets => '预设';
-
-  @override
   String gasCalculators_blender_unitPrice(String unit) {
     return '每 100 $unit 价格';
   }
-
-  @override
-  String get gasCalculators_blender_manageCylinderSizes => '管理气瓶尺寸';
 
   @override
   String get gasCalculators_blender_costTotal => '合计';
@@ -19118,6 +19707,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_conflict_field_additionalCredentials => '其他资质';
 
   @override
+  String get settings_conflict_field_advisoryKey => '内置建议';
+
+  @override
   String get settings_conflict_field_airBreakBreakSeconds => '空气休息时长';
 
   @override
@@ -19963,6 +20555,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_conflict_field_intervalHours => '间隔（小时）';
 
   @override
+  String get settings_conflict_field_isArchived => '已归档';
+
+  @override
   String get settings_conflict_field_isBuiltIn => '内置';
 
   @override
@@ -20109,6 +20704,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_conflict_field_mode => '呼吸模式';
+
+  @override
+  String get settings_conflict_field_movedAt => '移动时间';
 
   @override
   String get settings_conflict_field_name => '名称';
@@ -20609,6 +21207,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_conflict_field_summaryTtsSeconds => '计划上升至水面时间';
 
   @override
+  String get settings_conflict_field_supersedesRuleId => '替换内置规则';
+
+  @override
   String get settings_conflict_field_surfaceConditions => '水面状况';
 
   @override
@@ -20953,6 +21554,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_conflict_ref_equipment => '装备';
+
+  @override
+  String get settings_conflict_ref_equipmentLocation => '装备位置';
 
   @override
   String get settings_conflict_ref_equipmentSet => '装备套装';
@@ -21840,6 +22444,112 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_manage_serviceTypes_subtitle => '装备需要的保养项目及其频率';
+
+  @override
+  String get settings_manage_locations => '位置';
+
+  @override
+  String get settings_manage_locations_subtitle => '装备存放、保养或借出的地方';
+
+  @override
+  String get settings_manage_currencyRules => '证书有效性';
+
+  @override
+  String get settings_manage_currencyRules_subtitle => '复习与续证规则';
+
+  @override
+  String get currencyRules_title => '证书有效性';
+
+  @override
+  String get currencyRules_addTooltip => '添加规则';
+
+  @override
+  String get currencyRules_editTooltip => '编辑规则';
+
+  @override
+  String get currencyRules_deleteTooltip => '删除规则';
+
+  @override
+  String get currencyRules_builtIn => '内置';
+
+  @override
+  String get currencyRules_custom => '你的规则';
+
+  @override
+  String currencyRules_replaces(String name) {
+    return '替代 $name';
+  }
+
+  @override
+  String currencyRules_replacedBy(String name) {
+    return '已被 $name 替代';
+  }
+
+  @override
+  String currencyRules_summary_activity(int lapse) {
+    String _temp0 = intl.Intl.pluralLogic(
+      lapse,
+      locale: localeName,
+      other: '上次符合条件的潜水后 $lapse 天到期',
+      one: '上次符合条件的潜水后 $lapse 天到期',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String currencyRules_summary_date(int lapse) {
+    String _temp0 = intl.Intl.pluralLogic(
+      lapse,
+      locale: localeName,
+      other: '证卡日期后 $lapse 天到期',
+      one: '证卡日期后 $lapse 天到期',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get currencyRules_deleteDialog_title => '删除规则？';
+
+  @override
+  String currencyRules_deleteDialog_content(String name) {
+    return '将删除 $name。已记录的复习仍保留在各证卡的记录中。';
+  }
+
+  @override
+  String get currencyRules_dialog_addTitle => '新规则';
+
+  @override
+  String get currencyRules_dialog_editTitle => '编辑规则';
+
+  @override
+  String get currencyRules_dialog_copyNote => '保存后会创建你自己的副本，替代此内置规则。';
+
+  @override
+  String get currencyRules_dialog_name => '名称';
+
+  @override
+  String get currencyRules_dialog_nameRequired => '请输入名称';
+
+  @override
+  String get currencyRules_dialog_clock => '计算起点';
+
+  @override
+  String get currencyRules_dialog_clock_activity => '上次符合条件的潜水';
+
+  @override
+  String get currencyRules_dialog_clock_date => '证卡上的日期';
+
+  @override
+  String get currencyRules_dialog_agencies => '机构';
+
+  @override
+  String get currencyRules_dialog_levels => '级别';
+
+  @override
+  String get currencyRules_dialog_anyHint => '不选择则适用于全部';
+
+  @override
+  String get currencyRules_dialog_note => '备注';
 
   @override
   String get settings_migrationProgress_doNotClose => '请不要关闭应用';
@@ -23074,7 +23784,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String insights_focus_summary_allShown(int total) {
-    return '只有 $total 次潜水有此数值，因此全部显示';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '只有 $total 次潜水有此数值，因此全部显示',
+      one: '只有 1 次潜水有此数值，因此显示这一次',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -27043,6 +27759,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get universalImport_triage_excludedCsv => '单独导入（CSV）';
+
+  @override
+  String universalImport_triage_excludedHandoff(String format) {
+    return '单独导入（$format）';
+  }
 
   @override
   String get universalImport_triage_unsupported => '不支持的格式';
@@ -44529,6 +45250,54 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navTrack_handoff_reviewTrackButton => '查看水下轨迹';
 
   @override
+  String get suuntoJson_handoff_recognized => '已识别 Suunto 潜水导出文件';
+
+  @override
+  String get suuntoJson_handoff_description =>
+      '此文件由 Suunto 应用导出。Suunto 导入器会以与 Suunto Cloud 导入相同的方式读取它，包括该潜水记录的轨迹。';
+
+  @override
+  String get suuntoJson_handoff_importButton => '导入 Suunto 潜水';
+
+  @override
+  String get suuntoFile_step_title => 'Suunto 应用导出文件';
+
+  @override
+  String get suuntoFile_step_description =>
+      '选择一个或多个从 Suunto 应用以 JSON 格式导出的潜水。带有记录轨迹的潜水会一并导入轨迹。';
+
+  @override
+  String get suuntoFile_step_chooseFiles => '选择文件';
+
+  @override
+  String suuntoFile_step_readyCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 次潜水可导入',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suuntoFile_step_routeIncluded => '包含记录的轨迹';
+
+  @override
+  String get suuntoFile_step_noRoute => '无记录的轨迹';
+
+  @override
+  String get suuntoFile_rejection_notJson => '不是 JSON 文件';
+
+  @override
+  String get suuntoFile_rejection_notSuuntoExport => '不是 Suunto 应用导出文件';
+
+  @override
+  String get suuntoFile_rejection_notADive => '不是潜水（其他活动类型）';
+
+  @override
+  String get universalImport_summary_importWithSuunto => '使用 Suunto 导入器导入';
+
+  @override
   String get navTrack_section_trackTitle => '水下轨迹';
 
   @override
@@ -45243,6 +46012,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get query_equipment_lastDived => '最近使用';
 
   @override
+  String get query_equipment_location => '位置';
+
+  @override
   String get query_equipment_model => '型号';
 
   @override
@@ -45448,6 +46220,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get query_weights_amount => '数量';
+
+  @override
+  String get query_weights_label => '名称';
 
   @override
   String get query_weights_notes => '备注';
@@ -45876,4 +46651,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get query_saveNeedsDiver => '请先创建潜水员档案再保存查询';
+
+  @override
+  String get builtIns_showColumnLabel => '显示';
+
+  @override
+  String get builtIns_showInPickers => '在选择列表中显示';
+
+  @override
+  String preDive_start_allTemplatesHidden(String path) {
+    return '所有检查清单都已隐藏。可在 $path 中重新显示。';
+  }
+
+  @override
+  String get settings_conflict_field_hiddenBuiltInIds => '已隐藏的内置项目';
 }

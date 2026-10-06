@@ -21,9 +21,11 @@ import 'package:submersion/core/services/pdf_templates/pdf_profile_series.dart';
 import 'package:submersion/core/services/pdf_templates/pdf_template_factory.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
+import 'package:submersion/features/dive_roles/domain/entities/dive_role.dart';
 import 'package:submersion/features/dive_types/domain/entities/dive_type_entity.dart';
 import 'package:submersion/features/signatures/data/services/signature_storage_service.dart';
 import 'package:submersion/features/trips/domain/entities/trip.dart';
+import 'package:submersion/features/certification_agencies/domain/certification_catalog.dart';
 
 /// Handles PDF export for dive logbooks and trip reports.
 class PdfExportService {
@@ -221,9 +223,11 @@ class PdfExportService {
     String? title,
     Map<String, PdfProfileSeries>? profiles,
     List<Certification>? certifications,
+    CertificationCatalog? certificationCatalog,
     Diver? diver,
     Uint8List? diverPhoto,
     Map<String, DiveTypeEntity> diveTypesById = const {},
+    Map<String, DiveRole> diveRolesById = const {},
   }) async {
     final diveSignatures = await SignatureStorageService()
         .getSignaturesForDives([for (final dive in dives) dive.id]);
@@ -272,10 +276,12 @@ class PdfExportService {
       // Only honored when the diver asked for the cards, matching the
       // settings export path.
       certifications: options.includeCertificationCards ? certifications : null,
+      certificationCatalog: certificationCatalog,
       diver: diver,
       diverPhoto: diverPhoto,
       includeVerificationAreas: options.includeVerificationAreas,
       diveTypesById: diveTypesById,
+      diveRolesById: diveRolesById,
       localization: localization,
     );
 
@@ -294,9 +300,11 @@ class PdfExportService {
     String? title,
     Map<String, PdfProfileSeries>? profiles,
     List<Certification>? certifications,
+    CertificationCatalog? certificationCatalog,
     Diver? diver,
     Uint8List? diverPhoto,
     Map<String, DiveTypeEntity> diveTypesById = const {},
+    Map<String, DiveRole> diveRolesById = const {},
   }) async {
     final result = await generateDivePdfBytes(
       dives,
@@ -306,9 +314,11 @@ class PdfExportService {
       title: title,
       profiles: profiles,
       certifications: certifications,
+      certificationCatalog: certificationCatalog,
       diver: diver,
       diverPhoto: diverPhoto,
       diveTypesById: diveTypesById,
+      diveRolesById: diveRolesById,
     );
     return saveAndShareFileBytes(
       result.bytes,
@@ -326,9 +336,11 @@ class PdfExportService {
     String? title,
     Map<String, PdfProfileSeries>? profiles,
     List<Certification>? certifications,
+    CertificationCatalog? certificationCatalog,
     Diver? diver,
     Uint8List? diverPhoto,
     Map<String, DiveTypeEntity> diveTypesById = const {},
+    Map<String, DiveRole> diveRolesById = const {},
   }) async {
     final result = await generateDivePdfBytes(
       dives,
@@ -338,9 +350,11 @@ class PdfExportService {
       title: title,
       profiles: profiles,
       certifications: certifications,
+      certificationCatalog: certificationCatalog,
       diver: diver,
       diverPhoto: diverPhoto,
       diveTypesById: diveTypesById,
+      diveRolesById: diveRolesById,
     );
     return savePdfBytesToFile(result.bytes, result.fileName);
   }

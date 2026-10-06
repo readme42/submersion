@@ -122,7 +122,7 @@ import 'package:submersion/features/dive_log/presentation/widgets/sac_volume_hin
 import 'package:submersion/features/dive_log/presentation/widgets/sac_segments_no_pressure_note.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/source_bar.dart';
 import 'package:submersion/features/dive_roles/domain/entities/dive_role.dart';
-import 'package:submersion/features/dive_roles/presentation/dive_role_display.dart';
+import 'package:submersion/features/dive_roles/presentation/dive_role_list_display.dart';
 import 'package:submersion/features/dive_roles/presentation/providers/dive_role_providers.dart';
 import 'package:submersion/features/dive_sites/presentation/pages/site_detail_page.dart';
 import 'package:submersion/features/dive_log/presentation/formatters/dive_type_label.dart';
@@ -151,11 +151,13 @@ import 'package:submersion/features/reef/presentation/widgets/water_conditions_c
 import 'package:submersion/features/tides/presentation/providers/tide_providers.dart';
 import 'package:submersion/features/tides/presentation/widgets/tide_cycle_graph.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/weight_name_text.dart';
 import 'package:submersion/features/weight_planner/presentation/widgets/weight_enum_display.dart';
 import 'package:submersion/features/dive_log/presentation/formatters/visibility_display.dart';
 import 'package:submersion/features/dive_log/presentation/formatters/altitude_group_label.dart';
 import 'package:submersion/features/tides/presentation/tide_state_display.dart';
 import 'package:submersion/features/tides/domain/services/site_wall_clock.dart';
+import 'package:submersion/features/certification_agencies/presentation/providers/certification_catalog_providers.dart';
 
 class DiveDetailPage extends ConsumerStatefulWidget {
   final String diveId;
@@ -3139,6 +3141,9 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
         diver: diver,
         diverPhoto: diverPhoto,
         diveTypesById: diveTypesById,
+        diveRolesById: await diveRoleMapOrEmpty(
+          ref.read(diveRoleMapProvider.future),
+        ),
       );
 
       // Close loading dialog BEFORE opening file picker to avoid navigator lock issues
@@ -4080,10 +4085,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     // Add new weights
     for (final weight in dive.weights) {
       displayWeights.add(
-        _WeightDisplay(
-          type: weight.weightType.localizedName(context.l10n),
-          amount: weight.amountKg,
-        ),
+        _WeightDisplay(title: WeightNameText(weight), amount: weight.amountKg),
       );
     }
 
@@ -4091,9 +4093,10 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     if (!hasWeights && hasLegacyWeight) {
       displayWeights.add(
         _WeightDisplay(
-          type:
-              dive.weightType?.localizedName(context.l10n) ??
-              context.l10n.diveLog_detail_section_weight,
+          title: Text(
+            dive.weightType?.localizedName(context.l10n) ??
+                context.l10n.diveLog_detail_section_weight,
+          ),
           amount: dive.weightAmount!,
         ),
       );
@@ -4126,10 +4129,12 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
             ...displayWeights.map(
               (weight) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
+                // A long name wraps; the amount stays on its first line.
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(weight.type),
+                    Expanded(child: weight.title),
+                    const SizedBox(width: 12),
                     Text(units.formatWeight(weight.amount)),
                   ],
                 ),
@@ -4560,11 +4565,11 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                   ],
                 ),
                 const Divider(),
-                if (dive.diverRoleId != null)
+                if (dive.diverRoleIds.isNotEmpty)
                   _buildMyRoleTile(context, ref, dive),
                 if (showLegacyText)
                   LegacyBuddyTextSection(dive: dive)
-                else if (buddies.isEmpty && dive.diverRoleId == null)
+                else if (buddies.isEmpty && dive.diverRoleIds.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text(
@@ -4603,18 +4608,21 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       ),
       title: Text(bwr.buddy.name),
-      subtitle: Text(bwr.role.localizedName(context.l10n)),
+      subtitle: Text(bwr.roles.joinedLocalizedNames(context.l10n)),
       trailing: const Icon(Icons.chevron_right, size: 20),
       onTap: () => context.push('/buddies/${bwr.buddy.id}'),
     );
   }
 
-  /// The active diver's own role on this dive (#547), shown above buddies.
+  /// The active diver's own roles on this dive (#547, #1221), shown above
+  /// buddies.
   Widget _buildMyRoleTile(BuildContext context, WidgetRef ref, Dive dive) {
     final rolesById =
         ref.watch(diveRoleMapProvider).value ?? const <String, DiveRole>{};
-    final role =
-        rolesById[dive.diverRoleId!] ?? DiveRole.synthetic(dive.diverRoleId!);
+    final label = rolesForIds(
+      dive.diverRoleIds,
+      rolesById,
+    ).joinedLocalizedNames(context.l10n);
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: CircleAvatar(
@@ -4625,7 +4633,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
         ),
       ),
       title: Text(context.l10n.buddies_picker_me),
-      subtitle: Text(role.localizedName(context.l10n)),
+      subtitle: Text(label),
     );
   }
 
@@ -5565,6 +5573,9 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                         extras: await ref.read(uddfDivesExtrasFetchProvider)([
                           dive.id,
                         ], choice.options),
+                        certificationCatalog: await ref.read(
+                          allCustomCertificationsCatalogProvider.future,
+                        ),
                       ),
                   saveFn: (choice) async => ref
                       .read(exportServiceProvider)
@@ -5578,6 +5589,9 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                         extras: await ref.read(uddfDivesExtrasFetchProvider)([
                           dive.id,
                         ], choice.options),
+                        certificationCatalog: await ref.read(
+                          allCustomCertificationsCatalogProvider.future,
+                        ),
                       ),
                 );
               },
@@ -5721,10 +5735,10 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
 
 /// Helper class for unified weight display
 class _WeightDisplay {
-  final String type;
+  final Widget title;
   final double amount;
 
-  const _WeightDisplay({required this.type, required this.amount});
+  const _WeightDisplay({required this.title, required this.amount});
 }
 
 /// Actions available for profile chart export

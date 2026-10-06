@@ -19,13 +19,15 @@ void main() {
     },
   );
 
-  test('v266 is the current schema version and is in the ladder', () {
-    // The newest rung owns the exact assertion; relax it to
-    // greaterThanOrEqualTo when the next one lands. Counted from 265 so the
-    // pin holds whether or not the open 262/264/265 claims land first.
-    expect(AppDatabase.currentSchemaVersion, 266);
+  test('v266 is at or below the current schema version and in the ladder', () {
+    // Relaxed once later rungs landed on top; the newest rung owns the
+    // exact assertions.
+    expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(266));
     expect(AppDatabase.migrationVersions, contains(266));
-    expect(AppDatabase.migrationStepCount(265), 1);
+    expect(
+      AppDatabase.migrationStepCount(265),
+      AppDatabase.migrationStepCount(266) + 1,
+    );
   });
 
   test('the columns are additive, so the sync floor does not move', () {

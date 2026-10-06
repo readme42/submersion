@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:submersion/core/database/raw_dive_data_codec.dart';
 import 'package:submersion/core/database/tables/app_tables.dart';
 import 'package:submersion/core/database/tables/buddy_tables.dart';
+import 'package:submersion/core/database/tables/certification_currency_tables.dart';
 import 'package:submersion/core/database/tables/cylinder_tables.dart';
 import 'package:submersion/core/database/tables/dive_plan_tables.dart';
 import 'package:submersion/core/database/tables/dive_derived_metrics_tables.dart';
@@ -11,6 +12,7 @@ import 'package:submersion/core/database/tables/dive_profile_tables.dart';
 import 'package:submersion/core/database/tables/dive_tables.dart';
 import 'package:submersion/core/database/tables/diver_tables.dart';
 import 'package:submersion/core/database/tables/equipment_condition_tables.dart';
+import 'package:submersion/core/database/tables/equipment_location_tables.dart';
 import 'package:submersion/core/database/tables/equipment_service_status_tables.dart';
 import 'package:submersion/core/database/tables/equipment_tables.dart';
 import 'package:submersion/core/database/tables/marine_life_tables.dart';
@@ -31,6 +33,7 @@ import 'package:submersion/core/database/migrations/app_database_migrations.dart
 
 export 'package:submersion/core/database/tables/app_tables.dart';
 export 'package:submersion/core/database/tables/buddy_tables.dart';
+export 'package:submersion/core/database/tables/certification_currency_tables.dart';
 export 'package:submersion/core/database/tables/cylinder_tables.dart';
 export 'package:submersion/core/database/tables/dive_plan_tables.dart';
 export 'package:submersion/core/database/tables/dive_derived_metrics_tables.dart';
@@ -39,6 +42,7 @@ export 'package:submersion/core/database/tables/dive_profile_tables.dart';
 export 'package:submersion/core/database/tables/dive_tables.dart';
 export 'package:submersion/core/database/tables/diver_tables.dart';
 export 'package:submersion/core/database/tables/equipment_condition_tables.dart';
+export 'package:submersion/core/database/tables/equipment_location_tables.dart';
 export 'package:submersion/core/database/tables/equipment_service_status_tables.dart';
 export 'package:submersion/core/database/tables/equipment_tables.dart';
 export 'package:submersion/core/database/tables/marine_life_tables.dart';
@@ -115,6 +119,12 @@ String legacyDataSourceId(String diveId) => '$kLegacyDataSourceIdPrefix$diveId';
     DiveDiveTypes,
     DiveTypes,
     DiveRoles,
+    // Several roles per person on a dive (v272, issue #1221)
+    DiveDiverRoles,
+    DiveBuddyRoles,
+    // Custom certification agencies and levels (v261, issue #690)
+    CustomCertificationAgencies,
+    CustomCertificationLevels,
     TankPresets,
     WeightPresets,
     WeightPresetEntries,
@@ -148,6 +158,9 @@ String legacyDataSourceId(String diveId) => '$kLegacyDataSourceIdPrefix$diveId';
     // Equipment sharing and its event log (v234, issue #2046)
     EquipmentShares,
     EquipmentOwnershipEvents,
+    // Equipment locations and their move log (v268)
+    EquipmentLocations,
+    EquipmentLocationMoves,
     // Equipment service cache for the query language (v242, issue
     // #2365), local only
     EquipmentServiceStatus,
@@ -227,6 +240,10 @@ String legacyDataSourceId(String diveId) => '$kLegacyDataSourceIdPrefix$diveId';
     SiteHides,
     // Insight observation dismissals (v265)
     InsightObservationDismissals,
+    // Certification currency (v271, issue #2267)
+    CertificationCurrencyRules,
+    CertificationCurrencyPrefs,
+    CertificationCurrencyEvents,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -236,7 +253,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 266;
+  static const int currentSchemaVersion = 272;
 
   /// The oldest schema whose reader can apply this build's sync payloads
   /// without loss or misinterpretation (the compatibility floor).
@@ -1111,6 +1128,37 @@ class AppDatabase extends _$AppDatabase {
     // so the floor stays. Renumbered from 263, which main shipped first
     // (#2030); 262 is claimed by an open branch.
     266,
+    // v267: custom certification agencies and levels (issue #690). Two new
+    // synced tables and an index, no data migration, so the floor stays.
+    // Renumbered from 265 and 266, which main shipped first.
+    267,
+    // v268: equipment locations and their move log (issue #3037). Two new
+    // tables, so the floor stays.
+    268,
+    // v269: diver_settings.hidden_built_in_ids, the built-in dive types,
+    // roles, site types, service types and pre-dive templates each diver hid
+    // from the pickers (issue #401). Additive nullable column, no backfill,
+    // so the floor stays. Renumbered several times while this was open.
+    269,
+    // v270: dive_weights.label and weight_preset_entries.label, a diver's own
+    // name for a weight (issue #956). Additive defaulted columns, so the
+    // floor stays: an older peer's payload omits the key and the row keeps
+    // its local value or the '' default. Renumbered as other rungs shipped
+    // first (261 through 269).
+    270,
+    // v271: certification currency (issue #2267): the rule catalog with its
+    // built-in seed, per certification overrides and the event ledger. New
+    // synced tables only, so the floor stays. Built-in rules are reference
+    // data, re-seeded by INSERT OR IGNORE from onCreate, the rung and
+    // beforeOpen. Renumbered from 261, 262, 266, 267 and 269 as main shipped
+    // those first (and then 270); 268 is held by an open branch.
+    271,
+    // v272: dive_diver_roles and dive_buddy_roles, several roles per person
+    // on a dive (issue #1221). New synced child tables, no backfill: an
+    // older peer ignores them and its scalar role writes still resolve, so
+    // the floor stays. Renumbered from 262, 264, 267, 270 and 271 as main
+    // shipped those; 268 is held by an open branch (#3043).
+    272,
   ];
 
   /// Returns the number of migration steps that will execute when upgrading

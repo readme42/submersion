@@ -37,8 +37,8 @@ extension BeforeOpenBackstops on AppDatabase {
     // v229 backstop: the per-set diver figure switch.
     await _assertEquipmentSetShowFigureColumn();
 
-    // v227 backstop: the hidden built-in tank presets.
-    await _assertHiddenTankPresetIdsColumn();
+    // v227 and v269 backstops: hidden tank presets and built-in entries.
+    await _assertHiddenPickerEntryColumns();
 
     // v222 backstop: the per-site vertical exaggeration overrides.
     await _assertSeascapeVerticalExaggerationOverridesColumn();
@@ -153,57 +153,15 @@ extension BeforeOpenBackstops on AppDatabase {
     // version-collision self-heal; createTable is idempotent).
     await Migrator(this).createTable(siteFeatures);
 
-    // v217 backstop: site classification tables, seed and indexes
-    // (parallel-branch version-collision self-heal; all idempotent).
-    await _assertSiteClassificationSchema();
-
-    // v219 backstop: the equipment tag junction and its index
-    // (parallel-branch version-collision self-heal; all idempotent).
-    await _assertEquipmentTagSchema();
-
-    // v221 backstop: the rental gear notes table (parallel-branch
-    // version-collision self-heal; createTable is idempotent).
-    await _assertDiveCenterGearNotesSchema();
-
-    // v232 backstop: the trip cylinder tables and the dive_tanks link
-    // (parallel-branch version-collision self-heal; all idempotent).
-    await _assertTripCylindersSchema();
-
-    // v234 backstop: the equipment sharing tables and the share pair
-    // index (parallel-branch version-collision self-heal; all
-    // idempotent).
-    await _assertEquipmentSharingSchema();
-
-    // v235 backstop: connection_maps and idx_sightings_dive_id
-    // (parallel-branch version-collision self-heal; idempotent).
-    await _assertConnectionMapsSchema();
-
-    // v238 backstop: re-assert the saved_queries table. A database that
-    // arrives by restore or sync-adopt never runs onUpgrade, and one
-    // already at 239 or later skips the v238 rung.
-    await _assertSavedQueriesSchema();
-
-    // v242 backstop: the equipment service cache (local, idempotent).
-    await _assertEquipmentServiceStatusTable();
-
-    // v245 backstop: the certifications buddy index (idempotent).
-    await _assertCertificationsBuddyIndex();
-    // v247 backstop: the Explore derived metrics (local, idempotent).
-    await _assertDerivedMetricsTable();
-
-    // v248 backstop: trip_equipment and its item index (idempotent).
-    await _assertTripEquipmentSchema();
-
-    // v250 backstop: trip_hides and site_hides (idempotent).
-    await _assertTripHidesSchema();
-    await _assertSiteHidesSchema();
-    // v265 backstop: Insights observation dismissals and muted rules.
-    await _assertInsightObservationsSchema();
+    // v217 to v267 table backstops (before_open_table_backstops.dart).
+    await _tableBackstopsFromV217();
 
     // v122 backstop: service ledger schema + built-in kinds. The legacy
     // backfill is onUpgrade only: re-running it resurrects deleted schedules.
     await _assertServiceLedgerSchema();
 
+    // v271 backstop: currency tables and built-in rules, re-seeded (#2267).
+    await _assertCertificationCurrencySchema();
     // v123 backstop: re-assert safety review tables + settings columns
     // (parallel-branch collision self-heal).
     await _assertSafetyReviewSchema();
@@ -599,19 +557,9 @@ extension BeforeOpenBackstops on AppDatabase {
     // only, so it cannot touch diver data.
     await _assertCcrPpO2LimitColumns();
 
-    // v194 backstop: re-assert dive_tanks.transmitter_serial. Every tank
-    // read selects the whole row, so a database that arrives by restore
-    // or sync-adopt without the rung would throw on the first read.
-    // Column only, no backfill, so it cannot touch diver data.
-    await _assertTankTransmitterSerialColumn();
-
-    // v254 backstop: re-assert dive_tanks.role_source, for the same reason
-    // as transmitter_serial above. Column only, no backfill.
-    await _assertTankRoleSourceColumn();
-
-    // v259 backstop: re-assert dive_tanks.usage_duration (issue #1496).
-    // Column only, no backfill.
-    await _assertTankUsageDurationColumn();
+    // v194, v254, v259 and v270 backstops: dive_tanks and weight columns
+    // every row read selects (before_open_child_columns.dart).
+    await _assertChildRowColumns();
 
     // v145 backstop: re-assert the gps_tracks provenance and trim columns.
     await _assertGpsTrackColumns();
@@ -682,25 +630,10 @@ extension BeforeOpenBackstops on AppDatabase {
     // arrives by restore or sync-adopt never runs onUpgrade.
     await _assertDivePlanMissionSchema();
 
-    // v103 backstop: dive_roles table + built-in seed + dives.diver_role
-    // column (same collision disease; all DDL idempotent). The seed is
-    // guarded on the divers FK parent existing, which only matters for
-    // minimal test-fixture databases.
-    await Migrator(this).createTable(diveRoles);
-    final diversParent = await customSelect(
-      "SELECT name FROM sqlite_master "
-      "WHERE type='table' AND name='divers'",
-    ).get();
-    if (diversParent.isNotEmpty) {
-      await customStatement(kSeedBuiltInDiveRolesSql);
-    }
-    final divesCols = await customSelect("PRAGMA table_info('dives')").get();
-    final hasDiverRoleCol = divesCols.any(
-      (c) => c.read<String>('name') == 'diver_role',
-    );
-    if (divesCols.isNotEmpty && !hasDiverRoleCol) {
-      await customStatement('ALTER TABLE dives ADD COLUMN diver_role TEXT');
-    }
+    // v103 and v272 backstops: the dive role vocabulary and
+    // dives.diver_role, then the role junctions (issue #1221).
+    await _assertDiveRoleVocabularySchema();
+    await _assertDiveRoleLinkSchema();
 
     // v104 backstop: weight prediction tables + columns (same collision
     // disease; all DDL idempotent). Indexes for the new tables are in the

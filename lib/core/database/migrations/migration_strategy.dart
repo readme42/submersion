@@ -30,6 +30,10 @@ extension AppDatabaseMigrationStrategy on AppDatabase {
     // for upgraded databases; beforeOpen re-asserts).
     await customStatement(kSeedBuiltInServiceKindsSql);
 
+    // Seed built-in certification currency rules (the v271 rung seeds
+    // upgraded databases; beforeOpen re-asserts).
+    await customStatement(kSeedBuiltInCurrencyRulesSql);
+
     // Tag uniqueness indexes (v149, issue #1032): createAll() never builds
     // raw-SQL indexes, so a fresh install would otherwise be the one
     // device in the library without them.
@@ -53,6 +57,10 @@ extension AppDatabaseMigrationStrategy on AppDatabase {
     // Equipment share pair unique index (v234, issue #2046), for the
     // same reason.
     await assertEquipmentShareUniqueness(this);
+
+    // Role junction unique indexes (v272, issue #1221), for the same
+    // reason: createAll() never builds raw-SQL indexes.
+    await assertDiveRoleLinkUniqueness(this);
   }
 
   /// Runs every rung above [from], oldest first. The rungs are split

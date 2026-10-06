@@ -52,6 +52,7 @@ import 'package:submersion/features/equipment/presentation/widgets/children_card
 import 'package:submersion/features/equipment/presentation/widgets/components_card.dart';
 import 'package:submersion/features/equipment/presentation/widgets/condition_findings_card.dart';
 import 'package:submersion/features/equipment/presentation/widgets/condition_trend_card.dart';
+import 'package:submersion/features/equipment/presentation/widgets/equipment_location_card.dart';
 import 'package:submersion/features/equipment/presentation/widgets/exposure_card.dart';
 import 'package:submersion/features/equipment/presentation/widgets/equipment_header_status.dart';
 import 'package:submersion/features/equipment/presentation/widgets/equipment_tag_chips.dart';
@@ -218,6 +219,8 @@ class _EquipmentDetailContent extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
           _buildDetailsSection(context, ref, equipment, units),
+          const SizedBox(height: 24),
+          EquipmentLocationCard(equipment: equipment),
           const SizedBox(height: 24),
           if (equipment.type == EquipmentType.tank) ...[
             PassportEntryCard(equipment: equipment),

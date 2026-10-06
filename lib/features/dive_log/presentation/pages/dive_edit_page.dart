@@ -4,12 +4,14 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:go_router/go_router.dart';
+import 'package:submersion/core/built_ins/built_in_catalog.dart';
 import 'package:submersion/features/dive_log/data/services/derived_metrics_scheduler.dart';
 import 'package:submersion/features/equipment/presentation/utils/usable_set_items.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/utils/number_input.dart';
 import 'package:submersion/features/equipment/data/services/sensor_summary_scheduler.dart';
 import 'package:submersion/features/marine_life/presentation/species_display.dart';
+import 'package:submersion/features/settings/presentation/providers/hidden_built_ins_provider.dart';
 import 'package:submersion/shared/widgets/app_date_picker.dart';
 import 'package:submersion/shared/widgets/forms/number_field.dart';
 import 'package:submersion/shared/widgets/forms/number_input_validation.dart';
@@ -26,8 +28,9 @@ import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/dive_log/presentation/formatters/visibility_display.dart';
 import 'package:submersion/features/buddies/domain/entities/buddy.dart';
+import 'package:submersion/features/dive_roles/data/repositories/dive_role_link_repository.dart';
 import 'package:submersion/features/dive_roles/domain/entities/dive_role.dart';
-import 'package:submersion/features/dive_roles/presentation/dive_role_display.dart';
+import 'package:submersion/features/dive_roles/presentation/dive_role_list_display.dart';
 import 'package:submersion/features/dive_roles/presentation/providers/dive_role_providers.dart';
 import 'package:submersion/features/dive_roles/presentation/widgets/dive_role_selector_sheet.dart';
 import 'package:submersion/features/buddies/presentation/providers/buddy_providers.dart';
@@ -151,7 +154,7 @@ import 'package:submersion/features/tank_presets/domain/entities/tank_preset_ent
 import 'package:submersion/features/tank_presets/domain/services/default_tank_preset_resolver.dart';
 import 'package:submersion/features/tank_presets/presentation/providers/tank_preset_providers.dart';
 import 'package:submersion/core/utils/log_failure.dart';
-import 'package:submersion/features/weight_planner/presentation/widgets/weight_enum_display.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/dive_weight_entry_row.dart';
 import 'package:submersion/features/dive_log/presentation/formatters/altitude_group_label.dart';
 import 'package:submersion/features/tides/data/services/dive_tide_recorder.dart';
 import 'package:submersion/features/dive_log/presentation/providers/shared_gear_overlap_providers.dart';
@@ -293,6 +296,11 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
 
   List<String> _selectedDiveTypeIds = const ['recreational'];
 
+  /// The dive's types and roles as loaded, offered by the pickers even when
+  /// hidden (issue #401) so a change to one can be undone in place.
+  List<String> _loadedDiveTypeIds = const [];
+  Set<String> _loadedRoleIds = const {};
+
   /// The dive types the assigned site added (issue #2037) and the diver has
   /// not touched since: what the next site assignment may take back.
   Set<String> _siteAddedDiveTypeIds = const {};
@@ -332,7 +340,9 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
   /// and stays inert instead of claiming the dive has none.
   bool _routeLinksFailed = false;
   Set<String> _originalBuddyIds = {};
-  String? _diverRoleId;
+
+  /// The active diver's own roles on the dive (#547, several since #1221).
+  List<String> _diverRoleIds = const [];
 
   EquipmentSet? _geofenceSuggestion;
   final Set<String> _dismissedSuggestionSetIds = {};
@@ -874,7 +884,8 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           _existingDive = dive;
           _isPlanned = dive.isPlanned;
           _hasPrimarySource = hasPrimarySource;
-          _diverRoleId = dive.diverRoleId;
+          _diverRoleIds = dive.diverRoleIds;
+          _loadedRoleIds = {..._loadedRoleIds, ...dive.diverRoleIds};
           _diveNumberController.text = dive.diveNumber != null
               ? _seedInt(dive.diveNumber!)
               : '';
@@ -929,6 +940,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           _notesController.text = dive.notes;
           _nameController.text = dive.name ?? '';
           _selectedDiveTypeIds = List.from(dive.diveTypeIds);
+          _loadedDiveTypeIds = List.unmodifiable(dive.diveTypeIds);
           _selectedVisibility = dive.visibility ?? Visibility.unknown;
           _visibilityController.text = dive.visibilityMeters != null
               ? _seedDecimal(units.convertDepth(dive.visibilityMeters!), 0)
@@ -987,20 +999,20 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           _weatherDescriptionController.text = dive.weatherDescription ?? '';
 
           // Load weight entries (weights already stored in kg, conversion happens in display)
-          _weights = List.from(dive.weights);
           // Migrate legacy single weight to weights list if needed
-          if (_weights.isEmpty &&
-              dive.weightAmount != null &&
-              dive.weightAmount! > 0) {
-            _weights.add(
-              DiveWeight(
-                id: _uuid.v4(),
-                diveId: dive.id,
-                weightType: dive.weightType ?? WeightType.belt,
-                amountKg: dive.weightAmount!,
-              ),
-            );
-          }
+          _weights =
+              dive.weights.isEmpty &&
+                  dive.weightAmount != null &&
+                  dive.weightAmount! > 0
+              ? [
+                  DiveWeight(
+                    id: _uuid.v4(),
+                    diveId: dive.id,
+                    weightType: dive.weightType ?? WeightType.belt,
+                    amountKg: dive.weightAmount!,
+                  ),
+                ]
+              : List.of(dive.weights);
 
           // Load weighting feedback
           _weightingFeedback = dive.weightingFeedback;
@@ -1093,6 +1105,10 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       setState(() {
         _selectedBuddies = buddies;
         _originalBuddyIds = buddies.map((b) => b.buddy.id).toSet();
+        _loadedRoleIds = {
+          ..._loadedRoleIds,
+          for (final b in buddies) ...b.roleIds,
+        };
       });
     }
   }
@@ -1316,13 +1332,21 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
   final Map<String, Buddy> _buddyById = {};
 
   /// Roles the user picked in the buddy picker during this edit. Membership
-  /// alone never lands here, so an entry means "apply this role" (#893).
-  final Map<String, DiveRole> _buddyRoleById = {};
+  /// alone never lands here, so an entry means "apply these roles" (#893,
+  /// several since #1221).
+  final Map<String, List<DiveRole>> _buddyRoleById = {};
 
-  /// Role id each buddy already carries on every selected dive that has them,
-  /// so filling in the missing links reuses it instead of the default Buddy.
-  /// Buddies with a mix of roles across the selection are absent.
-  final Map<String, String> _existingBuddyRoleIds = {};
+  /// Role set each buddy already carries on every selected dive that has
+  /// them, so filling in the missing links reuses it instead of the default
+  /// Buddy. Buddies with a mix of sets across the selection are absent.
+  final Map<String, List<String>> _existingBuddyRoleIds = {};
+
+  /// The diver's own role set every selected dive shares, or null when the
+  /// dives disagree ([_diverRolesMixed]). A shared set seeds [_diverRoleIds],
+  /// so it is the My role row's value; only Mixed or Not set is shown as a
+  /// placeholder.
+  List<String>? _existingDiverRoleIds;
+  bool _diverRolesMixed = false;
   List<BulkMembershipItem> _buddyMembers = [];
   MembershipDelta _buddyDelta = MembershipDelta.empty;
 
@@ -1473,7 +1497,6 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       diveCenterId: _selectedDiveCenter?.id,
       tripId: _selectedTrip?.id,
       courseId: _selectedCourse?.id,
-      diverRoleId: _diverRoleId,
       rating: _rating > 0 ? _rating : null,
       isFavorite: _bulkFavorite,
       excludedFromStats: _bulkExcludedFromStats,
@@ -1555,11 +1578,21 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     // is staged and relabels itself once the role list resolves.
     final rolesById =
         ref.watch(diveRoleMapProvider).value ?? const <String, DiveRole>{};
-    final id = _diverRoleId;
-    if (id == null) return null;
-    return (rolesById[id] ?? DiveRole.synthetic(id)).localizedName(
-      context.l10n,
-    );
+    if (_diverRoleIds.isEmpty) return null;
+    return rolesForIds(
+      _diverRoleIds,
+      rolesById,
+    ).joinedLocalizedNames(context.l10n);
+  }
+
+  /// What the My role row says when no set is staged: Mixed when the
+  /// selected dives' sets differ, otherwise Not set. A set the dives share is
+  /// the row's value from the start, not a placeholder.
+  String _bulkDiverRolePlaceholder() {
+    final l10n = context.l10n;
+    return _diverRolesMixed
+        ? l10n.diveLog_bulkEdit_buddyRoleMixed
+        : l10n.diveLog_edit_row_notSet;
   }
 
   Future<void> _showBulkDiverRolePicker() async {
@@ -1571,37 +1604,38 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       context,
       title: context.l10n.buddies_picker_selectMyRole,
       roles: roles,
-      allowNone: true,
-      selectedRoleId: _diverRoleId,
+      hiddenRoleIds: ref.read(
+        hiddenBuiltInIdsProvider(BuiltInCatalog.diveRoles),
+      ),
+      allowEmpty: true,
+      selectedRoleIds: _diverRoleIds,
     );
     if (selection == null || !mounted) return;
     setState(() {
       _markDirty();
-      _diverRoleId = selection.role?.id;
+      _diverRoleIds = [for (final r in selection) r.id];
     });
   }
 
-  /// The role id to show for a buddy row, or null when the selection has no
+  /// The role ids to show for a buddy row, or null when the selection has no
   /// single answer: the buddy's links disagree across the selected dives, so
   /// [_existingBuddyRoleIds] (unanimous only) has nothing for them.
-  String? _bulkBuddyRoleId(String id) {
+  List<String>? _bulkBuddyRoleIds(String id) {
     final picked = _buddyRoleById[id];
-    if (picked != null) return picked.id;
+    if (picked != null) return [for (final r in picked) r.id];
     final existing = _existingBuddyRoleIds[id];
     if (existing != null) return existing;
     // Not on any selected dive yet (a fresh picker add): the link the save
     // will create defaults to Buddy, so say so rather than "Mixed".
-    return (_buddyCounts[id] ?? 0) == 0 ? DiveRole.buddyId : null;
+    return (_buddyCounts[id] ?? 0) == 0 ? const [DiveRole.buddyId] : null;
   }
 
   String _bulkBuddyRoleLabel(String id) {
     final rolesById =
         ref.watch(diveRoleMapProvider).value ?? const <String, DiveRole>{};
-    final roleId = _bulkBuddyRoleId(id);
-    if (roleId == null) return context.l10n.diveLog_bulkEdit_buddyRoleMixed;
-    return (rolesById[roleId] ?? DiveRole.synthetic(roleId)).localizedName(
-      context.l10n,
-    );
+    final roleIds = _bulkBuddyRoleIds(id);
+    if (roleIds == null) return context.l10n.diveLog_bulkEdit_buddyRoleMixed;
+    return rolesForIds(roleIds, rolesById).joinedLocalizedNames(context.l10n);
   }
 
   Future<void> _showBulkBuddyRolePicker(BulkMembershipItem item) async {
@@ -1611,16 +1645,21 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       context,
       title: context.l10n.buddies_picker_selectRole(item.label),
       roles: roles,
-      selectedRoleId: _bulkBuddyRoleId(item.id),
+      hiddenRoleIds: ref.read(
+        hiddenBuiltInIdsProvider(BuiltInCatalog.diveRoles),
+      ),
+      selectedRoleIds: _bulkBuddyRoleIds(item.id) ?? const [],
+      keepRoleIds: [...?_existingBuddyRoleIds[item.id]],
       onCreateCustomRole: (name) => ref
           .read(diveRoleListNotifierProvider.notifier)
           .addDiveRoleByName(name),
     );
-    final role = selection?.role;
-    if (role == null || !mounted) return;
+    if (selection == null || !mounted) return;
     setState(() {
       _markDirty();
-      _buddyRoleById[item.id] = role;
+      _buddyRoleById[item.id] = selection.isEmpty
+          ? [DiveRole.builtInBuddy()]
+          : selection;
     });
   }
 
@@ -1737,12 +1776,21 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           counts: _buddyCounts,
           onAdd: _bulkAddBuddies,
           onChanged: (d) => setState(() => _buddyDelta = d),
-          // Each dive_buddies link carries a role, so the row needs an
-          // affordance membership alone cannot express (#1220).
-          trailingBuilder: (item) => TextButton(
-            key: ValueKey('buddy-role-${item.id}'),
-            onPressed: () => _showBulkBuddyRolePicker(item),
-            child: Text(_bulkBuddyRoleLabel(item.id)),
+          // Each dive_buddies link carries roles, so the row needs an
+          // affordance membership alone cannot express (#1220). It sits under
+          // the name, not in the trailing slot, because a set of roles can be
+          // long (#1221, as #2276 did for assembly chips).
+          detailBuilder: (item) => Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton(
+              key: ValueKey('buddy-role-${item.id}'),
+              onPressed: () => _showBulkBuddyRolePicker(item),
+              child: Text(
+                _bulkBuddyRoleLabel(item.id),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ),
         ),
         // The diver's own role is a scalar column, not a membership row, so it
@@ -1753,13 +1801,13 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           FormRow.picker(
             label: l10n.diveLog_bulkEdit_fieldMyRole,
             value: _bulkDiverRoleLabel(),
-            placeholder: l10n.diveLog_edit_row_notSet,
+            placeholder: _bulkDiverRolePlaceholder(),
             onTap: _showBulkDiverRolePicker,
-            onClear: _diverRoleId == null
+            onClear: _diverRoleIds.isEmpty
                 ? null
                 : () => setState(() {
                     _markDirty();
-                    _diverRoleId = null;
+                    _diverRoleIds = const [];
                   }),
           ),
         ),
@@ -1792,6 +1840,9 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
 
   List<BulkCollectionOp> _collectCollectionOps() {
     final ops = <BulkCollectionOp>[];
+    if (_bulkEnabled.contains(BulkField.diverRole)) {
+      ops.add(DiverRolesOp(roleIds: _diverRoleIds));
+    }
     if (_tagDelta.addIds.isNotEmpty) {
       ops.add(TagsOp(mode: BulkCollectionMode.add, tagIds: _tagDelta.addIds));
     }
@@ -2251,7 +2302,9 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       return;
     }
 
-    final scalarFields = Set<BulkField>.from(_bulkEnabled);
+    // The My role gate rides DiverRolesOp (#1221), not a scalar column.
+    final scalarFields = Set<BulkField>.from(_bulkEnabled)
+      ..remove(BulkField.diverRole);
     String? notesAppend;
     if (_bulkEnabled.contains(BulkField.notes) && _bulkNotesAppend) {
       scalarFields.remove(BulkField.notes);
@@ -2554,6 +2607,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
       child: DiveTypeMultiSelectField(
         selectedTypeIds: _selectedDiveTypeIds,
+        keepTypeIds: _loadedDiveTypeIds,
         onChanged: (ids) {
           setState(() {
             _selectedDiveTypeIds = ids;
@@ -4226,6 +4280,9 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     final buddyRepo = ref.read(buddyRepositoryProvider);
     final buddyCounts = await buddyRepo.buddyCountsForDives(ids);
     final buddyRoles = await buddyRepo.unanimousBuddyRolesForDives(ids);
+    final diverRoleSets = await DiveRoleLinkRepository().diverRoleIdsForDives(
+      ids,
+    );
 
     final equip = await EquipmentRepository().getEquipmentByIds(
       equipCounts.keys.toList(),
@@ -4276,6 +4333,17 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           ),
       ]..sort(byLabel);
       _buddyCounts = buddyCounts;
+      final distinctDiverSets = {
+        for (final set in diverRoleSets.values) set.join('|'),
+      };
+      _diverRolesMixed = distinctDiverSets.length > 1;
+      _existingDiverRoleIds = _diverRolesMixed
+          ? null
+          : diverRoleSets.values.firstOrNull;
+      // A set every dive shares is the row's starting value, so the picker
+      // opens with it ticked and enabling the gate keeps it rather than
+      // replacing it with nothing.
+      if (!_diverRolesMixed) _diverRoleIds = _existingDiverRoleIds ?? const [];
       _buddyById
         ..clear()
         ..addAll(buddyMap);
@@ -4508,7 +4576,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       final existing = _buddyMembers.map((e) => e.id).toSet();
       for (final bwr in buddies) {
         _buddyById[bwr.buddy.id] = bwr.buddy;
-        _buddyRoleById[bwr.buddy.id] = bwr.role;
+        _buddyRoleById[bwr.buddy.id] = bwr.roles;
       }
       _buddyMembers = [
         ..._buddyMembers,
@@ -4532,19 +4600,19 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         ),
-    role: _roleForBuddy(id),
+    roles: _rolesForBuddy(id),
   );
 
-  /// A picked role wins; otherwise reuse the role the buddy already has across
+  /// Picked roles win; otherwise reuse the set the buddy already has across
   /// the selection so a membership-only add cannot demote them to Buddy. Only
-  /// the id reaches the database, so an unresolved id stays synthetic (#893).
-  DiveRole _roleForBuddy(String id) {
+  /// the ids reach the database, so unresolved ids stay synthetic (#893).
+  List<DiveRole> _rolesForBuddy(String id) {
     final picked = _buddyRoleById[id];
     if (picked != null) return picked;
     final existing = _existingBuddyRoleIds[id];
     return existing == null
-        ? DiveRole.builtInBuddy()
-        : DiveRole.synthetic(existing);
+        ? [DiveRole.builtInBuddy()]
+        : [for (final r in existing) DiveRole.synthetic(r)];
   }
 
   void _saveEquipmentAsSet() {
@@ -5127,11 +5195,20 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ..._weights.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final weight = entry.value;
-                  return _buildWeightEntryRow(index, weight, units);
-                }),
+                for (final weight in _weights)
+                  DiveWeightEntryRow(
+                    key: ValueKey(weight.id),
+                    weight: weight,
+                    units: units,
+                    onChanged: _replaceWeight,
+                    onRemove: () => setState(() {
+                      _markDirty();
+                      _weights = [
+                        for (final w in _weights)
+                          if (w.id != weight.id) w,
+                      ];
+                    }),
+                  ),
               ],
             ),
           ),
@@ -5140,14 +5217,15 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           onTap: () {
             setState(() {
               _markDirty();
-              _weights.add(
+              _weights = [
+                ..._weights,
                 DiveWeight(
                   id: _uuid.v4(),
                   diveId: widget.diveId ?? '',
                   weightType: WeightType.integrated,
                   amountKg: 0,
                 ),
-              );
+              ];
             });
           },
         ),
@@ -5341,83 +5419,19 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     }
   }
 
-  Widget _buildWeightEntryRow(
-    int index,
-    DiveWeight weight,
-    UnitFormatter units,
-  ) {
-    // Display in user's preferred unit
-    final displayAmount = units.convertWeight(weight.amountKg);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: DropdownButtonFormField<WeightType>(
-              initialValue: weight.weightType,
-              decoration: InputDecoration(
-                labelText: context.l10n.diveLog_edit_label_type,
-                isDense: true,
-              ),
-              isExpanded: true,
-              items: WeightType.values.map((type) {
-                return DropdownMenuItem(
-                  value: type,
-                  child: Text(type.localizedName(context.l10n)),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _weights[index] = weight.copyWith(weightType: value);
-                  });
-                }
-              },
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            flex: 1,
-            child: TextFormField(
-              initialValue: displayAmount > 0 ? _seedWeight(displayAmount) : '',
-              decoration: InputDecoration(
-                labelText: units.weightSymbol,
-                isDense: true,
-              ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              inputFormatters: numberInputFormatters(),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: numberValidator(context),
-              onChanged: (value) {
-                final displayValue = switch (readNumber(value)) {
-                  NumberValue(:final value) => value,
-                  NumberBlank() => 0.0, // an empty amount is 0 kg, as before
-                  // Keep the last readable amount; the error blocks save.
-                  NumberInvalid() => null,
-                };
-                if (displayValue == null) return;
-                // Convert back to kg for storage
-                final amountKg = units.weightToKg(displayValue);
-                _weights[index] = weight.copyWith(amountKg: amountKg);
-              },
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            onPressed: () {
-              setState(() {
-                _markDirty();
-                _weights.removeAt(index);
-              });
-            },
-            tooltip: context.l10n.diveLog_edit_tooltip_removeWeight,
-          ),
-        ],
-      ),
-    );
+  /// Stores an edited weight row. The row keeps its own fields current, and
+  /// the Form's onChanged marks the page dirty; the page rebuilds only when
+  /// the amount or placement changed, which the Total and "Save as preset"
+  /// above the rows read. A name alone shows nowhere outside its row.
+  void _replaceWeight(DiveWeight updated) {
+    final previous = _weights.firstWhere((w) => w.id == updated.id);
+    final next = [for (final w in _weights) w.id == updated.id ? updated : w];
+    if (previous.amountKg == updated.amountKg &&
+        previous.weightType == updated.weightType) {
+      _weights = next;
+    } else {
+      setState(() => _weights = next);
+    }
   }
 
   Widget _buildBuddiesSection() {
@@ -5425,16 +5439,17 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       expanded: _isExpanded('buddies', defaultValue: false),
       onToggle: () => _toggleSection('buddies', defaultValue: false),
       summary: _buddiesSummary(),
-      isEmpty: _selectedBuddies.isEmpty && _diverRoleId == null,
+      isEmpty: _selectedBuddies.isEmpty && _diverRoleIds.isEmpty,
       buddyPicker: Padding(
         padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
         child: BuddyPicker(
           diveId: widget.diveId,
           selectedBuddies: _selectedBuddies,
-          diverRoleId: _diverRoleId,
-          onDiverRoleChanged: (roleId) {
+          keepRoleIds: _loadedRoleIds,
+          diverRoleIds: _diverRoleIds,
+          onDiverRoleChanged: (roleIds) {
             _markDirty();
-            setState(() => _diverRoleId = roleId);
+            setState(() => _diverRoleIds = roleIds);
           },
           onChanged: (buddies) {
             _markDirty();
@@ -5947,7 +5962,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         weatherCode: _existingDive?.weatherCode,
         importId: _existingDive?.importId,
         surfaceInterval: _existingDive?.surfaceInterval,
-        diverRoleId: _diverRoleId,
+        diverRoleIds: _diverRoleIds,
         // CCR/SCR rebreather settings
         diveMode: _diveMode,
         setpointLow: _diveMode == DiveMode.ccr ? _setpointLow : null,

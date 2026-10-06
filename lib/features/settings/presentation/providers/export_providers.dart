@@ -1,5 +1,6 @@
 import 'package:clock/clock.dart';
 import 'package:submersion/core/providers/provider.dart';
+import 'package:submersion/core/services/export/models/currency_backup_data.dart';
 import 'package:submersion/core/services/export/excel/observations_excel_export_service.dart';
 import 'package:submersion/features/cylinder_passports/domain/entities/cylinder_fill.dart';
 import 'package:submersion/features/cylinder_passports/presentation/providers/cylinder_passport_providers.dart';
@@ -34,10 +35,12 @@ import 'package:submersion/features/dive_sites/presentation/providers/site_featu
 import 'package:submersion/features/dive_sites/presentation/providers/site_providers.dart';
 import 'package:submersion/features/equipment/presentation/providers/equipment_component_providers.dart';
 import 'package:submersion/features/equipment/presentation/providers/equipment_providers.dart';
+import 'package:submersion/features/equipment/presentation/providers/equipment_location_providers.dart';
 import 'package:submersion/features/equipment/presentation/providers/equipment_tag_providers.dart';
 import 'package:submersion/features/equipment/data/repositories/equipment_set_repository_impl.dart';
 import 'package:submersion/features/equipment/presentation/providers/equipment_set_providers.dart';
 import 'package:submersion/features/buddies/presentation/providers/buddy_providers.dart';
+import 'package:submersion/features/certifications/presentation/providers/certification_currency_providers.dart';
 import 'package:submersion/features/certifications/presentation/providers/certification_providers.dart';
 import 'package:submersion/features/dive_centers/presentation/providers/dive_center_providers.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
@@ -55,6 +58,7 @@ import 'package:submersion/features/dive_log/domain/entities/dive.dart'
 import 'package:submersion/features/pre_dive/presentation/providers/pre_dive_providers.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
+import 'package:submersion/features/certification_agencies/presentation/providers/certification_catalog_providers.dart';
 
 /// Export service provider
 final exportServiceProvider = Provider<ExportService>((ref) {
@@ -159,6 +163,18 @@ class ExportNotifier extends StateNotifier<ExportState> {
     return ComponentsIndex.fromRows(
       rows,
     ).namesByParent({for (final e in equipment) e.id: e});
+  }
+
+  /// Each item's current place name, for the equipment CSV's Location
+  /// column (v268). Items with no location are absent.
+  Future<Map<String, String>> _equipmentLocationNamesFor(
+    List<EquipmentItem> equipment,
+  ) async {
+    final current = await _ref.read(currentEquipmentLocationsProvider.future);
+    return {
+      for (final item in equipment)
+        if (current[item.id] case final place?) item.id: place.name,
+    };
   }
 
   /// Each exported item's tag names, by name, for the Tags column of the
@@ -316,6 +332,7 @@ class ExportNotifier extends StateNotifier<ExportState> {
         equipment,
         componentNames: await _componentNamesFor(equipment),
         tagNames: await _equipmentTagNamesFor(equipment),
+        locationNames: await _equipmentLocationNamesFor(equipment),
         units: _csvUnits(unitMode),
       );
       state = state.copyWith(
@@ -330,6 +347,17 @@ class ExportNotifier extends StateNotifier<ExportState> {
       );
     }
   }
+
+  /// The certification currency rows a full backup of [certifications]
+  /// carries (issue #2267).
+  Future<CurrencyBackupData> _currencyBackup(
+    List<Certification> certifications,
+  ) async => CurrencyBackupData.forCertifications(
+    certifications,
+    rules: await _ref.read(currencyRulesProvider.future),
+    prefs: await _ref.read(currencyPrefsProvider.future),
+    events: await _ref.read(currencyEventsProvider.future),
+  );
 
   /// The active diver's gear check-ins. The export's equipment and dives
   /// are scoped to that diver, and a shared item can carry another diver's
@@ -654,11 +682,18 @@ class ExportNotifier extends StateNotifier<ExportState> {
       title: localization.l10n.settings_export_pdfDocumentTitle,
       diveSignatures: diveSignatures.isNotEmpty ? diveSignatures : null,
       certifications: certifications,
+      certificationCatalog: await _ref.read(
+        allCustomCertificationsCatalogProvider.future,
+      ),
       diver: diver,
       profiles: profiles,
       diverPhoto: diverPhoto,
       includeVerificationAreas: exportOptions.includeVerificationAreas,
       diveTypesById: await _diveTypesById(),
+      // The diver's own roles print by name (#1221).
+      diveRolesById: await diveRoleMapOrEmpty(
+        _ref.read(diveRoleMapProvider.future),
+      ),
     );
   }
 
@@ -747,12 +782,17 @@ class ExportNotifier extends StateNotifier<ExportState> {
       final relations = await _uddfDiveRelations(dives);
 
       state = state.copyWith(message: _l10n.settings_export_progress_uddf);
+      final currency = await _currencyBackup(certifications);
       final path = await _exportService.exportAllDataToUddf(
         dives: dives,
         sites: sites,
         equipment: equipment,
         buddies: buddies,
         certifications: certifications,
+        currency: currency,
+        certificationCatalog: await _ref.read(
+          allCustomCertificationsCatalogProvider.future,
+        ),
         diveCenters: diveCenters,
         species: species,
         diveBuddies: relations.diveBuddies,
@@ -1272,6 +1312,7 @@ class ExportNotifier extends StateNotifier<ExportState> {
         equipment,
         componentNames: await _componentNamesFor(equipment),
         tagNames: await _equipmentTagNamesFor(equipment),
+        locationNames: await _equipmentLocationNamesFor(equipment),
         dialogTitle: _l10n.settings_export_saveEquipmentCsvDialogTitle,
         units: _csvUnits(unitMode),
       );
@@ -1489,12 +1530,17 @@ class ExportNotifier extends StateNotifier<ExportState> {
       state = state.copyWith(
         message: _l10n.settings_export_progress_chooseLocation,
       );
+      final currency = await _currencyBackup(certifications);
       final path = await _exportService.saveAllDataToUddfFile(
         dives: dives,
         sites: sites,
         equipment: equipment,
         buddies: buddies,
         certifications: certifications,
+        currency: currency,
+        certificationCatalog: await _ref.read(
+          allCustomCertificationsCatalogProvider.future,
+        ),
         diveCenters: diveCenters,
         species: species,
         diveBuddies: relations.diveBuddies,

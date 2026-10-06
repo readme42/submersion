@@ -2477,6 +2477,18 @@ class _ManageSectionContent extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  leading: const Icon(Icons.workspace_premium_outlined),
+                  title: Text(
+                    context.l10n.settings_manage_certificationAgencies,
+                  ),
+                  subtitle: Text(
+                    context.l10n.settings_manage_certificationAgencies_subtitle,
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/certification-agencies'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   leading: const Icon(MdiIcons.divingScubaTank),
                   title: Text(context.l10n.settings_manage_tankPresets),
                   subtitle: Text(
@@ -2524,6 +2536,28 @@ class _ManageSectionContent extends StatelessWidget {
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/equipment/service-types'),
+                ),
+                const Divider(height: 1),
+                // Refresher and renewal rules (issue #2267)
+                ListTile(
+                  leading: const Icon(Icons.event_repeat_outlined),
+                  title: Text(context.l10n.settings_manage_currencyRules),
+                  subtitle: Text(
+                    context.l10n.settings_manage_currencyRules_subtitle,
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/currency-rules'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  key: const ValueKey('settings_manage_locations'),
+                  leading: const Icon(Icons.place_outlined),
+                  title: Text(context.l10n.settings_manage_locations),
+                  subtitle: Text(
+                    context.l10n.settings_manage_locations_subtitle,
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/equipment/locations'),
                 ),
                 const Divider(height: 1),
                 ListTile(

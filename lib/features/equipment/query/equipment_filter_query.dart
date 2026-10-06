@@ -82,6 +82,22 @@ extension EquipmentFilterQuery on EquipmentFilterState {
         ),
       );
     }
+    if (locationNames.isNotEmpty || noLocation) {
+      // Any of the chosen places, or none at all.
+      final options = <QueryNode>[
+        if (locationNames.isNotEmpty)
+          c(
+            'location',
+            QueryOp.inList,
+            ListValue([
+              for (final name in locationNames.toList()..sort())
+                StringValue(name),
+            ]),
+          ),
+        if (noLocation) c('location', QueryOp.isEmpty, null),
+      ];
+      parts.add(options.length == 1 ? options.single : OrNode(options));
+    }
     if (query != null) parts.add(query!);
     return switch (parts) {
       [] => null,

@@ -15,11 +15,13 @@ import 'package:submersion/core/services/pdf_templates/pdf_shared_components.dar
 import 'package:submersion/core/services/pdf_templates/pdf_template_builder.dart';
 import 'package:submersion/features/certifications/domain/entities/certification.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
+import 'package:submersion/features/dive_roles/domain/entities/dive_role.dart';
 import 'package:submersion/features/dive_types/domain/entities/dive_type_entity.dart';
 import 'package:submersion/features/divers/domain/entities/diver.dart';
 import 'package:submersion/features/signatures/domain/entities/signature.dart';
 import 'package:submersion/features/dive_log/presentation/formatters/visibility_display.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/environment_enum_display.dart';
+import 'package:submersion/features/certification_agencies/domain/certification_catalog.dart';
 
 /// NAUI-style PDF template mimicking NAUI logbook format.
 ///
@@ -42,6 +44,7 @@ class PdfTemplateNaui extends PdfTemplateBuilder {
     String? title,
     Map<String, List<Signature>>? diveSignatures,
     List<Certification>? certifications,
+    CertificationCatalog? certificationCatalog,
     Diver? diver,
     // Accepted for the shared builder contract; this template does not chart
     // profiles, show a portrait, or offer verification areas.
@@ -50,6 +53,7 @@ class PdfTemplateNaui extends PdfTemplateBuilder {
     bool includeVerificationAreas = false,
     EquipmentArrangement gearArrangement = EquipmentArrangement.defaults,
     Map<String, DiveTypeEntity> diveTypesById = const {},
+    Map<String, DiveRole> diveRolesById = const {},
     Map<String, String> equipmentSetNamesById = const {},
     DateTime? generatedAt,
     PdfLocalization? localization,
@@ -88,6 +92,7 @@ class PdfTemplateNaui extends PdfTemplateBuilder {
           textDirection: loc.textDirection,
           build: (context) => PdfSharedComponents.buildCertificationCardsBody(
             certifications: certifications,
+            certificationCatalog: certificationCatalog,
             dates: dates,
             l10n: l10n,
             diver: diver,

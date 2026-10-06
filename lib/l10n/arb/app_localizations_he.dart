@@ -3064,6 +3064,124 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String get certifications_list_filter_needsAttention => 'דורש תשומת לב';
+
+  @override
+  String get certifications_list_filter_clear => 'ניקוי';
+
+  @override
+  String get certifications_list_needsAttention_empty =>
+      'אין הסמכות שדורשות תשומת לב';
+
+  @override
+  String get certifications_list_needsAttention_emptySubtitle =>
+      'כל ההסמכות בתוקף או מושתקות.';
+
+  @override
+  String get currencyRule_padi_reactivate_name => 'ריענון PADI (ReActivate)';
+
+  @override
+  String get currencyRule_ssi_skills_update_name => 'SSI Scuba Skills Update';
+
+  @override
+  String get currencyRule_generic_refresher_name => 'ריענון';
+
+  @override
+  String get currencyRule_first_aid_24mo_name => 'חידוש עזרה ראשונה והחייאה';
+
+  @override
+  String get currencyRule_pro_membership_annual_name => 'חידוש חברות מקצועית';
+
+  @override
+  String get currencyRule_gue_revalidation_name => 'תיקוף מחדש GUE';
+
+  @override
+  String get currencyRule_ffessm_licence_annual_name =>
+      'רישיון FFESSM ואישור רפואי';
+
+  @override
+  String get currencyRule_cave_currency_name => 'כשירות שוטפת במערות';
+
+  @override
+  String get currencyRule_rebreather_currency_name =>
+      'כשירות שוטפת ב-Rebreather';
+
+  @override
+  String get currencyRule_deco_currency_name => 'כשירות שוטפת בדקומפרסיה';
+
+  @override
+  String get currencyRule_card_expiry_name => 'תפוגת הכרטיס';
+
+  @override
+  String get currencyRule_padi_reactivate_advisory =>
+      'PADI ממליצה על ריענון ReActivate לאחר שישה עד שנים עשר חודשים מחוץ למים.';
+
+  @override
+  String get currencyRule_ssi_skills_update_advisory =>
+      'SSI ממליצה על Scuba Skills Update לאחר שישה עד שנים עשר חודשים ללא צלילה.';
+
+  @override
+  String get currencyRule_generic_refresher_advisory =>
+      'רוב הארגונים ממליצים על ריענון לאחר שישה עד שנים עשר חודשים ללא צלילה.';
+
+  @override
+  String get currencyRule_first_aid_advisory =>
+      'הסמכות עזרה ראשונה, החייאה ומתן חמצן מתחדשות בדרך כלל כל שנתיים.';
+
+  @override
+  String get currencyRule_pro_membership_advisory =>
+      'חברות מקצועית מתחדשת בדרך כלל מדי שנה כדי לשמור על מעמד הדרכה פעיל.';
+
+  @override
+  String get currencyRule_gue_revalidation_advisory =>
+      'דירוגי GUE מתוקפים מחדש בדרך כלל כל שלוש שנים.';
+
+  @override
+  String get currencyRule_ffessm_licence_advisory =>
+      'רישיון FFESSM והאישור הרפואי שלו מתחדשים מדי שנה.';
+
+  @override
+  String get currencyRule_cave_currency_advisory =>
+      'מיומנויות מערות נשחקות ללא תרגול; נהוג להמליץ על צלילת בדיקה לאחר שנה של הפסקה.';
+
+  @override
+  String get currencyRule_rebreather_currency_advisory =>
+      'מיומנויות Rebreather נשחקות מהר; ארגונים רבים ממליצים על ריענון לאחר שישה חודשים של הפסקה.';
+
+  @override
+  String get currencyRule_deco_currency_advisory =>
+      'נהוג לרענן נוהלי דקומפרסיה לאחר שנה ללא צלילת דקומפרסיה.';
+
+  @override
+  String get currencyRule_card_expiry_advisory =>
+      'תאריך התפוגה המודפס על הכרטיס.';
+
+  @override
+  String get certifications_currency_status_current => 'בתוקף';
+
+  @override
+  String get certifications_currency_status_dueSoon => 'בקרוב';
+
+  @override
+  String get certifications_currency_status_lapsed => 'פג תוקף';
+
+  @override
+  String get certifications_currency_eventType_refresher => 'ריענון';
+
+  @override
+  String get certifications_currency_eventType_renewal => 'חידוש';
+
+  @override
+  String get certifications_currency_eventType_revalidation => 'תיקוף מחדש';
+
+  @override
+  String get certifications_currency_eventType_skillsUpdate =>
+      'עדכון מיומנויות';
+
+  @override
+  String get certifications_currency_eventType_other => 'אחר';
+
+  @override
   String get certifications_detail_action_delete => 'מחק';
 
   @override
@@ -3147,6 +3265,139 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get certifications_detail_sectionTitle_dates => 'תאריכים';
+
+  @override
+  String get certifications_detail_sectionTitle_currency => 'תוקף';
+
+  @override
+  String certifications_currency_dueOn(String date) {
+    return 'מועד: $date';
+  }
+
+  @override
+  String certifications_currency_lapsedSince(String date) {
+    return 'פג תוקף מאז $date';
+  }
+
+  @override
+  String certifications_currency_anchor_lastDive(String date) {
+    return 'צלילה אחרונה $date';
+  }
+
+  @override
+  String certifications_currency_anchor_lastQualifyingDive(String date) {
+    return 'צלילה מזכה אחרונה $date';
+  }
+
+  @override
+  String certifications_currency_anchor_cardExpiry(String date) {
+    return 'תפוגת הכרטיס $date';
+  }
+
+  @override
+  String certifications_currency_anchor_cardIssue(String date) {
+    return 'הונפק $date';
+  }
+
+  @override
+  String certifications_currency_anchor_ledgerEvent(String event, String date) {
+    return '$event נרשם ב-$date';
+  }
+
+  @override
+  String certifications_currency_alsoCovers(String names) {
+    return 'חל גם על $names';
+  }
+
+  @override
+  String get certifications_currency_muted => 'מושתק';
+
+  @override
+  String get certifications_currency_noCountedDive =>
+      'עדיין לא נרשמה צלילה נספרת';
+
+  @override
+  String get certifications_currency_action_log => 'רישום ריענון';
+
+  @override
+  String get certifications_currency_action_interval => 'עריכת מרווח';
+
+  @override
+  String get certifications_currency_action_mapping => 'אילו צלילות נספרות';
+
+  @override
+  String get certifications_currency_action_mute => 'השתקה';
+
+  @override
+  String get certifications_currency_action_unmute => 'ביטול השתקה';
+
+  @override
+  String get certifications_currency_history => 'היסטוריה';
+
+  @override
+  String get certifications_currency_deleteEvent_title => 'למחוק את הרשומה?';
+
+  @override
+  String certifications_currency_deleteEvent_content(
+    String event,
+    String date,
+  ) {
+    return 'פעולה זו תסיר את $event שנרשם ב-$date.';
+  }
+
+  @override
+  String get certifications_currency_eventDialog_title =>
+      'רישום ריענון או חידוש';
+
+  @override
+  String get certifications_currency_eventDialog_type => 'סוג';
+
+  @override
+  String get certifications_currency_eventDialog_date => 'תאריך';
+
+  @override
+  String get certifications_currency_eventDialog_provider =>
+      'מרכז, מועדון או מדריך';
+
+  @override
+  String get certifications_currency_eventDialog_notes => 'הערות';
+
+  @override
+  String get certifications_currency_intervalDialog_title => 'מרווח';
+
+  @override
+  String get certifications_currency_intervalDialog_lapse => 'פג לאחר (ימים)';
+
+  @override
+  String get certifications_currency_intervalDialog_lead =>
+      'להזהיר מספר ימים זה מראש';
+
+  @override
+  String certifications_currency_intervalDialog_inheritHint(String days) {
+    return 'ריק משתמש בערך של הכלל ($days)';
+  }
+
+  @override
+  String get certifications_currency_intervalDialog_leadTooLong =>
+      'האזהרה לא יכולה להתחיל לפני המרווח';
+
+  @override
+  String get certifications_currency_mappingDialog_title =>
+      'אילו צלילות נספרות';
+
+  @override
+  String get certifications_currency_mappingDialog_types => 'סוגי צלילה';
+
+  @override
+  String get certifications_currency_mappingDialog_modes => 'מצבי צלילה';
+
+  @override
+  String get certifications_currency_mappingDialog_anyHint =>
+      'ללא בחירה כל צלילה נספרת';
+
+  @override
+  String get certifications_currency_mappingDialog_reset =>
+      'שימוש בברירת המחדל של הכלל';
 
   @override
   String get certifications_detail_sectionTitle_details => 'פרטי הסמכה';
@@ -3305,6 +3556,115 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get certifications_edit_label_agency => 'סוכנות *';
+
+  @override
+  String get certificationAgencies_unknownAgency => 'סוכנות לא ידועה';
+
+  @override
+  String get certificationAgencies_unknownCertification => 'הסמכה לא ידועה';
+
+  @override
+  String get certificationAgencies_addCustomAgency => 'הוספת סוכנות מותאמת...';
+
+  @override
+  String get certificationAgencies_addCustomCertification =>
+      'הוספת הסמכה מותאמת...';
+
+  @override
+  String get certificationAgencies_dialog_newAgencyTitle => 'סוכנות חדשה';
+
+  @override
+  String get certificationAgencies_dialog_editAgencyTitle => 'עריכת סוכנות';
+
+  @override
+  String get certificationAgencies_dialog_newCertificationTitle => 'הסמכה חדשה';
+
+  @override
+  String get certificationAgencies_dialog_editCertificationTitle =>
+      'עריכת הסמכה';
+
+  @override
+  String get certificationAgencies_dialog_nameLabel => 'שם';
+
+  @override
+  String get certificationAgencies_dialog_colorLabel => 'צבע הכרטיס';
+
+  @override
+  String get certificationAgencies_dialog_specialty => 'התמחות';
+
+  @override
+  String get certificationAgencies_error_nameRequired => 'יש להזין שם';
+
+  @override
+  String get certificationAgencies_error_nameTaken => 'השם הזה כבר בשימוש';
+
+  @override
+  String get settings_manage_certificationAgencies => 'סוכנויות הסמכה';
+
+  @override
+  String get settings_manage_certificationAgencies_subtitle =>
+      'ניהול סוכנויות והסמכות מותאמות';
+
+  @override
+  String get certificationAgencies_section_yours => 'הסוכנויות שלך';
+
+  @override
+  String get certificationAgencies_section_builtIn => 'סוכנויות מובנות';
+
+  @override
+  String get certificationAgencies_addAgency => 'הוספת סוכנות';
+
+  @override
+  String certificationAgencies_sharedBy(String name) {
+    return 'שותף על ידי $name';
+  }
+
+  @override
+  String get certificationAgencies_editor_addCertification => 'הוספת הסמכה';
+
+  @override
+  String get certificationAgencies_editor_builtInHint =>
+      'לא ניתן לשנות הסמכות מובנות. אפשר להוסיף הסמכות משלך.';
+
+  @override
+  String certificationAgencies_delete_confirmTitle(String name) {
+    return 'למחוק את $name?';
+  }
+
+  @override
+  String get certificationAgencies_delete_refusedTitle => 'עדיין בשימוש';
+
+  @override
+  String certificationAgencies_delete_refusedBody(String usage) {
+    return 'בשימוש ב-$usage. יש לשנות אותם קודם.';
+  }
+
+  @override
+  String certificationAgencies_usage_certifications(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count הסמכות',
+      one: 'הסמכה אחת',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String certificationAgencies_usage_courses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count קורסים',
+      one: 'קורס אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String certificationAgencies_usage_and(String first, String second) {
+    return '$first ו-$second';
+  }
 
   @override
   String get certifications_edit_addRecognition => 'הוספת הכרה נוספת';
@@ -4964,7 +5324,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get settings_homeChips_lastDive => 'עדכניות צלילה';
 
   @override
-  String get settings_homeChips_certifications => 'תפוגת הסמכות';
+  String get settings_homeChips_certifications => 'תוקף הסמכות';
 
   @override
   String get settings_homeChips_trip => 'טיול קרוב';
@@ -4988,8 +5348,14 @@ class AppLocalizationsHe extends AppLocalizations {
   String get settings_homeChips_dataQuality => 'איכות נתונים';
 
   @override
-  String dashboard_gauges_certsExpiring(int count) {
-    return '$count הסמכות עומדות לפוג';
+  String dashboard_gauges_certsNeedAttention(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count הסמכות דורשות תשומת לב',
+      one: 'הסמכה אחת דורשת תשומת לב',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -6700,6 +7066,12 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get diveLog_edit_label_waterType => 'סוג מים';
+
+  @override
+  String get diveLog_edit_label_weightName => 'שם (אופציונלי)';
+
+  @override
+  String get diveLog_edit_hint_weightName => 'לדוגמה: כיס עליון';
 
   @override
   String get diveLog_edit_marineLifeHint => 'הקש \"הוספה\" לרישום תצפיות';
@@ -11383,6 +11755,12 @@ class AppLocalizationsHe extends AppLocalizations {
   String get enum_certificationAgency_ffessm => 'FFESSM';
 
   @override
+  String get enum_certificationAgency_acuc => 'ACUC';
+
+  @override
+  String get enum_certificationAgency_dan => 'DAN';
+
+  @override
   String get enum_certificationAgency_gue => 'GUE';
 
   @override
@@ -11462,6 +11840,12 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get enum_certificationLevel_techDiver => 'צולל טכני';
+
+  @override
+  String get enum_certificationLevel_firstAid => 'עזרה ראשונה / החייאה';
+
+  @override
+  String get enum_certificationLevel_oxygenProvider => 'ספק חמצן חירום';
 
   @override
   String get enum_certificationLevel_trimix => 'טרימיקס';
@@ -14262,6 +14646,242 @@ class AppLocalizationsHe extends AppLocalizations {
   String get equipment_filter_section_category => 'קטגוריה';
 
   @override
+  String get equipment_location_kind_storage => 'אחסון';
+
+  @override
+  String get equipment_location_kind_serviceShop => 'מעבדת שירות';
+
+  @override
+  String get equipment_location_kind_person => 'אדם';
+
+  @override
+  String get equipment_location_kind_other => 'אחר';
+
+  @override
+  String get equipment_location_noLocation => 'אין מיקום';
+
+  @override
+  String get equipment_location_picker_title => 'בחירת מקום';
+
+  @override
+  String get equipment_location_picker_search => 'חיפוש מקומות';
+
+  @override
+  String get equipment_location_picker_newPlace => 'מקום חדש';
+
+  @override
+  String equipment_location_move_title(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'העברת $count פריטים',
+      one: 'העברת פריט אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_move_to => 'אל';
+
+  @override
+  String get equipment_location_move_choose => 'בחירת מקום';
+
+  @override
+  String get equipment_location_move_date => 'תאריך';
+
+  @override
+  String get equipment_location_move_time => 'שעה';
+
+  @override
+  String get equipment_location_move_note => 'הערה';
+
+  @override
+  String get equipment_location_move_noteHint => 'לדוגמה: טיפול שנתי בווסת';
+
+  @override
+  String get equipment_location_move_confirm => 'העברה';
+
+  @override
+  String get equipment_location_parts_title => 'להעביר גם את החלקים?';
+
+  @override
+  String equipment_location_parts_body(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'להעביר גם את $count החלקים שלו לאותו מקום?',
+      one: 'להעביר גם את החלק שלו לאותו מקום?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_parts_yes => 'העברת החלקים';
+
+  @override
+  String get equipment_location_parts_no => 'רק את זה';
+
+  @override
+  String get equipment_location_status_title => 'לעדכן סטטוס?';
+
+  @override
+  String equipment_location_status_body(int count, String status) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'לסמן גם $count פריטים כ$status?',
+      one: 'לסמן גם פריט אחד כ$status?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_status_yes => 'עדכון';
+
+  @override
+  String get equipment_location_status_no => 'השארת הסטטוס';
+
+  @override
+  String equipment_location_moved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count פריטים הועברו',
+      one: 'פריט אחד הועבר',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_card_title => 'מיקום';
+
+  @override
+  String get equipment_location_none => 'לא הוגדר מיקום';
+
+  @override
+  String equipment_location_since(String date) {
+    return 'מאז $date';
+  }
+
+  @override
+  String get equipment_location_moveButton => 'העברה';
+
+  @override
+  String get equipment_location_showAll => 'הצגת הכול';
+
+  @override
+  String get equipment_location_history_cleared => 'המיקום נוקה';
+
+  @override
+  String get equipment_location_editMove_title => 'עריכת העברה';
+
+  @override
+  String get equipment_location_editMove_delete => 'מחיקת העברה';
+
+  @override
+  String get equipment_location_deleteMoveConfirm =>
+      'למחוק את הרשומה הזו מההיסטוריה? מיקום הפריט יחושב מחדש מההעברות שנותרו.';
+
+  @override
+  String get equipment_location_bulkAction => 'העברה למיקום';
+
+  @override
+  String equipment_location_groupCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count פריטים',
+      one: 'פריט אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_activeFilter => 'מיקום';
+
+  @override
+  String get equipment_filter_section_location => 'מיקום';
+
+  @override
+  String get equipment_arrange_groupByLocation => 'קיבוץ לפי מיקום';
+
+  @override
+  String get equipment_arrange_groupByLocationSubtitle =>
+      'כותרת אחת לכל מקום, רק בעמוד זה';
+
+  @override
+  String get equipment_edit_locationLabel => 'מיקום';
+
+  @override
+  String get equipment_edit_locationNone => 'לא הוגדר';
+
+  @override
+  String get equipment_edit_locationFailed =>
+      'נשמר, אך לא ניתן היה להגדיר את המיקום. השתמש בהעברה בפריט כדי להגדיר אותו.';
+
+  @override
+  String get equipment_locations_title => 'מיקומים';
+
+  @override
+  String get equipment_locations_empty =>
+      'עדיין אין מקומות. הוסף אחד כדי לעקוב אחר מיקום הציוד שלך.';
+
+  @override
+  String get equipment_locations_add => 'הוספת מקום';
+
+  @override
+  String equipment_locations_archivedSection(int count) {
+    return 'בארכיון ($count)';
+  }
+
+  @override
+  String get equipment_locations_archive => 'העברה לארכיון';
+
+  @override
+  String get equipment_locations_restore => 'שחזור';
+
+  @override
+  String get equipment_locations_delete => 'מחיקה';
+
+  @override
+  String equipment_locations_deleteConfirm(String name) {
+    return 'למחוק את $name?';
+  }
+
+  @override
+  String get equipment_locations_itemsHere => 'פריטים כאן';
+
+  @override
+  String get equipment_locations_noItemsHere => 'אין כאן כלום כרגע.';
+
+  @override
+  String get equipment_locations_moveItems => 'העברת הפריטים שכאן';
+
+  @override
+  String get equipment_locations_newTitle => 'מקום חדש';
+
+  @override
+  String get equipment_locations_editTitle => 'עריכת מקום';
+
+  @override
+  String get equipment_locations_nameLabel => 'שם';
+
+  @override
+  String get equipment_locations_nameRequired => 'הזן שם';
+
+  @override
+  String get equipment_locations_duplicateWarning => 'כבר יש לך מקום בשם הזה';
+
+  @override
+  String get equipment_locations_kindLabel => 'סוג';
+
+  @override
+  String get equipment_locations_notesLabel => 'הערות';
+
+  @override
+  String get equipment_locations_notesHint => 'כתובת, טלפון, מספר לוקר';
+
+  @override
   String get equipment_list_retryButton => 'נסה שוב';
 
   @override
@@ -15390,6 +16010,15 @@ class AppLocalizationsHe extends AppLocalizations {
       'לא ניתן לפתוח את הבלון הזה. נסו שוב.';
 
   @override
+  String gasCalculators_blender_cylinderNoVolume(String name) {
+    return 'לא נרשם נפח מים עבור $name';
+  }
+
+  @override
+  String get gasCalculators_blender_noCylinders =>
+      'אין עדיין בלונים בציוד שלך. הזן במקום זאת את נפח המים.';
+
+  @override
   String gasCalculators_blender_filledFrom(String name, String mix) {
     return '$name: $mix';
   }
@@ -15559,15 +16188,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get gasCalculators_blender_cylinderVolume => 'נפח המים של הבלון';
 
   @override
-  String get gasCalculators_blender_cylinderPresets => 'הגדרות מוכנות';
-
-  @override
   String gasCalculators_blender_unitPrice(String unit) {
     return 'מחיר ל-100 $unit';
   }
-
-  @override
-  String get gasCalculators_blender_manageCylinderSizes => 'ניהול גדלי בלונים';
 
   @override
   String get gasCalculators_blender_costTotal => 'סה\"כ';
@@ -19643,6 +20266,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get settings_conflict_field_additionalCredentials => 'הסמכות נוספות';
 
   @override
+  String get settings_conflict_field_advisoryKey => 'עצה מובנית';
+
+  @override
   String get settings_conflict_field_airBreakBreakSeconds => 'משך הפסקת האוויר';
 
   @override
@@ -20558,6 +21184,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get settings_conflict_field_intervalHours => 'מרווח בשעות';
 
   @override
+  String get settings_conflict_field_isArchived => 'בארכיון';
+
+  @override
   String get settings_conflict_field_isBuiltIn => 'מובנה';
 
   @override
@@ -20709,6 +21338,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get settings_conflict_field_mode => 'מצב נשימה';
+
+  @override
+  String get settings_conflict_field_movedAt => 'הועבר בתאריך';
 
   @override
   String get settings_conflict_field_name => 'שם';
@@ -21238,6 +21870,9 @@ class AppLocalizationsHe extends AppLocalizations {
       'זמן מתוכנן עד פני המים';
 
   @override
+  String get settings_conflict_field_supersedesRuleId => 'מחליף כלל מובנה';
+
+  @override
   String get settings_conflict_field_surfaceConditions => 'תנאים בפני המים';
 
   @override
@@ -21594,6 +22229,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get settings_conflict_ref_equipment => 'ציוד';
+
+  @override
+  String get settings_conflict_ref_equipmentLocation => 'מיקום ציוד';
 
   @override
   String get settings_conflict_ref_equipmentSet => 'סט ציוד';
@@ -22510,6 +23148,114 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get settings_manage_serviceTypes_subtitle =>
       'הטיפולים שהציוד שלך צריך, ובאיזו תדירות';
+
+  @override
+  String get settings_manage_locations => 'מיקומים';
+
+  @override
+  String get settings_manage_locations_subtitle =>
+      'היכן הציוד שלך מאוחסן, בטיפול או מושאל';
+
+  @override
+  String get settings_manage_currencyRules => 'תוקף הסמכות';
+
+  @override
+  String get settings_manage_currencyRules_subtitle => 'כללי ריענון וחידוש';
+
+  @override
+  String get currencyRules_title => 'תוקף הסמכות';
+
+  @override
+  String get currencyRules_addTooltip => 'הוספת כלל';
+
+  @override
+  String get currencyRules_editTooltip => 'עריכת כלל';
+
+  @override
+  String get currencyRules_deleteTooltip => 'מחיקת כלל';
+
+  @override
+  String get currencyRules_builtIn => 'מובנים';
+
+  @override
+  String get currencyRules_custom => 'הכללים שלך';
+
+  @override
+  String currencyRules_replaces(String name) {
+    return 'מחליף את $name';
+  }
+
+  @override
+  String currencyRules_replacedBy(String name) {
+    return 'הוחלף ב-$name';
+  }
+
+  @override
+  String currencyRules_summary_activity(int lapse) {
+    String _temp0 = intl.Intl.pluralLogic(
+      lapse,
+      locale: localeName,
+      other: 'פג $lapse ימים אחרי הצלילה המזכה האחרונה',
+      one: 'פג יום אחד אחרי הצלילה המזכה האחרונה',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String currencyRules_summary_date(int lapse) {
+    String _temp0 = intl.Intl.pluralLogic(
+      lapse,
+      locale: localeName,
+      other: 'פג $lapse ימים אחרי התאריך שעל הכרטיס',
+      one: 'פג יום אחד אחרי התאריך שעל הכרטיס',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get currencyRules_deleteDialog_title => 'למחוק את הכלל?';
+
+  @override
+  String currencyRules_deleteDialog_content(String name) {
+    return '$name יוסר. ריענונים שנרשמו נשארים בהיסטוריה של כל כרטיס.';
+  }
+
+  @override
+  String get currencyRules_dialog_addTitle => 'כלל חדש';
+
+  @override
+  String get currencyRules_dialog_editTitle => 'עריכת כלל';
+
+  @override
+  String get currencyRules_dialog_copyNote =>
+      'השמירה יוצרת עותק משלך שמחליף את הכלל המובנה הזה.';
+
+  @override
+  String get currencyRules_dialog_name => 'שם';
+
+  @override
+  String get currencyRules_dialog_nameRequired => 'יש להזין שם';
+
+  @override
+  String get currencyRules_dialog_clock => 'נספר מ';
+
+  @override
+  String get currencyRules_dialog_clock_activity => 'צלילה מזכה אחרונה';
+
+  @override
+  String get currencyRules_dialog_clock_date => 'תאריך על הכרטיס';
+
+  @override
+  String get currencyRules_dialog_agencies => 'ארגונים';
+
+  @override
+  String get currencyRules_dialog_levels => 'רמות';
+
+  @override
+  String get currencyRules_dialog_anyHint => 'ללא בחירה חל על הכל';
+
+  @override
+  String get currencyRules_dialog_note => 'הערה';
 
   @override
   String get settings_migrationProgress_doNotClose =>
@@ -23777,12 +24523,26 @@ class AppLocalizationsHe extends AppLocalizations {
     String group,
     String overall,
   ) {
-    return '$count מתוך $total צלילות, ממוצע הקבוצה $group לעומת $overall בסך הכול';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total צלילות',
+      two: 'שתי צלילות',
+      one: 'צלילה אחת',
+    );
+    return '$count מתוך $_temp0, ממוצע הקבוצה $group לעומת $overall בסך הכול';
   }
 
   @override
   String insights_focus_summary_allShown(int total) {
-    return 'רק ל־$total צלילות יש ערך זה, ולכן כולן מוצגות';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: 'רק ל־$total צלילות יש ערך זה, ולכן כולן מוצגות',
+      two: 'רק לשתי צלילות יש ערך זה, ולכן שתיהן מוצגות',
+      one: 'רק לצלילה אחת יש ערך זה, ולכן היא מוצגת',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -23891,7 +24651,14 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String insights_focus_factors_coverage(int covered, int total) {
-    return '$covered מתוך $total צלילות';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total צלילות',
+      two: 'שתי צלילות',
+      one: 'צלילה אחת',
+    );
+    return '$covered מתוך $_temp0';
   }
 
   @override
@@ -27919,6 +28686,11 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get universalImport_triage_excludedCsv => 'ייבוא נפרד (CSV)';
+
+  @override
+  String universalImport_triage_excludedHandoff(String format) {
+    return 'ייבוא נפרד ($format)';
+  }
 
   @override
   String get universalImport_triage_unsupported => 'פורמט לא נתמך';
@@ -46428,6 +47200,57 @@ class AppLocalizationsHe extends AppLocalizations {
   String get navTrack_handoff_reviewTrackButton => 'בדיקת המסלול התת-ימי';
 
   @override
+  String get suuntoJson_handoff_recognized => 'זוהה ייצוא צלילה של Suunto';
+
+  @override
+  String get suuntoJson_handoff_description =>
+      'קובץ זה יוצא מאפליקציית Suunto. מייבא Suunto קורא אותו באותו אופן כמו הייבוא מ-Suunto Cloud, כולל המסלול המוקלט של הצלילה.';
+
+  @override
+  String get suuntoJson_handoff_importButton => 'ייבוא צלילת Suunto';
+
+  @override
+  String get suuntoFile_step_title => 'ייצואים מאפליקציית Suunto';
+
+  @override
+  String get suuntoFile_step_description =>
+      'בחר צלילה אחת או יותר שיוצאו מאפליקציית Suunto כ-JSON. צלילות שהוקלטו עם מסלול מביאות אותו איתן.';
+
+  @override
+  String get suuntoFile_step_chooseFiles => 'בחירת קבצים';
+
+  @override
+  String suuntoFile_step_readyCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count צלילות מוכנות לייבוא',
+      one: 'צלילה אחת מוכנה לייבוא',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suuntoFile_step_routeIncluded => 'כולל מסלול מוקלט';
+
+  @override
+  String get suuntoFile_step_noRoute => 'אין מסלול מוקלט';
+
+  @override
+  String get suuntoFile_rejection_notJson => 'לא קובץ JSON';
+
+  @override
+  String get suuntoFile_rejection_notSuuntoExport =>
+      'לא ייצוא מאפליקציית Suunto';
+
+  @override
+  String get suuntoFile_rejection_notADive => 'לא צלילה (סוג פעילות אחר)';
+
+  @override
+  String get universalImport_summary_importWithSuunto =>
+      'ייבוא עם מייבא Suunto';
+
+  @override
   String get navTrack_section_trackTitle => 'מסלול תת-ימי';
 
   @override
@@ -47153,6 +47976,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get query_equipment_lastDived => 'שימוש אחרון';
 
   @override
+  String get query_equipment_location => 'מיקום';
+
+  @override
   String get query_equipment_model => 'דגם';
 
   @override
@@ -47358,6 +48184,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get query_weights_amount => 'כמות';
+
+  @override
+  String get query_weights_label => 'שם';
 
   @override
   String get query_weights_notes => 'הערות';
@@ -47790,4 +48619,19 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get query_saveNeedsDiver => 'צור פרופיל צולל כדי לשמור שאילתות';
+
+  @override
+  String get builtIns_showColumnLabel => 'הצג';
+
+  @override
+  String get builtIns_showInPickers => 'הצג בבוררים';
+
+  @override
+  String preDive_start_allTemplatesHidden(String path) {
+    return 'כל רשימות הבדיקה מוסתרות. אפשר להציג אחת מחדש ב-$path.';
+  }
+
+  @override
+  String get settings_conflict_field_hiddenBuiltInIds =>
+      'פריטים מובנים מוסתרים';
 }

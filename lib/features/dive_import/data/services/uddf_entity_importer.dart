@@ -11,7 +11,9 @@ import 'package:submersion/features/cylinder_passports/data/repositories/cylinde
 import 'package:submersion/features/cylinder_passports/data/services/csv_fill_importer.dart';
 import 'package:submersion/features/dive_import/data/repositories/imported_file_repository.dart';
 import 'package:submersion/features/dive_import/data/services/additional_computer_writer.dart';
+import 'package:submersion/features/dive_import/data/services/currency_restorer.dart';
 import 'package:submersion/features/dive_import/data/services/import_map_readers.dart';
+import 'package:submersion/features/dive_import/data/services/import_weight_mapper.dart';
 import 'package:submersion/features/dive_import/data/services/imported_profile_readers.dart';
 import 'package:submersion/features/dive_import/data/services/parsed_profile_event_mapper.dart';
 import 'package:submersion/features/dive_import/data/services/restored_source_attribution.dart';
@@ -31,6 +33,8 @@ import 'package:submersion/core/utils/number_utils.dart';
 import 'package:submersion/features/buddies/data/repositories/buddy_repository.dart';
 import 'package:submersion/features/buddies/domain/entities/buddy.dart';
 import 'package:submersion/features/dive_roles/domain/entities/dive_role.dart';
+import 'package:submersion/features/dive_roles/domain/services/dive_role_set.dart';
+import 'package:submersion/features/certifications/data/repositories/certification_currency_repository.dart';
 import 'package:submersion/features/certifications/data/repositories/certification_repository.dart';
 import 'package:submersion/features/certifications/domain/entities/certification.dart';
 import 'package:submersion/features/courses/data/repositories/course_repository.dart';
@@ -54,7 +58,10 @@ import 'package:submersion/features/site_types/data/repositories/site_type_repos
 import 'package:submersion/features/site_types/domain/entities/site_type_entity.dart';
 import 'package:submersion/features/dive_roles/data/repositories/dive_role_repository.dart';
 import 'package:submersion/features/dive_types/domain/entities/dive_type_entity.dart';
+import 'package:submersion/features/dive_import/data/services/import_equipment_location_linker.dart';
 import 'package:submersion/features/dive_import/data/services/import_equipment_tag_linker.dart';
+import 'package:submersion/features/equipment/data/repositories/equipment_location_move_repository.dart';
+import 'package:submersion/features/equipment/data/repositories/equipment_location_repository.dart';
 import 'package:submersion/features/equipment/data/repositories/equipment_repository_impl.dart';
 import 'package:submersion/features/equipment/data/repositories/equipment_tag_repository.dart';
 import 'package:submersion/features/equipment/data/repositories/equipment_set_repository_impl.dart';
@@ -84,6 +91,8 @@ import 'package:submersion/features/universal_import/data/models/source_diver.da
 import 'package:submersion/features/universal_import/data/services/import_site_location.dart';
 import 'package:submersion/features/universal_import/data/services/import_tank_defaults.dart';
 import 'package:uuid/uuid.dart';
+import 'package:submersion/features/certification_agencies/data/repositories/custom_certification_repository.dart';
+import 'package:submersion/features/certification_agencies/data/services/certification_import_resolver.dart';
 
 /// Bundles all repositories needed for UDDF import.
 class ImportRepositories {
@@ -139,6 +148,11 @@ class ImportRepositories {
   /// equipment is not linked to its tags (issue #1942).
   final EquipmentTagRepository? equipmentTagRepository;
 
+  /// Optional for the same reason; when either is null, the locations in a
+  /// Submersion equipment CSV are skipped (v268).
+  final EquipmentLocationRepository? equipmentLocationRepository;
+  final EquipmentLocationMoveRepository? equipmentLocationMoveRepository;
+
   /// Optional for the same reason; when null, the site features in the
   /// source are skipped rather than failing the import (issue #2200).
   final SiteFeatureRepository? siteFeatureRepository;
@@ -149,6 +163,10 @@ class ImportRepositories {
   /// row, the passport repository finds the cylinder it links to.
   final CylinderFillRepository? cylinderFillRepository;
   final CylinderPassportRepository? cylinderPassportRepository;
+
+  /// Optional for the same reason; when null, the certification currency
+  /// rows in a full backup (issue #2267) are skipped.
+  final CertificationCurrencyRepository? certificationCurrencyRepository;
 
   const ImportRepositories({
     required this.tripRepository,
@@ -171,10 +189,13 @@ class ImportRepositories {
     this.siteTypeRepository,
     this.siteClassificationRepository,
     this.equipmentTagRepository,
+    this.equipmentLocationRepository,
+    this.equipmentLocationMoveRepository,
     this.siteFeatureRepository,
     this.speciesRepository,
     this.cylinderFillRepository,
     this.cylinderPassportRepository,
+    this.certificationCurrencyRepository,
   });
 }
 
@@ -337,13 +358,26 @@ class UddfEntityImporter {
 
   final ImportedFileRepository _importedFiles;
 
+  /// Custom certification agencies and levels: an imported agency that names
+  /// no built-in becomes one, owned by the importing diver (issue #690).
+  final CustomCertificationRepository _customCertifications;
+
+  /// Whether an agency created by an import starts shared, from the
+  /// "Share by default" setting.
+  final bool _shareCustomAgenciesByDefault;
+
   UddfEntityImporter({
     TankPresetEntity? defaultTankPreset,
     int defaultStartPressure = 200,
     bool applyDefaultTankToImports = false,
     String placeNameLanguage = LocationService.defaultLanguageCode,
     ImportedFileRepository? importedFiles,
+    CustomCertificationRepository? customCertifications,
+    bool shareCustomAgenciesByDefault = false,
   }) : _defaultTankPreset = defaultTankPreset,
+       _customCertifications =
+           customCertifications ?? CustomCertificationRepository(),
+       _shareCustomAgenciesByDefault = shareCustomAgenciesByDefault,
        _defaultStartPressure = defaultStartPressure,
        _applyDefaultTankToImports = applyDefaultTankToImports,
        _placeNameLanguage = placeNameLanguage,
@@ -429,6 +463,11 @@ class UddfEntityImporter {
     ImportCancellationToken? cancelToken,
   }) async {
     final now = DateTime.now();
+    final certResolver = CertificationImportResolver(
+      _customCertifications,
+      diverId: diverId,
+      shareByDefault: _shareCustomAgenciesByDefault,
+    );
 
     // ID mappings for cross-references
     final tripIdMapping = <String, String>{};
@@ -514,6 +553,7 @@ class UddfEntityImporter {
       buddyIdMapping,
       now,
       onProgress,
+      certResolver,
     );
 
     final diveCentersCount = await _importDiveCenters(
@@ -526,14 +566,31 @@ class UddfEntityImporter {
       onProgress,
     );
 
+    final certIdMapping = <String, String>{};
     final certificationsCount = await _importCertifications(
       data.certifications,
       selections.certifications,
       repositories.certificationRepository,
       diverId,
+      certIdMapping,
       now,
       onProgress,
+      certResolver,
     );
+
+    // Certification currency (issue #2267): custom rules restore with no
+    // selection step, and prefs and events ride along with the
+    // certifications just created, as service records do with equipment.
+    final currencyRepository = repositories.certificationCurrencyRepository;
+    if (currencyRepository != null) {
+      await CurrencyRestorer(currencyRepository).restore(
+        rules: data.currencyRules,
+        prefs: data.currencyPrefs,
+        events: data.currencyEvents,
+        diverId: diverId,
+        certIdMapping: certIdMapping,
+      );
+    }
 
     final tagsCount = await _importTags(
       data.tags,
@@ -556,6 +613,20 @@ class UddfEntityImporter {
         items: data.equipment,
         equipmentIdMapping: equipmentIdMapping,
         tagIdMapping: tagIdMapping,
+      );
+    }
+
+    // Equipment locations (v268), from the Submersion equipment CSV.
+    final locationRepository = repositories.equipmentLocationRepository;
+    final moveRepository = repositories.equipmentLocationMoveRepository;
+    if (locationRepository != null && moveRepository != null) {
+      await ImportEquipmentLocationLinker(
+        places: locationRepository,
+        moves: moveRepository,
+      ).link(
+        items: data.equipment,
+        equipmentIdMapping: equipmentIdMapping,
+        diverId: diverId,
       );
     }
 
@@ -633,6 +704,7 @@ class UddfEntityImporter {
       buddyIdMapping,
       now,
       onProgress,
+      certResolver,
     );
 
     final divesResult = await _importDives(
@@ -987,6 +1059,7 @@ class UddfEntityImporter {
     Map<String, String> idMapping,
     DateTime now,
     ImportProgressCallback? onProgress,
+    CertificationImportResolver certResolver,
   ) async {
     if (selected.isEmpty) return 0;
     onProgress?.call(ImportPhase.buddies, 0, selected.length);
@@ -1017,22 +1090,29 @@ class UddfEntityImporter {
       // issue #553: buddy certs live in the certifications table now (setting
       // them on the Buddy entity would be ignored). Create a buddy-owned cert
       // row from the parsed certification, if any.
-      final certLevel = _parseEnum(
-        buddyData['certificationLevel'],
-        CertificationLevel.values,
-      );
-      final certAgency = _parseEnum(
-        buddyData['certificationAgency'],
-        CertificationAgency.values,
-      );
-      if (certLevel != null || certAgency != null) {
+      final levelText = _certificationText(buddyData['certificationLevel']);
+      final agencyText = _certificationText(buddyData['certificationAgency']);
+      // An agency that names no built-in becomes a custom agency (issue
+      // #690); level text that matches nothing is dropped, as before, so it
+      // alone never creates a certification.
+      final givenAgencyId = agencyText == null
+          ? null
+          : await certResolver.agencyId(agencyText);
+      final agencyId = givenAgencyId ?? CertificationAgency.other.name;
+      final levelId = await certResolver.levelId(agencyId, levelText);
+      if (levelId != null || givenAgencyId != null) {
         await certRepository.createCertification(
           Certification(
             id: '',
             buddyId: newId,
-            name: certLevel?.displayName ?? certAgency?.displayName ?? name,
-            agency: certAgency ?? CertificationAgency.other,
-            level: certLevel,
+            name:
+                CertificationLevel.fromId(levelId)?.displayName ??
+                (levelId != null ? levelText : null) ??
+                CertificationAgency.fromId(agencyId)?.displayName ??
+                agencyText ??
+                name,
+            agency: agencyId,
+            level: levelId,
             createdAt: now,
             updatedAt: now,
           ),
@@ -1109,8 +1189,10 @@ class UddfEntityImporter {
     Set<int> selected,
     CertificationRepository repository,
     String diverId,
+    Map<String, String> idMapping,
     DateTime now,
     ImportProgressCallback? onProgress,
+    CertificationImportResolver certResolver,
   ) async {
     if (selected.isEmpty) return 0;
     onProgress?.call(ImportPhase.certifications, 0, selected.length);
@@ -1123,8 +1205,13 @@ class UddfEntityImporter {
       if (name == null || name.isEmpty) continue;
 
       final newId = _uuid.v4();
-      final agency = _parseCertificationAgency(certData['agency']);
-      final level = _parseCertificationLevel(certData['level']);
+      final agency = await certResolver.agencyId(
+        _certificationText(certData['agency']),
+      );
+      final level = await certResolver.levelId(
+        agency,
+        _certificationText(certData['level']),
+      );
 
       final certification = Certification(
         id: newId,
@@ -1143,6 +1230,8 @@ class UddfEntityImporter {
       );
 
       await repository.createCertification(certification);
+      final uddfId = certData['uddfId'];
+      if (uddfId is String && uddfId.isNotEmpty) idMapping[uddfId] = newId;
       count++;
       onProgress?.call(ImportPhase.certifications, count, selected.length);
     }
@@ -2010,6 +2099,7 @@ class UddfEntityImporter {
     Map<String, String> buddyIdMapping,
     DateTime now,
     ImportProgressCallback? onProgress,
+    CertificationImportResolver certResolver,
   ) async {
     if (selected.isEmpty) return 0;
     onProgress?.call(ImportPhase.courses, 0, selected.length);
@@ -2024,7 +2114,9 @@ class UddfEntityImporter {
       final uddfId = courseData['uddfId'] as String?;
       final newId = _uuid.v4();
 
-      final agency = _parseCertificationAgency(courseData['agency']);
+      final agency = await certResolver.agencyId(
+        _certificationText(courseData['agency']),
+      );
 
       // Map instructor buddy reference to new ID
       String? instructorId;
@@ -2531,13 +2623,7 @@ class UddfEntityImporter {
       final weights =
           weightsData
               ?.map(
-                (w) => DiveWeight(
-                  id: _uuid.v4(),
-                  diveId: diveId,
-                  weightType: w['type'] as WeightType? ?? WeightType.integrated,
-                  amountKg: w['amount'] as double? ?? 0.0,
-                  notes: w['notes'] as String? ?? '',
-                ),
+                (w) => weightFromImportData(w, id: _uuid.v4(), diveId: diveId),
               )
               .toList() ??
           [];
@@ -2611,13 +2697,16 @@ class UddfEntityImporter {
       final diveMode =
           _parseEnum(diveData['diveMode'], DiveMode.values) ?? DiveMode.oc;
       final isPlanned = diveData['isPlanned'] as bool? ?? false;
-      // The diver's own role, as this diver's copy of it. A custom role this
-      // diver lacks (its definition never arrived) leaves the dive with no
-      // role rather than one this diver's role list cannot resolve.
-      final diverRoleValue = diveData['diverRoleId'];
-      final diverRoleId = diverRoleValue is String && diverRoleValue.isNotEmpty
-          ? await localRoleId(diverRoleValue)
-          : null;
+      // The diver's own roles (several since #1221), each as this diver's
+      // copy of it. A custom role this diver lacks (its definition never
+      // arrived) is dropped rather than kept as one this diver's role list
+      // cannot resolve.
+      final diverRoleValue = diveData['diverRoleIds'];
+      final diverRoleIds = DiveRoleSet.normalize([
+        if (diverRoleValue is List)
+          for (final id in diverRoleValue.whereType<String>())
+            if (id.isNotEmpty) ?await localRoleId(id),
+      ]);
       final isFavorite = diveData['isFavorite'] as bool? ?? false;
       final excludedFromStats = diveData['excludedFromStats'] as bool? ?? false;
       final excludedFromGasStats =
@@ -2721,7 +2810,7 @@ class UddfEntityImporter {
         // Dive mode and rebreather fields
         diveMode: diveMode,
         isPlanned: isPlanned,
-        diverRoleId: diverRoleId,
+        diverRoleIds: diverRoleIds,
         isFavorite: isFavorite,
         excludedFromStats: excludedFromStats,
         excludedFromGasStats: excludedFromGasStats,
@@ -3404,6 +3493,15 @@ class UddfEntityImporter {
     BuddyRepository repository, {
     required Future<String?> Function(String roleId) localRoleId,
   }) async {
+    // Roles per person, collected from every source before any link is
+    // written (issue #1221): the standard elements infer roles that add up
+    // (DiveRoleSet.accumulate), while Submersion's exact <buddyroles> set,
+    // when present, is the person's whole set.
+    final inferred = <String, List<String>>{};
+    final exact = <String, List<String>>{};
+    void infer(String buddyId, String roleId) =>
+        inferred.putIfAbsent(buddyId, () => []).add(roleId);
+
     // Link referenced buddies (from pre-imported buddy entities)
     final buddyRefsValue = diveData['buddyRefs'];
     final buddyRefs = buddyRefsValue is List
@@ -3412,7 +3510,7 @@ class UddfEntityImporter {
     for (final buddyRef in buddyRefs) {
       final newBuddyId = buddyIdMapping[buddyRef];
       if (newBuddyId != null) {
-        await repository.addBuddyToDive(diveId, newBuddyId, DiveRole.buddyId);
+        infer(newBuddyId, DiveRole.buddyId);
       }
     }
 
@@ -3424,11 +3522,7 @@ class UddfEntityImporter {
     for (final guideRef in guideRefs) {
       final newGuideId = buddyIdMapping[guideRef];
       if (newGuideId != null) {
-        await repository.addBuddyToDive(
-          diveId,
-          newGuideId,
-          DiveRole.diveGuideId,
-        );
+        infer(newGuideId, DiveRole.diveGuideId);
       }
     }
 
@@ -3446,7 +3540,7 @@ class UddfEntityImporter {
       if (buddy.diverId == null) {
         await repository.updateBuddy(buddy.copyWith(diverId: diverId));
       }
-      await repository.addBuddyToDive(diveId, buddy.id, DiveRole.buddyId);
+      infer(buddy.id, DiveRole.buddyId);
       inlineIds.add(buddy.id);
     }
 
@@ -3463,15 +3557,16 @@ class UddfEntityImporter {
       if (guide.diverId == null) {
         await repository.updateBuddy(guide.copyWith(diverId: diverId));
       }
-      await repository.addBuddyToDive(diveId, guide.id, DiveRole.diveGuideId);
+      infer(guide.id, DiveRole.diveGuideId);
       inlineIds.add(guide.id);
     }
 
     // Exact roles from Submersion's private <buddyroles> block (issue
-    // #1737). Applied last: addBuddyToDive keeps one row per person, so
-    // these override any role inferred from the standard elements. A role
-    // this diver lacks can only be a custom role whose definition never
-    // arrived, which the standard elements carried as a plain buddy.
+    // #1737), one entry per role since #1221. They replace whatever the
+    // standard elements inferred for that person. A role this diver lacks
+    // can only be a custom role whose definition never arrived: it is
+    // dropped, and stands in as a plain buddy only when nothing else of the
+    // person's resolves (normalizeBuddy).
     final roleRefsValue = diveData['buddyRoleRefs'];
     final roleRefs = roleRefsValue is List ? roleRefsValue : const [];
     for (final entry in roleRefs) {
@@ -3481,10 +3576,18 @@ class UddfEntityImporter {
       if (buddyRef is! String || roleId is! String || roleId.isEmpty) continue;
       final newBuddyId = buddyIdMapping[buddyRef];
       if (newBuddyId == null) continue;
-      await repository.addBuddyToDive(
+      final localId = await localRoleId(roleId);
+      final roles = exact.putIfAbsent(newBuddyId, () => []);
+      if (localId != null) roles.add(localId);
+    }
+
+    for (final buddyId in {...inferred.keys, ...exact.keys}) {
+      await repository.addBuddyToDiveWithRoles(
         diveId,
-        newBuddyId,
-        await localRoleId(roleId) ?? DiveRole.buddyId,
+        buddyId,
+        exact.containsKey(buddyId)
+            ? DiveRoleSet.normalizeBuddy(exact[buddyId]!)
+            : DiveRoleSet.accumulate(inferred[buddyId]!),
       );
     }
 
@@ -3582,26 +3685,14 @@ class UddfEntityImporter {
     return EquipmentStatus.active;
   }
 
-  CertificationAgency _parseCertificationAgency(dynamic value) {
-    if (value is CertificationAgency) return value;
-    if (value is String) {
-      // A named-but-unrecognised agency is "other", not PADI. Defaulting to
-      // PADI relabels real cards from agencies outside the enum (#912).
-      return _parseEnumValue(value, CertificationAgency.values) ??
-          (value.trim().isEmpty
-              ? CertificationAgency.padi
-              : CertificationAgency.other);
-    }
-    return CertificationAgency.padi;
-  }
-
-  CertificationLevel? _parseCertificationLevel(dynamic value) {
-    if (value is CertificationLevel) return value;
-    if (value is String) {
-      return _parseEnumValue(value, CertificationLevel.values);
-    }
-    return null;
-  }
+  /// Parsed agency or level text: parsers emit either an enum value or the
+  /// file's own text (issue #690).
+  static String? _certificationText(Object? value) => switch (value) {
+    final CertificationAgency a => a.name,
+    final CertificationLevel l => l.name,
+    final String s => s,
+    _ => null,
+  };
 
   T? _parseEnumValue<T extends Enum>(String value, List<T> values) {
     final lowerValue = value.toLowerCase();

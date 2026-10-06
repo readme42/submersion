@@ -104,6 +104,8 @@ import 'package:submersion/features/universal_import/presentation/providers/univ
 import '../../../../helpers/test_database.dart';
 import 'universal_adapter_test.mocks.dart';
 import '../../../../helpers/fake_hosts.dart';
+import 'package:submersion/features/certification_agencies/domain/certification_catalog.dart';
+import 'package:submersion/features/certification_agencies/presentation/providers/certification_catalog_providers.dart';
 
 typedef Override = riverpod.Override;
 
@@ -355,6 +357,10 @@ List<Override> _fullOverrides({
     tankPresetRepositoryProvider.overrideWithValue(tankPresetRepo),
     // Override the async list providers used by checkDuplicates.
     allTripsProvider.overrideWith((ref) async => existingTrips),
+    // Custom certification agencies the duplicate check names (#690).
+    allCustomCertificationsCatalogProvider.overrideWith(
+      (ref) async => CertificationCatalog.builtInOnly,
+    ),
     sitesProvider.overrideWith((ref) async => existingSites),
     allEquipmentProvider.overrideWith((ref) async => existingEquipment),
     allBuddiesProvider.overrideWith((ref) async => existingBuddies),
@@ -3266,7 +3272,7 @@ void main() {
       final existingCert = Certification(
         id: 'cert-1',
         name: 'Open Water',
-        agency: CertificationAgency.padi,
+        agency: CertificationAgency.padi.name,
         createdAt: _now,
         updatedAt: _now,
       );
@@ -4074,7 +4080,7 @@ void main() {
 
         final mockBuddyRepo = MockBuddyRepository();
         when(
-          mockBuddyRepo.addBuddyToDive(any, any, any),
+          mockBuddyRepo.addBuddyToDiveWithRoles(any, any, any),
         ).thenAnswer((_) async {});
 
         final mockTankPresetRepo = MockTankPresetRepository();
@@ -4113,7 +4119,9 @@ void main() {
             );
 
             verifyNever(mockBuddyRepo.createBuddy(any));
-            verify(mockBuddyRepo.addBuddyToDive(any, 'buddy-1', any)).called(1);
+            verify(
+              mockBuddyRepo.addBuddyToDiveWithRoles(any, 'buddy-1', any),
+            ).called(1);
           },
         );
       },

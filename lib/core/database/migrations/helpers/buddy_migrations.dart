@@ -243,4 +243,54 @@ extension BuddyMigrations on AppDatabase {
       'ON certifications (buddy_id)',
     );
   }
+
+  /// v103 backstop: the dive_roles table, its built-in seed and the
+  /// dives.diver_role column (all DDL idempotent). The seed is guarded on
+  /// the divers FK parent existing, which only matters for minimal
+  /// test-fixture databases. Moved here from beforeOpen beside the v272
+  /// role junctions.
+  Future<void> _assertDiveRoleVocabularySchema() async {
+    await Migrator(this).createTable(diveRoles);
+    if (await _tableExists('divers')) {
+      await customStatement(kSeedBuiltInDiveRolesSql);
+    }
+    final divesCols = await customSelect("PRAGMA table_info('dives')").get();
+    final hasDiverRoleCol = divesCols.any(
+      (c) => c.read<String>('name') == 'diver_role',
+    );
+    if (divesCols.isNotEmpty && !hasDiverRoleCol) {
+      await customStatement('ALTER TABLE dives ADD COLUMN diver_role TEXT');
+    }
+  }
+
+  /// v272: the role junctions (issue #1221). Table-only, no backfill: an
+  /// existing dive resolves to its scalar role (DiveRoleSet.resolve), so no
+  /// row is minted per device. Idempotent; called from the v272 rung and the
+  /// beforeOpen backstop. Skipped on a partial fixture without parents.
+  Future<void> _assertDiveRoleLinkSchema() async {
+    for (final parent in const ['dives', 'buddies']) {
+      if (!await _tableExists(parent)) return;
+    }
+    await Migrator(this).createTable(diveDiverRoles);
+    await Migrator(this).createTable(diveBuddyRoles);
+    await assertDiveRoleLinkUniqueness(this);
+  }
+
+  /// Idempotent creation of the v267 custom certification tables (issue
+  /// #690) and the level-by-agency index. Called from the v267 rung and the
+  /// beforeOpen backstop. Skipped on a partial migration fixture without
+  /// `divers`, so an older fixture does not gain tables whose foreign keys
+  /// point nowhere.
+  Future<void> _assertCustomCertificationSchema() async {
+    final divers = await customSelect(
+      "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'divers'",
+    ).get();
+    if (divers.isEmpty) return;
+    await Migrator(this).createTable(customCertificationAgencies);
+    await Migrator(this).createTable(customCertificationLevels);
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_custom_certification_levels_agency '
+      'ON custom_certification_levels(agency_id)',
+    );
+  }
 }

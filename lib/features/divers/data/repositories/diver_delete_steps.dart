@@ -140,6 +140,11 @@ const List<DiverDeleteStep> diverTripAndSiteSteps = [
 
 const _diverGear = 'SELECT id FROM equipment WHERE diver_id = ?1';
 
+/// The diver's own certifications and their buddies' certifications.
+const _diverCertifications =
+    'SELECT id FROM certifications WHERE diver_id = ?1 '
+    'OR buddy_id IN (SELECT id FROM buddies WHERE diver_id = ?1)';
+
 /// The diver's gear, with the children `EquipmentRepository.deleteEquipment`
 /// tombstones. They would cascade with the gear; deleting them first is the
 /// same outcome with their ids in hand.
@@ -195,6 +200,13 @@ const List<DiverDeleteStep> diverGearSteps = [
     entityType: 'equipmentOwnershipEvents',
     where: 'equipment_id IN ($_diverGear)',
   ),
+  // The location log of the diver's gear (v268). Moves on other profiles'
+  // gear stay; their places are kept by retireDiverEquipmentLocations.
+  (
+    table: 'equipment_location_moves',
+    entityType: 'equipmentLocationMoves',
+    where: 'equipment_id IN ($_diverGear)',
+  ),
   (table: 'equipment', entityType: 'equipment', where: 'diver_id = ?1'),
 ];
 
@@ -214,6 +226,19 @@ const List<DiverDeleteStep> diverLibrarySteps = [
     table: 'equipment_sets',
     entityType: 'equipmentSets',
     where: 'diver_id = ?1',
+  ),
+  // Currency prefs and events cascade with their certification, and a
+  // cascade writes no tombstones, so they are logged first, as
+  // CertificationRepository.deleteCertification logs them.
+  (
+    table: 'certification_currency_prefs',
+    entityType: 'certificationCurrencyPrefs',
+    where: 'certification_id IN ($_diverCertifications)',
+  ),
+  (
+    table: 'certification_currency_events',
+    entityType: 'certificationCurrencyEvents',
+    where: 'certification_id IN ($_diverCertifications)',
   ),
   (
     table: 'certifications',

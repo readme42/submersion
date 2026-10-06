@@ -3115,6 +3115,125 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get certifications_list_filter_needsAttention => 'Requiere atención';
+
+  @override
+  String get certifications_list_filter_clear => 'Borrar';
+
+  @override
+  String get certifications_list_needsAttention_empty =>
+      'Ninguna certificación requiere atención';
+
+  @override
+  String get certifications_list_needsAttention_emptySubtitle =>
+      'Todas las certificaciones están al día o silenciadas.';
+
+  @override
+  String get currencyRule_padi_reactivate_name => 'Repaso PADI (ReActivate)';
+
+  @override
+  String get currencyRule_ssi_skills_update_name => 'SSI Scuba Skills Update';
+
+  @override
+  String get currencyRule_generic_refresher_name => 'Repaso';
+
+  @override
+  String get currencyRule_first_aid_24mo_name =>
+      'Renovación de primeros auxilios y RCP';
+
+  @override
+  String get currencyRule_pro_membership_annual_name =>
+      'Renovación de la membresía profesional';
+
+  @override
+  String get currencyRule_gue_revalidation_name => 'Revalidación GUE';
+
+  @override
+  String get currencyRule_ffessm_licence_annual_name =>
+      'Licencia FFESSM y certificado médico';
+
+  @override
+  String get currencyRule_cave_currency_name => 'Práctica en cuevas';
+
+  @override
+  String get currencyRule_rebreather_currency_name => 'Práctica con rebreather';
+
+  @override
+  String get currencyRule_deco_currency_name => 'Práctica de descompresión';
+
+  @override
+  String get currencyRule_card_expiry_name => 'Caducidad de la tarjeta';
+
+  @override
+  String get currencyRule_padi_reactivate_advisory =>
+      'PADI sugiere un repaso ReActivate tras seis a doce meses sin bucear.';
+
+  @override
+  String get currencyRule_ssi_skills_update_advisory =>
+      'SSI sugiere un Scuba Skills Update tras seis a doce meses sin bucear.';
+
+  @override
+  String get currencyRule_generic_refresher_advisory =>
+      'La mayoría de las agencias sugieren un repaso tras seis a doce meses sin bucear.';
+
+  @override
+  String get currencyRule_first_aid_advisory =>
+      'Las credenciales de primeros auxilios, RCP y proveedor de oxígeno suelen renovarse cada dos años.';
+
+  @override
+  String get currencyRule_pro_membership_advisory =>
+      'Las membresías profesionales suelen renovarse cada año para mantener activo el estatus docente.';
+
+  @override
+  String get currencyRule_gue_revalidation_advisory =>
+      'Las certificaciones GUE suelen revalidarse cada tres años.';
+
+  @override
+  String get currencyRule_ffessm_licence_advisory =>
+      'La licencia FFESSM y su certificado médico se renuevan cada año.';
+
+  @override
+  String get currencyRule_cave_currency_advisory =>
+      'Las habilidades en cuevas se pierden sin práctica; se suele aconsejar una inmersión de control tras un año sin bucear en ellas.';
+
+  @override
+  String get currencyRule_rebreather_currency_advisory =>
+      'Las habilidades con rebreather se pierden rápido; muchas agencias aconsejan un repaso tras seis meses sin usarlo.';
+
+  @override
+  String get currencyRule_deco_currency_advisory =>
+      'Los procedimientos de descompresión suelen repasarse tras un año sin inmersiones con descompresión.';
+
+  @override
+  String get currencyRule_card_expiry_advisory =>
+      'La fecha de caducidad impresa en esta tarjeta.';
+
+  @override
+  String get certifications_currency_status_current => 'Al día';
+
+  @override
+  String get certifications_currency_status_dueSoon => 'Vence pronto';
+
+  @override
+  String get certifications_currency_status_lapsed => 'Vencido';
+
+  @override
+  String get certifications_currency_eventType_refresher => 'Repaso';
+
+  @override
+  String get certifications_currency_eventType_renewal => 'Renovación';
+
+  @override
+  String get certifications_currency_eventType_revalidation => 'Revalidación';
+
+  @override
+  String get certifications_currency_eventType_skillsUpdate =>
+      'Actualización de habilidades';
+
+  @override
+  String get certifications_currency_eventType_other => 'Otro';
+
+  @override
   String get certifications_detail_action_delete => 'Eliminar';
 
   @override
@@ -3202,6 +3321,143 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get certifications_detail_sectionTitle_dates => 'Fechas';
+
+  @override
+  String get certifications_detail_sectionTitle_currency => 'Vigencia';
+
+  @override
+  String certifications_currency_dueOn(String date) {
+    return 'Vence el $date';
+  }
+
+  @override
+  String certifications_currency_lapsedSince(String date) {
+    return 'Vencido desde el $date';
+  }
+
+  @override
+  String certifications_currency_anchor_lastDive(String date) {
+    return 'Última inmersión $date';
+  }
+
+  @override
+  String certifications_currency_anchor_lastQualifyingDive(String date) {
+    return 'Última inmersión válida $date';
+  }
+
+  @override
+  String certifications_currency_anchor_cardExpiry(String date) {
+    return 'Caducidad de la tarjeta $date';
+  }
+
+  @override
+  String certifications_currency_anchor_cardIssue(String date) {
+    return 'Emitida el $date';
+  }
+
+  @override
+  String certifications_currency_anchor_ledgerEvent(String event, String date) {
+    return '$event registrado el $date';
+  }
+
+  @override
+  String certifications_currency_alsoCovers(String names) {
+    return 'También cubre $names';
+  }
+
+  @override
+  String get certifications_currency_muted => 'Silenciado';
+
+  @override
+  String get certifications_currency_noCountedDive =>
+      'Aún no hay ninguna inmersión válida registrada';
+
+  @override
+  String get certifications_currency_action_log => 'Registrar repaso';
+
+  @override
+  String get certifications_currency_action_interval => 'Editar intervalo';
+
+  @override
+  String get certifications_currency_action_mapping =>
+      'Qué inmersiones cuentan';
+
+  @override
+  String get certifications_currency_action_mute => 'Silenciar';
+
+  @override
+  String get certifications_currency_action_unmute => 'Reactivar';
+
+  @override
+  String get certifications_currency_history => 'Historial';
+
+  @override
+  String get certifications_currency_deleteEvent_title => '¿Eliminar entrada?';
+
+  @override
+  String certifications_currency_deleteEvent_content(
+    String event,
+    String date,
+  ) {
+    return 'Se eliminará el $event registrado el $date.';
+  }
+
+  @override
+  String get certifications_currency_eventDialog_title =>
+      'Registrar repaso o renovación';
+
+  @override
+  String get certifications_currency_eventDialog_type => 'Tipo';
+
+  @override
+  String get certifications_currency_eventDialog_date => 'Fecha';
+
+  @override
+  String get certifications_currency_eventDialog_provider =>
+      'Centro, club o instructor';
+
+  @override
+  String get certifications_currency_eventDialog_notes => 'Notas';
+
+  @override
+  String get certifications_currency_intervalDialog_title => 'Intervalo';
+
+  @override
+  String get certifications_currency_intervalDialog_lapse =>
+      'Vence tras (días)';
+
+  @override
+  String get certifications_currency_intervalDialog_lead =>
+      'Avisar con estos días de antelación';
+
+  @override
+  String certifications_currency_intervalDialog_inheritHint(String days) {
+    return 'En blanco usa el valor de la regla ($days)';
+  }
+
+  @override
+  String get certifications_currency_intervalDialog_leadTooLong =>
+      'El aviso no puede empezar antes que el intervalo';
+
+  @override
+  String get certifications_currency_mappingDialog_title =>
+      'Qué inmersiones cuentan';
+
+  @override
+  String get certifications_currency_mappingDialog_types =>
+      'Tipos de inmersión';
+
+  @override
+  String get certifications_currency_mappingDialog_modes =>
+      'Modos de inmersión';
+
+  @override
+  String get certifications_currency_mappingDialog_anyHint =>
+      'Sin selección, cuenta cualquier inmersión';
+
+  @override
+  String get certifications_currency_mappingDialog_reset =>
+      'Usar el valor de la regla';
 
   @override
   String get certifications_detail_sectionTitle_details =>
@@ -3370,6 +3626,121 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get certifications_edit_label_agency => 'Agencia *';
+
+  @override
+  String get certificationAgencies_unknownAgency => 'Agencia desconocida';
+
+  @override
+  String get certificationAgencies_unknownCertification =>
+      'Certificación desconocida';
+
+  @override
+  String get certificationAgencies_addCustomAgency =>
+      'Añadir agencia personalizada...';
+
+  @override
+  String get certificationAgencies_addCustomCertification =>
+      'Añadir certificación personalizada...';
+
+  @override
+  String get certificationAgencies_dialog_newAgencyTitle => 'Nueva agencia';
+
+  @override
+  String get certificationAgencies_dialog_editAgencyTitle => 'Editar agencia';
+
+  @override
+  String get certificationAgencies_dialog_newCertificationTitle =>
+      'Nueva certificación';
+
+  @override
+  String get certificationAgencies_dialog_editCertificationTitle =>
+      'Editar certificación';
+
+  @override
+  String get certificationAgencies_dialog_nameLabel => 'Nombre';
+
+  @override
+  String get certificationAgencies_dialog_colorLabel => 'Color de la tarjeta';
+
+  @override
+  String get certificationAgencies_dialog_specialty => 'Especialidad';
+
+  @override
+  String get certificationAgencies_error_nameRequired => 'Introduce un nombre';
+
+  @override
+  String get certificationAgencies_error_nameTaken =>
+      'Ese nombre ya está en uso';
+
+  @override
+  String get settings_manage_certificationAgencies =>
+      'Agencias de certificación';
+
+  @override
+  String get settings_manage_certificationAgencies_subtitle =>
+      'Gestionar agencias y certificaciones personalizadas';
+
+  @override
+  String get certificationAgencies_section_yours => 'Tus agencias';
+
+  @override
+  String get certificationAgencies_section_builtIn => 'Agencias integradas';
+
+  @override
+  String get certificationAgencies_addAgency => 'Añadir agencia';
+
+  @override
+  String certificationAgencies_sharedBy(String name) {
+    return 'Compartida por $name';
+  }
+
+  @override
+  String get certificationAgencies_editor_addCertification =>
+      'Añadir certificación';
+
+  @override
+  String get certificationAgencies_editor_builtInHint =>
+      'Las certificaciones integradas no se pueden cambiar. Puedes añadir las tuyas.';
+
+  @override
+  String certificationAgencies_delete_confirmTitle(String name) {
+    return '¿Eliminar $name?';
+  }
+
+  @override
+  String get certificationAgencies_delete_refusedTitle => 'Todavía en uso';
+
+  @override
+  String certificationAgencies_delete_refusedBody(String usage) {
+    return 'Lo usan $usage. Cámbialos primero.';
+  }
+
+  @override
+  String certificationAgencies_usage_certifications(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count certificaciones',
+      one: '1 certificación',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String certificationAgencies_usage_courses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cursos',
+      one: '1 curso',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String certificationAgencies_usage_and(String first, String second) {
+    return '$first y $second';
+  }
 
   @override
   String get certifications_edit_addRecognition => 'Añadir otro reconocimiento';
@@ -5076,8 +5447,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settings_homeChips_lastDive => 'Vigencia de buceo';
 
   @override
-  String get settings_homeChips_certifications =>
-      'Vencimiento de certificaciones';
+  String get settings_homeChips_certifications => 'Vigencia de certificaciones';
 
   @override
   String get settings_homeChips_trip => 'Próximo viaje';
@@ -5101,8 +5471,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settings_homeChips_dataQuality => 'Calidad de datos';
 
   @override
-  String dashboard_gauges_certsExpiring(int count) {
-    return '$count certificaciones por vencer';
+  String dashboard_gauges_certsNeedAttention(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count certificaciones requieren atención',
+      one: '$count certificación requiere atención',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -6844,6 +7220,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get diveLog_edit_label_waterType => 'Tipo de agua';
+
+  @override
+  String get diveLog_edit_label_weightName => 'Nombre (opcional)';
+
+  @override
+  String get diveLog_edit_hint_weightName => 'p. ej., bolsillo superior';
 
   @override
   String get diveLog_edit_marineLifeHint =>
@@ -11634,6 +12016,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get enum_certificationAgency_ffessm => 'FFESSM';
 
   @override
+  String get enum_certificationAgency_acuc => 'ACUC';
+
+  @override
+  String get enum_certificationAgency_dan => 'DAN';
+
+  @override
   String get enum_certificationAgency_gue => 'GUE';
 
   @override
@@ -11714,6 +12102,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get enum_certificationLevel_techDiver => 'Buzo técnico';
+
+  @override
+  String get enum_certificationLevel_firstAid => 'Primeros auxilios / RCP';
+
+  @override
+  String get enum_certificationLevel_oxygenProvider =>
+      'Proveedor de oxígeno de emergencia';
 
   @override
   String get enum_certificationLevel_trimix => 'Trimix';
@@ -14559,6 +14954,245 @@ class AppLocalizationsEs extends AppLocalizations {
   String get equipment_filter_section_category => 'Categoría';
 
   @override
+  String get equipment_location_kind_storage => 'Almacenamiento';
+
+  @override
+  String get equipment_location_kind_serviceShop => 'Taller de mantenimiento';
+
+  @override
+  String get equipment_location_kind_person => 'Persona';
+
+  @override
+  String get equipment_location_kind_other => 'Otro';
+
+  @override
+  String get equipment_location_noLocation => 'Sin ubicación';
+
+  @override
+  String get equipment_location_picker_title => 'Elige un lugar';
+
+  @override
+  String get equipment_location_picker_search => 'Buscar lugares';
+
+  @override
+  String get equipment_location_picker_newPlace => 'Nuevo lugar';
+
+  @override
+  String equipment_location_move_title(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Mover $count elementos',
+      one: 'Mover $count elemento',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_move_to => 'A';
+
+  @override
+  String get equipment_location_move_choose => 'Elige un lugar';
+
+  @override
+  String get equipment_location_move_date => 'Fecha';
+
+  @override
+  String get equipment_location_move_time => 'Hora';
+
+  @override
+  String get equipment_location_move_note => 'Nota';
+
+  @override
+  String get equipment_location_move_noteHint =>
+      'p. ej., revisión anual del regulador';
+
+  @override
+  String get equipment_location_move_confirm => 'Mover';
+
+  @override
+  String get equipment_location_parts_title => '¿Mover también las piezas?';
+
+  @override
+  String equipment_location_parts_body(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '¿Mover también sus $count piezas al mismo lugar?',
+      one: '¿Mover también su $count pieza al mismo lugar?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_parts_yes => 'Mover piezas';
+
+  @override
+  String get equipment_location_parts_no => 'Solo este';
+
+  @override
+  String get equipment_location_status_title => '¿Actualizar el estado?';
+
+  @override
+  String equipment_location_status_body(int count, String status) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '¿Marcar también $count elementos como $status?',
+      one: '¿Marcar también $count elemento como $status?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_status_yes => 'Actualizar';
+
+  @override
+  String get equipment_location_status_no => 'Mantener estado';
+
+  @override
+  String equipment_location_moved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count elementos movidos',
+      one: '$count elemento movido',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_card_title => 'Ubicación';
+
+  @override
+  String get equipment_location_none => 'Sin ubicación definida';
+
+  @override
+  String equipment_location_since(String date) {
+    return 'Desde el $date';
+  }
+
+  @override
+  String get equipment_location_moveButton => 'Mover';
+
+  @override
+  String get equipment_location_showAll => 'Mostrar todo';
+
+  @override
+  String get equipment_location_history_cleared => 'Ubicación borrada';
+
+  @override
+  String get equipment_location_editMove_title => 'Editar movimiento';
+
+  @override
+  String get equipment_location_editMove_delete => 'Eliminar movimiento';
+
+  @override
+  String get equipment_location_deleteMoveConfirm =>
+      '¿Eliminar esta entrada del historial? La ubicación del elemento se recalcula con los movimientos que quedan.';
+
+  @override
+  String get equipment_location_bulkAction => 'Mover a una ubicación';
+
+  @override
+  String equipment_location_groupCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count elementos',
+      one: '$count elemento',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_activeFilter => 'Ubicación';
+
+  @override
+  String get equipment_filter_section_location => 'Ubicación';
+
+  @override
+  String get equipment_arrange_groupByLocation => 'Agrupar por ubicación';
+
+  @override
+  String get equipment_arrange_groupByLocationSubtitle =>
+      'Un encabezado por lugar, solo en esta página';
+
+  @override
+  String get equipment_edit_locationLabel => 'Ubicación';
+
+  @override
+  String get equipment_edit_locationNone => 'Sin definir';
+
+  @override
+  String get equipment_edit_locationFailed =>
+      'Guardado, pero no se pudo establecer su ubicación. Usa Mover en el elemento para establecerla.';
+
+  @override
+  String get equipment_locations_title => 'Ubicaciones';
+
+  @override
+  String get equipment_locations_empty =>
+      'Aún no hay lugares. Añade uno para saber dónde está tu equipo.';
+
+  @override
+  String get equipment_locations_add => 'Añadir lugar';
+
+  @override
+  String equipment_locations_archivedSection(int count) {
+    return 'Archivados ($count)';
+  }
+
+  @override
+  String get equipment_locations_archive => 'Archivar';
+
+  @override
+  String get equipment_locations_restore => 'Restaurar';
+
+  @override
+  String get equipment_locations_delete => 'Eliminar';
+
+  @override
+  String equipment_locations_deleteConfirm(String name) {
+    return '¿Eliminar $name?';
+  }
+
+  @override
+  String get equipment_locations_itemsHere => 'Elementos aquí';
+
+  @override
+  String get equipment_locations_noItemsHere => 'No hay nada aquí ahora mismo.';
+
+  @override
+  String get equipment_locations_moveItems => 'Mover los elementos de aquí';
+
+  @override
+  String get equipment_locations_newTitle => 'Nuevo lugar';
+
+  @override
+  String get equipment_locations_editTitle => 'Editar lugar';
+
+  @override
+  String get equipment_locations_nameLabel => 'Nombre';
+
+  @override
+  String get equipment_locations_nameRequired => 'Introduce un nombre';
+
+  @override
+  String get equipment_locations_duplicateWarning =>
+      'Ya tienes un lugar con este nombre';
+
+  @override
+  String get equipment_locations_kindLabel => 'Tipo';
+
+  @override
+  String get equipment_locations_notesLabel => 'Notas';
+
+  @override
+  String get equipment_locations_notesHint =>
+      'Dirección, teléfono, número de taquilla';
+
+  @override
   String get equipment_list_retryButton => 'Reintentar';
 
   @override
@@ -15725,6 +16359,15 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo abrir ese cilindro. Inténtalo de nuevo.';
 
   @override
+  String gasCalculators_blender_cylinderNoVolume(String name) {
+    return 'No hay volumen de agua registrado para $name';
+  }
+
+  @override
+  String get gasCalculators_blender_noCylinders =>
+      'Aún no hay cilindros en tu equipo. Escribe el volumen de agua en su lugar.';
+
+  @override
   String gasCalculators_blender_filledFrom(String name, String mix) {
     return '$name: $mix';
   }
@@ -15897,16 +16540,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Volumen de agua del cilindro';
 
   @override
-  String get gasCalculators_blender_cylinderPresets => 'Preajustes';
-
-  @override
   String gasCalculators_blender_unitPrice(String unit) {
     return 'Precio por 100 $unit';
   }
-
-  @override
-  String get gasCalculators_blender_manageCylinderSizes =>
-      'Gestionar tamaños de cilindro';
 
   @override
   String get gasCalculators_blender_costTotal => 'Total';
@@ -20106,6 +20742,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Titulaciones adicionales';
 
   @override
+  String get settings_conflict_field_advisoryKey => 'Consejo integrado';
+
+  @override
   String get settings_conflict_field_airBreakBreakSeconds =>
       'Duración de la pausa de aire';
 
@@ -21082,6 +21721,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settings_conflict_field_intervalHours => 'Intervalo en horas';
 
   @override
+  String get settings_conflict_field_isArchived => 'Archivado';
+
+  @override
   String get settings_conflict_field_isBuiltIn => 'Integrado';
 
   @override
@@ -21237,6 +21879,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings_conflict_field_mode => 'Modo de respiración';
+
+  @override
+  String get settings_conflict_field_movedAt => 'Movido el';
 
   @override
   String get settings_conflict_field_name => 'Nombre';
@@ -21806,6 +22451,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Tiempo hasta la superficie previsto';
 
   @override
+  String get settings_conflict_field_supersedesRuleId =>
+      'Sustituye a la regla integrada';
+
+  @override
   String get settings_conflict_field_surfaceConditions =>
       'Condiciones en superficie';
 
@@ -22175,6 +22824,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings_conflict_ref_equipment => 'Equipo';
+
+  @override
+  String get settings_conflict_ref_equipmentLocation => 'Ubicación del equipo';
 
   @override
   String get settings_conflict_ref_equipmentSet => 'Conjunto de equipo';
@@ -23111,6 +23763,115 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get settings_manage_serviceTypes_subtitle =>
       'Mantenimiento que necesita tu equipo y con qué frecuencia';
+
+  @override
+  String get settings_manage_locations => 'Ubicaciones';
+
+  @override
+  String get settings_manage_locations_subtitle =>
+      'Dónde guardas, revisas o prestas tu equipo';
+
+  @override
+  String get settings_manage_currencyRules => 'Vigencia de certificaciones';
+
+  @override
+  String get settings_manage_currencyRules_subtitle =>
+      'Reglas de repaso y renovación';
+
+  @override
+  String get currencyRules_title => 'Vigencia de certificaciones';
+
+  @override
+  String get currencyRules_addTooltip => 'Añadir regla';
+
+  @override
+  String get currencyRules_editTooltip => 'Editar regla';
+
+  @override
+  String get currencyRules_deleteTooltip => 'Eliminar regla';
+
+  @override
+  String get currencyRules_builtIn => 'Integradas';
+
+  @override
+  String get currencyRules_custom => 'Tus reglas';
+
+  @override
+  String currencyRules_replaces(String name) {
+    return 'Sustituye a $name';
+  }
+
+  @override
+  String currencyRules_replacedBy(String name) {
+    return 'Sustituida por $name';
+  }
+
+  @override
+  String currencyRules_summary_activity(int lapse) {
+    String _temp0 = intl.Intl.pluralLogic(
+      lapse,
+      locale: localeName,
+      other: 'Vence $lapse días después de la última inmersión válida',
+      one: 'Vence $lapse día después de la última inmersión válida',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String currencyRules_summary_date(int lapse) {
+    String _temp0 = intl.Intl.pluralLogic(
+      lapse,
+      locale: localeName,
+      other: 'Vence $lapse días después de la fecha de la tarjeta',
+      one: 'Vence $lapse día después de la fecha de la tarjeta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get currencyRules_deleteDialog_title => '¿Eliminar regla?';
+
+  @override
+  String currencyRules_deleteDialog_content(String name) {
+    return 'Se eliminará $name. Los repasos registrados permanecen en el historial de cada tarjeta.';
+  }
+
+  @override
+  String get currencyRules_dialog_addTitle => 'Nueva regla';
+
+  @override
+  String get currencyRules_dialog_editTitle => 'Editar regla';
+
+  @override
+  String get currencyRules_dialog_copyNote =>
+      'Al guardar se crea tu propia copia, que sustituye a esta regla integrada.';
+
+  @override
+  String get currencyRules_dialog_name => 'Nombre';
+
+  @override
+  String get currencyRules_dialog_nameRequired => 'Introduce un nombre';
+
+  @override
+  String get currencyRules_dialog_clock => 'Cuenta desde';
+
+  @override
+  String get currencyRules_dialog_clock_activity => 'Última inmersión válida';
+
+  @override
+  String get currencyRules_dialog_clock_date => 'Una fecha de la tarjeta';
+
+  @override
+  String get currencyRules_dialog_agencies => 'Agencias';
+
+  @override
+  String get currencyRules_dialog_levels => 'Niveles';
+
+  @override
+  String get currencyRules_dialog_anyHint => 'Sin selección se aplica a todo';
+
+  @override
+  String get currencyRules_dialog_note => 'Nota';
 
   @override
   String get settings_migrationProgress_doNotClose =>
@@ -24431,12 +25192,25 @@ class AppLocalizationsEs extends AppLocalizations {
     String group,
     String overall,
   ) {
-    return '$count de $total inmersiones, media del grupo $group frente a $overall en total';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total inmersiones',
+      one: '1 inmersión',
+    );
+    return '$count de $_temp0, media del grupo $group frente a $overall en total';
   }
 
   @override
   String insights_focus_summary_allShown(int total) {
-    return 'Solo $total inmersiones tienen este valor, así que se muestran todas';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other:
+          'Solo $total inmersiones tienen este valor, así que se muestran todas',
+      one: 'Solo 1 inmersión tiene este valor, así que se muestra',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -24546,7 +25320,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String insights_focus_factors_coverage(int covered, int total) {
-    return '$covered de $total inmersiones';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total inmersiones',
+      one: '1 inmersión',
+    );
+    return '$covered de $_temp0';
   }
 
   @override
@@ -28664,6 +29444,11 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get universalImport_triage_excludedCsv =>
       'Importar individualmente (CSV)';
+
+  @override
+  String universalImport_triage_excludedHandoff(String format) {
+    return 'Importar individualmente ($format)';
+  }
 
   @override
   String get universalImport_triage_unsupported => 'Formato no compatible';
@@ -47471,6 +48256,59 @@ class AppLocalizationsEs extends AppLocalizations {
   String get navTrack_handoff_reviewTrackButton => 'Revisar track submarino';
 
   @override
+  String get suuntoJson_handoff_recognized =>
+      'Exportación de inmersión de Suunto reconocida';
+
+  @override
+  String get suuntoJson_handoff_description =>
+      'Este archivo se exportó desde la app de Suunto. El importador de Suunto lo lee igual que la importación de Suunto Cloud, incluida la ruta registrada de la inmersión.';
+
+  @override
+  String get suuntoJson_handoff_importButton => 'Importar inmersión de Suunto';
+
+  @override
+  String get suuntoFile_step_title => 'Exportaciones de la app de Suunto';
+
+  @override
+  String get suuntoFile_step_description =>
+      'Elige una o más inmersiones exportadas desde la app de Suunto como JSON. Las inmersiones registradas con ruta la incluyen.';
+
+  @override
+  String get suuntoFile_step_chooseFiles => 'Elegir archivos';
+
+  @override
+  String suuntoFile_step_readyCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count inmersiones listas para importar',
+      one: '$count inmersión lista para importar',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suuntoFile_step_routeIncluded => 'Incluye ruta registrada';
+
+  @override
+  String get suuntoFile_step_noRoute => 'Sin ruta registrada';
+
+  @override
+  String get suuntoFile_rejection_notJson => 'No es un archivo JSON';
+
+  @override
+  String get suuntoFile_rejection_notSuuntoExport =>
+      'No es una exportación de la app de Suunto';
+
+  @override
+  String get suuntoFile_rejection_notADive =>
+      'No es una inmersión (otro tipo de actividad)';
+
+  @override
+  String get universalImport_summary_importWithSuunto =>
+      'Importar con el importador de Suunto';
+
+  @override
   String get navTrack_section_trackTitle => 'Track submarino';
 
   @override
@@ -48197,6 +49035,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get query_equipment_lastDived => 'Último uso';
 
   @override
+  String get query_equipment_location => 'Ubicación';
+
+  @override
   String get query_equipment_model => 'Modelo';
 
   @override
@@ -48402,6 +49243,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get query_weights_amount => 'Cantidad';
+
+  @override
+  String get query_weights_label => 'Nombre';
 
   @override
   String get query_weights_notes => 'Notas';
@@ -48837,4 +49681,19 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get query_saveNeedsDiver =>
       'Crea un perfil de buceador para guardar consultas';
+
+  @override
+  String get builtIns_showColumnLabel => 'Mostrar';
+
+  @override
+  String get builtIns_showInPickers => 'Mostrar en los selectores';
+
+  @override
+  String preDive_start_allTemplatesHidden(String path) {
+    return 'Todas las listas de verificación están ocultas. Vuelve a mostrar una en $path.';
+  }
+
+  @override
+  String get settings_conflict_field_hiddenBuiltInIds =>
+      'Entradas integradas ocultas';
 }

@@ -30,6 +30,7 @@ import 'package:submersion/features/tank_presets/presentation/providers/tank_pre
 import '../../../../helpers/mock_providers.dart';
 import '../../../../helpers/test_app.dart';
 import '../../../../helpers/test_database.dart';
+import '../../../../helpers/role_sheet.dart';
 
 /// Covers the bulk tri-state membership wiring in DiveEditPage: loading members
 /// for every reference collection, the add-affordance dialogs/sheets, and the
@@ -67,7 +68,7 @@ void main() {
             createdAt: DateTime(2026, 1, 1),
             updatedAt: DateTime(2026, 1, 1),
           ),
-          role: role ?? DiveRole.builtInBuddy(),
+          roles: [role ?? DiveRole.builtInBuddy()],
         );
 
     Future<void> seedTag(String id, String name) => db
@@ -442,8 +443,7 @@ void main() {
       await tester.tap(find.text('Alice'));
       await tester.pumpAndSettle();
       expect(find.text('Select Role for Alice'), findsOneWidget);
-      await tester.tap(find.text('Instructor'));
-      await tester.pumpAndSettle();
+      await pickOnlyRole(tester, 'Instructor');
 
       // Done (close the sheet) then Add (merge into the membership editor).
       await tester.tap(find.text('Done'));
@@ -525,8 +525,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Instructor'));
-      await tester.pumpAndSettle();
+      await pickOnlyRole(tester, 'Instructor');
       await tester.tap(find.text('Done'));
       await tester.pumpAndSettle();
       await tester.tap(

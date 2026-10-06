@@ -10,9 +10,11 @@ import 'package:submersion/core/services/pdf_templates/pdf_profile_series.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/certifications/domain/entities/certification.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
+import 'package:submersion/features/dive_roles/domain/entities/dive_role.dart';
 import 'package:submersion/features/dive_types/domain/entities/dive_type_entity.dart';
 import 'package:submersion/features/divers/domain/entities/diver.dart';
 import 'package:submersion/features/signatures/domain/entities/signature.dart';
+import 'package:submersion/features/certification_agencies/domain/certification_catalog.dart';
 
 /// Abstract base class for PDF template builders.
 ///
@@ -54,6 +56,8 @@ abstract class PdfTemplateBuilder {
   /// - [diveTypesById]: The diver's `dive_types` rows, so each type prints
   ///   under the name the diver gave it (#1834). An id with no row falls
   ///   back to a name rebuilt from the id.
+  /// - [diveRolesById]: The diver's `dive_roles` rows, so the diver's own
+  ///   roles print by name (#1221). An id with no row prints its raw id.
   /// - [equipmentSetNamesById]: Every equipment set's name by id, so a dive
   ///   names the sets its gear came from (#2031). A set with no entry is
   ///   left unnamed.
@@ -74,12 +78,14 @@ abstract class PdfTemplateBuilder {
     String? title,
     Map<String, List<Signature>>? diveSignatures,
     List<Certification>? certifications,
+    CertificationCatalog? certificationCatalog,
     Diver? diver,
     Map<String, PdfProfileSeries>? profiles,
     Uint8List? diverPhoto,
     bool includeVerificationAreas = false,
     EquipmentArrangement gearArrangement = EquipmentArrangement.defaults,
     Map<String, DiveTypeEntity> diveTypesById = const {},
+    Map<String, DiveRole> diveRolesById = const {},
     Map<String, String> equipmentSetNamesById = const {},
     DateTime? generatedAt,
     PdfLocalization? localization,

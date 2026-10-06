@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:submersion/core/built_ins/built_in_catalog.dart';
 import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/features/equipment/data/repositories/equipment_share_repository.dart';
 import 'package:submersion/features/equipment/domain/entities/equipment_item.dart';
@@ -172,6 +173,11 @@ class _FakeAppSettingsRepository implements AppSettingsRepository {
   Future<bool> getNavAlwaysHideLabels() async => false;
   @override
   Future<void> setNavAlwaysHideLabels(bool value) async {}
+
+  @override
+  Future<bool> getEquipmentGroupByLocation() async => false;
+  @override
+  Future<void> setEquipmentGroupByLocation(bool value) async {}
 }
 
 /// Mock SettingsNotifier that doesn't access the database.
@@ -237,6 +243,22 @@ class _MockSettingsNotifier extends StateNotifier<AppSettings>
       ids.remove(presetName);
     }
     state = state.copyWith(hiddenTankPresetIds: ids);
+  }
+
+  @override
+  Future<void> setBuiltInHidden(
+    BuiltInCatalog catalog,
+    String id,
+    bool hidden,
+  ) async {
+    state = state.copyWith(
+      hiddenBuiltInIds: withBuiltInHidden(
+        state.hiddenBuiltInIds,
+        catalog,
+        id,
+        hidden,
+      ),
+    );
   }
 
   @override

@@ -3196,6 +3196,124 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get certifications_list_filter_needsAttention => 'يحتاج إلى انتباه';
+
+  @override
+  String get certifications_list_filter_clear => 'مسح';
+
+  @override
+  String get certifications_list_needsAttention_empty =>
+      'لا توجد شهادات تحتاج إلى انتباه';
+
+  @override
+  String get certifications_list_needsAttention_emptySubtitle =>
+      'جميع الشهادات سارية أو مكتومة.';
+
+  @override
+  String get currencyRule_padi_reactivate_name => 'تنشيط PADI (ReActivate)';
+
+  @override
+  String get currencyRule_ssi_skills_update_name => 'SSI Scuba Skills Update';
+
+  @override
+  String get currencyRule_generic_refresher_name => 'دورة تنشيطية';
+
+  @override
+  String get currencyRule_first_aid_24mo_name =>
+      'تجديد الإسعافات الأولية والإنعاش القلبي الرئوي';
+
+  @override
+  String get currencyRule_pro_membership_annual_name => 'تجديد العضوية المهنية';
+
+  @override
+  String get currencyRule_gue_revalidation_name => 'إعادة تصديق GUE';
+
+  @override
+  String get currencyRule_ffessm_licence_annual_name =>
+      'رخصة FFESSM والشهادة الطبية';
+
+  @override
+  String get currencyRule_cave_currency_name => 'الممارسة في الكهوف';
+
+  @override
+  String get currencyRule_rebreather_currency_name =>
+      'الممارسة بجهاز إعادة التنفس';
+
+  @override
+  String get currencyRule_deco_currency_name => 'ممارسة تخفيف الضغط';
+
+  @override
+  String get currencyRule_card_expiry_name => 'انتهاء صلاحية البطاقة';
+
+  @override
+  String get currencyRule_padi_reactivate_advisory =>
+      'تقترح PADI دورة ReActivate التنشيطية بعد ستة إلى اثني عشر شهرًا بعيدًا عن الماء.';
+
+  @override
+  String get currencyRule_ssi_skills_update_advisory =>
+      'تقترح SSI دورة Scuba Skills Update بعد ستة إلى اثني عشر شهرًا دون غوص.';
+
+  @override
+  String get currencyRule_generic_refresher_advisory =>
+      'تقترح معظم الوكالات دورة تنشيطية بعد ستة إلى اثني عشر شهرًا دون غوص.';
+
+  @override
+  String get currencyRule_first_aid_advisory =>
+      'تُجدَّد شهادات الإسعافات الأولية والإنعاش القلبي الرئوي ومزود الأكسجين عادةً كل عامين.';
+
+  @override
+  String get currencyRule_pro_membership_advisory =>
+      'تُجدَّد العضويات المهنية عادةً كل عام للحفاظ على صفة التدريس نشطة.';
+
+  @override
+  String get currencyRule_gue_revalidation_advisory =>
+      'يُعاد تصديق تصنيفات GUE عادةً كل ثلاث سنوات.';
+
+  @override
+  String get currencyRule_ffessm_licence_advisory =>
+      'تُجدَّد رخصة FFESSM وشهادتها الطبية كل عام.';
+
+  @override
+  String get currencyRule_cave_currency_advisory =>
+      'تتلاشى مهارات الكهوف دون ممارسة؛ ويُنصح عادةً بغطسة تقييم بعد عام من الانقطاع.';
+
+  @override
+  String get currencyRule_rebreather_currency_advisory =>
+      'تتلاشى مهارات جهاز إعادة التنفس بسرعة؛ وتنصح وكالات كثيرة بدورة تنشيطية بعد ستة أشهر من الانقطاع.';
+
+  @override
+  String get currencyRule_deco_currency_advisory =>
+      'يُوصى عادةً بتنشيط إجراءات تخفيف الضغط بعد عام دون غطسة تخفيف ضغط.';
+
+  @override
+  String get currencyRule_card_expiry_advisory =>
+      'تاريخ انتهاء الصلاحية المطبوع على هذه البطاقة.';
+
+  @override
+  String get certifications_currency_status_current => 'ساري';
+
+  @override
+  String get certifications_currency_status_dueSoon => 'مستحق قريبًا';
+
+  @override
+  String get certifications_currency_status_lapsed => 'منتهي';
+
+  @override
+  String get certifications_currency_eventType_refresher => 'دورة تنشيطية';
+
+  @override
+  String get certifications_currency_eventType_renewal => 'تجديد';
+
+  @override
+  String get certifications_currency_eventType_revalidation => 'إعادة تصديق';
+
+  @override
+  String get certifications_currency_eventType_skillsUpdate => 'تحديث المهارات';
+
+  @override
+  String get certifications_currency_eventType_other => 'أخرى';
+
+  @override
   String get certifications_detail_action_delete => 'حذف';
 
   @override
@@ -3280,6 +3398,138 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get certifications_detail_sectionTitle_dates => 'التواريخ';
+
+  @override
+  String get certifications_detail_sectionTitle_currency => 'الصلاحية';
+
+  @override
+  String certifications_currency_dueOn(String date) {
+    return 'مستحق في $date';
+  }
+
+  @override
+  String certifications_currency_lapsedSince(String date) {
+    return 'منتهي منذ $date';
+  }
+
+  @override
+  String certifications_currency_anchor_lastDive(String date) {
+    return 'آخر غطسة $date';
+  }
+
+  @override
+  String certifications_currency_anchor_lastQualifyingDive(String date) {
+    return 'آخر غطسة مؤهلة $date';
+  }
+
+  @override
+  String certifications_currency_anchor_cardExpiry(String date) {
+    return 'انتهاء البطاقة $date';
+  }
+
+  @override
+  String certifications_currency_anchor_cardIssue(String date) {
+    return 'صدرت في $date';
+  }
+
+  @override
+  String certifications_currency_anchor_ledgerEvent(String event, String date) {
+    return 'تم تسجيل $event في $date';
+  }
+
+  @override
+  String certifications_currency_alsoCovers(String names) {
+    return 'يشمل أيضًا $names';
+  }
+
+  @override
+  String get certifications_currency_muted => 'مكتوم';
+
+  @override
+  String get certifications_currency_noCountedDive =>
+      'لم تُسجَّل غطسة محتسبة بعد';
+
+  @override
+  String get certifications_currency_action_log => 'تسجيل دورة تنشيطية';
+
+  @override
+  String get certifications_currency_action_interval => 'تعديل الفترة';
+
+  @override
+  String get certifications_currency_action_mapping => 'الغطسات المحتسبة';
+
+  @override
+  String get certifications_currency_action_mute => 'كتم';
+
+  @override
+  String get certifications_currency_action_unmute => 'إلغاء الكتم';
+
+  @override
+  String get certifications_currency_history => 'سجل الصلاحية';
+
+  @override
+  String get certifications_currency_deleteEvent_title => 'حذف الإدخال؟';
+
+  @override
+  String certifications_currency_deleteEvent_content(
+    String event,
+    String date,
+  ) {
+    return 'سيؤدي هذا إلى إزالة $event المسجل في $date.';
+  }
+
+  @override
+  String get certifications_currency_eventDialog_title =>
+      'تسجيل تنشيط أو تجديد';
+
+  @override
+  String get certifications_currency_eventDialog_type => 'النوع';
+
+  @override
+  String get certifications_currency_eventDialog_date => 'التاريخ';
+
+  @override
+  String get certifications_currency_eventDialog_provider =>
+      'المركز أو النادي أو المدرب';
+
+  @override
+  String get certifications_currency_eventDialog_notes => 'ملاحظات';
+
+  @override
+  String get certifications_currency_intervalDialog_title => 'الفترة';
+
+  @override
+  String get certifications_currency_intervalDialog_lapse => 'تنتهي بعد (أيام)';
+
+  @override
+  String get certifications_currency_intervalDialog_lead =>
+      'التنبيه قبل هذا العدد من الأيام';
+
+  @override
+  String certifications_currency_intervalDialog_inheritHint(String days) {
+    return 'اتركه فارغًا لاستخدام قيمة القاعدة ($days)';
+  }
+
+  @override
+  String get certifications_currency_intervalDialog_leadTooLong =>
+      'لا يمكن أن يبدأ التنبيه قبل بدء الفترة';
+
+  @override
+  String get certifications_currency_mappingDialog_title => 'الغطسات المحتسبة';
+
+  @override
+  String get certifications_currency_mappingDialog_types => 'أنواع الغطس';
+
+  @override
+  String get certifications_currency_mappingDialog_modes => 'أنماط الغطس';
+
+  @override
+  String get certifications_currency_mappingDialog_anyHint =>
+      'عدم تحديد أي شيء يعني احتساب أي غطسة';
+
+  @override
+  String get certifications_currency_mappingDialog_reset =>
+      'استخدام الإعداد الافتراضي للقاعدة';
 
   @override
   String get certifications_detail_sectionTitle_details => 'تفاصيل الشهادة';
@@ -3439,6 +3689,125 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get certifications_edit_label_agency => 'الجهة المانحة *';
+
+  @override
+  String get certificationAgencies_unknownAgency => 'جهة مانحة غير معروفة';
+
+  @override
+  String get certificationAgencies_unknownCertification => 'شهادة غير معروفة';
+
+  @override
+  String get certificationAgencies_addCustomAgency =>
+      'إضافة جهة مانحة مخصصة...';
+
+  @override
+  String get certificationAgencies_addCustomCertification =>
+      'إضافة شهادة مخصصة...';
+
+  @override
+  String get certificationAgencies_dialog_newAgencyTitle => 'جهة مانحة جديدة';
+
+  @override
+  String get certificationAgencies_dialog_editAgencyTitle =>
+      'تعديل الجهة المانحة';
+
+  @override
+  String get certificationAgencies_dialog_newCertificationTitle =>
+      'شهادة جديدة';
+
+  @override
+  String get certificationAgencies_dialog_editCertificationTitle =>
+      'تعديل الشهادة';
+
+  @override
+  String get certificationAgencies_dialog_nameLabel => 'الاسم';
+
+  @override
+  String get certificationAgencies_dialog_colorLabel => 'لون البطاقة';
+
+  @override
+  String get certificationAgencies_dialog_specialty => 'تخصص';
+
+  @override
+  String get certificationAgencies_error_nameRequired => 'أدخل اسمًا';
+
+  @override
+  String get certificationAgencies_error_nameTaken => 'هذا الاسم مستخدم بالفعل';
+
+  @override
+  String get settings_manage_certificationAgencies => 'جهات منح الشهادات';
+
+  @override
+  String get settings_manage_certificationAgencies_subtitle =>
+      'إدارة الجهات المانحة والشهادات المخصصة';
+
+  @override
+  String get certificationAgencies_section_yours => 'جهاتك المانحة';
+
+  @override
+  String get certificationAgencies_section_builtIn => 'الجهات المانحة المضمّنة';
+
+  @override
+  String get certificationAgencies_addAgency => 'إضافة جهة مانحة';
+
+  @override
+  String certificationAgencies_sharedBy(String name) {
+    return 'مشاركة من $name';
+  }
+
+  @override
+  String get certificationAgencies_editor_addCertification => 'إضافة شهادة';
+
+  @override
+  String get certificationAgencies_editor_builtInHint =>
+      'لا يمكن تغيير الشهادات المضمّنة. يمكنك إضافة شهاداتك الخاصة.';
+
+  @override
+  String certificationAgencies_delete_confirmTitle(String name) {
+    return 'حذف $name؟';
+  }
+
+  @override
+  String get certificationAgencies_delete_refusedTitle =>
+      'ما زال قيد الاستخدام';
+
+  @override
+  String certificationAgencies_delete_refusedBody(String usage) {
+    return 'مستخدم في $usage. غيّرها أولًا.';
+  }
+
+  @override
+  String certificationAgencies_usage_certifications(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count شهادة',
+      many: '$count شهادة',
+      few: '$count شهادات',
+      two: 'شهادتان',
+      one: 'شهادة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String certificationAgencies_usage_courses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count دورة',
+      many: '$count دورة',
+      few: '$count دورات',
+      two: 'دورتان',
+      one: 'دورة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String certificationAgencies_usage_and(String first, String second) {
+    return '$first و$second';
+  }
 
   @override
   String get certifications_edit_addRecognition => 'إضافة اعتراف آخر';
@@ -5149,7 +5518,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings_homeChips_lastDive => 'حداثة الغطس';
 
   @override
-  String get settings_homeChips_certifications => 'انتهاء الشهادات';
+  String get settings_homeChips_certifications => 'صلاحية الشهادات';
 
   @override
   String get settings_homeChips_trip => 'الرحلة القادمة';
@@ -5173,8 +5542,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings_homeChips_dataQuality => 'جودة البيانات';
 
   @override
-  String dashboard_gauges_certsExpiring(int count) {
-    return '$count شهادات على وشك الانتهاء';
+  String dashboard_gauges_certsNeedAttention(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count شهادة تحتاج إلى انتباه',
+      many: '$count شهادة تحتاج إلى انتباه',
+      few: '$count شهادات تحتاج إلى انتباه',
+      two: 'شهادتان تحتاجان إلى انتباه',
+      one: 'شهادة واحدة تحتاج إلى انتباه',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -6936,6 +7314,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_edit_label_waterType => 'نوع المياه';
+
+  @override
+  String get diveLog_edit_label_weightName => 'الاسم (اختياري)';
+
+  @override
+  String get diveLog_edit_hint_weightName => 'مثال: الجيب العلوي';
 
   @override
   String get diveLog_edit_marineLifeHint => 'انقر \"إضافة\" لتسجيل المشاهدات';
@@ -11793,6 +12177,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enum_certificationAgency_ffessm => 'FFESSM';
 
   @override
+  String get enum_certificationAgency_acuc => 'ACUC';
+
+  @override
+  String get enum_certificationAgency_dan => 'DAN';
+
+  @override
   String get enum_certificationAgency_gue => 'GUE';
 
   @override
@@ -11872,6 +12262,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get enum_certificationLevel_techDiver => 'غواص تقني';
+
+  @override
+  String get enum_certificationLevel_firstAid =>
+      'الإسعافات الأولية / الإنعاش القلبي الرئوي';
+
+  @override
+  String get enum_certificationLevel_oxygenProvider =>
+      'مزود الأكسجين في حالات الطوارئ';
 
   @override
   String get enum_certificationLevel_trimix => 'ترايمكس';
@@ -14745,6 +15143,264 @@ class AppLocalizationsAr extends AppLocalizations {
   String get equipment_filter_section_category => 'الفئة';
 
   @override
+  String get equipment_location_kind_storage => 'تخزين';
+
+  @override
+  String get equipment_location_kind_serviceShop => 'ورشة صيانة';
+
+  @override
+  String get equipment_location_kind_person => 'شخص';
+
+  @override
+  String get equipment_location_kind_other => 'أخرى';
+
+  @override
+  String get equipment_location_noLocation => 'بلا موقع';
+
+  @override
+  String get equipment_location_picker_title => 'اختر مكانًا';
+
+  @override
+  String get equipment_location_picker_search => 'البحث عن أماكن';
+
+  @override
+  String get equipment_location_picker_newPlace => 'مكان جديد';
+
+  @override
+  String equipment_location_move_title(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'نقل $count عنصر',
+      many: 'نقل $count عنصرًا',
+      few: 'نقل $count عناصر',
+      two: 'نقل عنصرين',
+      one: 'نقل عنصر واحد',
+      zero: 'نقل $count عنصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_move_to => 'إلى';
+
+  @override
+  String get equipment_location_move_choose => 'اختر مكانًا';
+
+  @override
+  String get equipment_location_move_date => 'التاريخ';
+
+  @override
+  String get equipment_location_move_time => 'الوقت';
+
+  @override
+  String get equipment_location_move_note => 'ملاحظة';
+
+  @override
+  String get equipment_location_move_noteHint =>
+      'مثال: الصيانة السنوية لمنظم الهواء';
+
+  @override
+  String get equipment_location_move_confirm => 'نقل';
+
+  @override
+  String get equipment_location_parts_title => 'نقل الأجزاء أيضًا؟';
+
+  @override
+  String equipment_location_parts_body(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'هل تنقل $count من أجزائه أيضًا إلى المكان نفسه؟',
+      many: 'هل تنقل $count من أجزائه أيضًا إلى المكان نفسه؟',
+      few: 'هل تنقل $count من أجزائه أيضًا إلى المكان نفسه؟',
+      two: 'هل تنقل جزأيه أيضًا إلى المكان نفسه؟',
+      one: 'هل تنقل جزأه أيضًا إلى المكان نفسه؟',
+      zero: 'هل تنقل أجزاءه أيضًا إلى المكان نفسه؟',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_parts_yes => 'نقل الأجزاء';
+
+  @override
+  String get equipment_location_parts_no => 'هذا فقط';
+
+  @override
+  String get equipment_location_status_title => 'تحديث الحالة؟';
+
+  @override
+  String equipment_location_status_body(int count, String status) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'وضع الحالة $status على $count عنصر أيضًا؟',
+      many: 'وضع الحالة $status على $count عنصرًا أيضًا؟',
+      few: 'وضع الحالة $status على $count عناصر أيضًا؟',
+      two: 'وضع الحالة $status على عنصرين أيضًا؟',
+      one: 'وضع الحالة $status على عنصر واحد أيضًا؟',
+      zero: 'وضع الحالة $status على $count عنصر أيضًا؟',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_status_yes => 'تحديث';
+
+  @override
+  String get equipment_location_status_no => 'الإبقاء على الحالة';
+
+  @override
+  String equipment_location_moved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم نقل $count عنصر',
+      many: 'تم نقل $count عنصرًا',
+      few: 'تم نقل $count عناصر',
+      two: 'تم نقل عنصرين',
+      one: 'تم نقل عنصر واحد',
+      zero: 'لم يُنقل أي عنصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_card_title => 'الموقع';
+
+  @override
+  String get equipment_location_none => 'لم يُحدَّد موقع';
+
+  @override
+  String equipment_location_since(String date) {
+    return 'منذ $date';
+  }
+
+  @override
+  String get equipment_location_moveButton => 'نقل';
+
+  @override
+  String get equipment_location_showAll => 'عرض الكل';
+
+  @override
+  String get equipment_location_history_cleared => 'تم مسح الموقع';
+
+  @override
+  String get equipment_location_editMove_title => 'تعديل النقل';
+
+  @override
+  String get equipment_location_editMove_delete => 'حذف النقل';
+
+  @override
+  String get equipment_location_deleteMoveConfirm =>
+      'حذف هذا الإدخال من السجل؟ يُحسب موقع العنصر من جديد من التنقلات المتبقية.';
+
+  @override
+  String get equipment_location_bulkAction => 'نقل إلى موقع';
+
+  @override
+  String equipment_location_groupCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عنصر',
+      many: '$count عنصرًا',
+      few: '$count عناصر',
+      two: 'عنصران',
+      one: 'عنصر واحد',
+      zero: 'لا عناصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get equipment_location_activeFilter => 'الموقع';
+
+  @override
+  String get equipment_filter_section_location => 'الموقع';
+
+  @override
+  String get equipment_arrange_groupByLocation => 'التجميع حسب الموقع';
+
+  @override
+  String get equipment_arrange_groupByLocationSubtitle =>
+      'عنوان لكل مكان، في هذه الصفحة فقط';
+
+  @override
+  String get equipment_edit_locationLabel => 'الموقع';
+
+  @override
+  String get equipment_edit_locationNone => 'غير محدد';
+
+  @override
+  String get equipment_edit_locationFailed =>
+      'تم الحفظ، لكن تعذّر تعيين موقعه. استخدم «نقل» على العنصر لتعيينه.';
+
+  @override
+  String get equipment_locations_title => 'المواقع';
+
+  @override
+  String get equipment_locations_empty =>
+      'لا توجد أماكن بعد. أضف مكانًا لتتبع مكان معداتك.';
+
+  @override
+  String get equipment_locations_add => 'إضافة مكان';
+
+  @override
+  String equipment_locations_archivedSection(int count) {
+    return 'المؤرشفة ($count)';
+  }
+
+  @override
+  String get equipment_locations_archive => 'أرشفة';
+
+  @override
+  String get equipment_locations_restore => 'استعادة';
+
+  @override
+  String get equipment_locations_delete => 'حذف';
+
+  @override
+  String equipment_locations_deleteConfirm(String name) {
+    return 'حذف $name؟';
+  }
+
+  @override
+  String get equipment_locations_itemsHere => 'العناصر هنا';
+
+  @override
+  String get equipment_locations_noItemsHere => 'لا يوجد شيء هنا حاليًا.';
+
+  @override
+  String get equipment_locations_moveItems => 'نقل العناصر الموجودة هنا';
+
+  @override
+  String get equipment_locations_newTitle => 'مكان جديد';
+
+  @override
+  String get equipment_locations_editTitle => 'تعديل المكان';
+
+  @override
+  String get equipment_locations_nameLabel => 'الاسم';
+
+  @override
+  String get equipment_locations_nameRequired => 'أدخل اسمًا';
+
+  @override
+  String get equipment_locations_duplicateWarning =>
+      'لديك مكان بهذا الاسم بالفعل';
+
+  @override
+  String get equipment_locations_kindLabel => 'النوع';
+
+  @override
+  String get equipment_locations_notesLabel => 'ملاحظات';
+
+  @override
+  String get equipment_locations_notesHint => 'العنوان، الهاتف، رقم الخزانة';
+
+  @override
   String get equipment_list_retryButton => 'إعادة المحاولة';
 
   @override
@@ -15906,6 +16562,15 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذر فتح هذه الأسطوانة. حاول مرة أخرى.';
 
   @override
+  String gasCalculators_blender_cylinderNoVolume(String name) {
+    return 'لا يوجد حجم ماء مسجَّل لـ $name';
+  }
+
+  @override
+  String get gasCalculators_blender_noCylinders =>
+      'لا توجد أسطوانات في معداتك بعد. أدخل السعة المائية بدلًا من ذلك.';
+
+  @override
   String gasCalculators_blender_filledFrom(String name, String mix) {
     return '$name: $mix';
   }
@@ -16076,16 +16741,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gasCalculators_blender_cylinderVolume => 'السعة المائية للأسطوانة';
 
   @override
-  String get gasCalculators_blender_cylinderPresets => 'الإعدادات المسبقة';
-
-  @override
   String gasCalculators_blender_unitPrice(String unit) {
     return 'السعر لكل 100 $unit';
   }
-
-  @override
-  String get gasCalculators_blender_manageCylinderSizes =>
-      'إدارة أحجام الأسطوانات';
 
   @override
   String get gasCalculators_blender_costTotal => 'الإجمالي';
@@ -20350,6 +21008,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings_conflict_field_additionalCredentials => 'مؤهلات إضافية';
 
   @override
+  String get settings_conflict_field_advisoryKey => 'النصيحة المدمجة';
+
+  @override
   String get settings_conflict_field_airBreakBreakSeconds =>
       'مدة استراحة الهواء';
 
@@ -21272,6 +21933,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings_conflict_field_intervalHours => 'الفاصل بالساعات';
 
   @override
+  String get settings_conflict_field_isArchived => 'مؤرشف';
+
+  @override
   String get settings_conflict_field_isBuiltIn => 'مدمج';
 
   @override
@@ -21422,6 +22086,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settings_conflict_field_mode => 'وضع التنفس';
+
+  @override
+  String get settings_conflict_field_movedAt => 'تاريخ النقل';
 
   @override
   String get settings_conflict_field_name => 'الاسم';
@@ -21958,6 +22625,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'الوقت المخطط حتى السطح';
 
   @override
+  String get settings_conflict_field_supersedesRuleId =>
+      'يحل محل القاعدة المدمجة';
+
+  @override
   String get settings_conflict_field_surfaceConditions => 'الأحوال على السطح';
 
   @override
@@ -22320,6 +22991,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settings_conflict_ref_equipment => 'المعدات';
+
+  @override
+  String get settings_conflict_ref_equipmentLocation => 'موقع المعدات';
 
   @override
   String get settings_conflict_ref_equipmentSet => 'طقم المعدات';
@@ -23252,6 +23926,120 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get settings_manage_serviceTypes_subtitle =>
       'الصيانة التي تحتاجها معداتك، وعدد مراتها';
+
+  @override
+  String get settings_manage_locations => 'المواقع';
+
+  @override
+  String get settings_manage_locations_subtitle =>
+      'أين تُخزَّن معداتك أو تُصان أو تُعار';
+
+  @override
+  String get settings_manage_currencyRules => 'صلاحية الشهادات';
+
+  @override
+  String get settings_manage_currencyRules_subtitle => 'قواعد التنشيط والتجديد';
+
+  @override
+  String get currencyRules_title => 'صلاحية الشهادات';
+
+  @override
+  String get currencyRules_addTooltip => 'إضافة قاعدة';
+
+  @override
+  String get currencyRules_editTooltip => 'تعديل القاعدة';
+
+  @override
+  String get currencyRules_deleteTooltip => 'حذف القاعدة';
+
+  @override
+  String get currencyRules_builtIn => 'مدمجة';
+
+  @override
+  String get currencyRules_custom => 'قواعدك';
+
+  @override
+  String currencyRules_replaces(String name) {
+    return 'تحل محل $name';
+  }
+
+  @override
+  String currencyRules_replacedBy(String name) {
+    return 'استُبدلت بـ $name';
+  }
+
+  @override
+  String currencyRules_summary_activity(int lapse) {
+    String _temp0 = intl.Intl.pluralLogic(
+      lapse,
+      locale: localeName,
+      other: 'تنتهي بعد $lapse يوم من آخر غطسة مؤهلة',
+      many: 'تنتهي بعد $lapse يومًا من آخر غطسة مؤهلة',
+      few: 'تنتهي بعد $lapse أيام من آخر غطسة مؤهلة',
+      two: 'تنتهي بعد يومين من آخر غطسة مؤهلة',
+      one: 'تنتهي بعد يوم واحد من آخر غطسة مؤهلة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String currencyRules_summary_date(int lapse) {
+    String _temp0 = intl.Intl.pluralLogic(
+      lapse,
+      locale: localeName,
+      other: 'تنتهي بعد $lapse يوم من التاريخ على البطاقة',
+      many: 'تنتهي بعد $lapse يومًا من التاريخ على البطاقة',
+      few: 'تنتهي بعد $lapse أيام من التاريخ على البطاقة',
+      two: 'تنتهي بعد يومين من التاريخ على البطاقة',
+      one: 'تنتهي بعد يوم واحد من التاريخ على البطاقة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get currencyRules_deleteDialog_title => 'حذف القاعدة؟';
+
+  @override
+  String currencyRules_deleteDialog_content(String name) {
+    return 'ستتم إزالة $name. تبقى الدورات التنشيطية المسجلة في سجل كل بطاقة.';
+  }
+
+  @override
+  String get currencyRules_dialog_addTitle => 'قاعدة جديدة';
+
+  @override
+  String get currencyRules_dialog_editTitle => 'تعديل القاعدة';
+
+  @override
+  String get currencyRules_dialog_copyNote =>
+      'يؤدي الحفظ إلى إنشاء نسختك الخاصة التي تحل محل هذه القاعدة المدمجة.';
+
+  @override
+  String get currencyRules_dialog_name => 'الاسم';
+
+  @override
+  String get currencyRules_dialog_nameRequired => 'أدخل اسمًا';
+
+  @override
+  String get currencyRules_dialog_clock => 'يُحتسب من';
+
+  @override
+  String get currencyRules_dialog_clock_activity => 'آخر غطسة مؤهلة';
+
+  @override
+  String get currencyRules_dialog_clock_date => 'تاريخ على البطاقة';
+
+  @override
+  String get currencyRules_dialog_agencies => 'الوكالات';
+
+  @override
+  String get currencyRules_dialog_levels => 'المستويات';
+
+  @override
+  String get currencyRules_dialog_anyHint => 'عدم تحديد أي شيء يعني الكل';
+
+  @override
+  String get currencyRules_dialog_note => 'ملاحظة';
 
   @override
   String get settings_migrationProgress_doNotClose => 'يرجى عدم إغلاق التطبيق';
@@ -24545,12 +25333,30 @@ class AppLocalizationsAr extends AppLocalizations {
     String group,
     String overall,
   ) {
-    return '$count من $total غطسة، متوسط المجموعة $group مقابل $overall إجمالاً';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total غطسة',
+      many: '$total غطسةً',
+      few: '$total غطسات',
+      two: 'غطستين',
+      one: 'غطسة واحدة',
+    );
+    return '$count من $_temp0، متوسط المجموعة $group مقابل $overall إجمالاً';
   }
 
   @override
   String insights_focus_summary_allShown(int total) {
-    return '$total غطسة فقط لها هذه القيمة، لذا تُعرض جميعها';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total غطسة فقط لها هذه القيمة، لذا تُعرض جميعها',
+      many: '$total غطسةً فقط لها هذه القيمة، لذا تُعرض جميعها',
+      few: '$total غطسات فقط لها هذه القيمة، لذا تُعرض جميعها',
+      two: 'غطستان فقط لهما هذه القيمة، لذا تُعرض كلتاهما',
+      one: 'غطسة واحدة فقط لها هذه القيمة، لذا تُعرض',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -24659,7 +25465,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String insights_focus_factors_coverage(int covered, int total) {
-    return '$covered من $total غطسة';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total غطسة',
+      many: '$total غطسةً',
+      few: '$total غطسات',
+      two: 'غطستين',
+      one: 'غطسة واحدة',
+    );
+    return '$covered من $_temp0';
   }
 
   @override
@@ -28996,6 +29811,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get universalImport_triage_excludedCsv => 'استيراد فردي (CSV)';
+
+  @override
+  String universalImport_triage_excludedHandoff(String format) {
+    return 'استيراد فردي ($format)';
+  }
 
   @override
   String get universalImport_triage_unsupported => 'تنسيق غير مدعوم';
@@ -48031,6 +48851,62 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navTrack_handoff_reviewTrackButton => 'مراجعة المسار تحت الماء';
 
   @override
+  String get suuntoJson_handoff_recognized =>
+      'تم التعرف على تصدير غطسة من Suunto';
+
+  @override
+  String get suuntoJson_handoff_description =>
+      'تم تصدير هذا الملف من تطبيق Suunto. يقرأه مستورد Suunto بالطريقة نفسها التي يعمل بها الاستيراد من Suunto Cloud، بما في ذلك المسار المسجّل للغطسة.';
+
+  @override
+  String get suuntoJson_handoff_importButton => 'استيراد غطسة Suunto';
+
+  @override
+  String get suuntoFile_step_title => 'تصديرات تطبيق Suunto';
+
+  @override
+  String get suuntoFile_step_description =>
+      'اختر غطسة واحدة أو أكثر مُصدَّرة من تطبيق Suunto بصيغة JSON. الغطسات المسجّلة مع مسار تجلبه معها.';
+
+  @override
+  String get suuntoFile_step_chooseFiles => 'اختيار الملفات';
+
+  @override
+  String suuntoFile_step_readyCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count غطسة جاهزة للاستيراد',
+      many: '$count غطسة جاهزة للاستيراد',
+      few: '$count غطسات جاهزة للاستيراد',
+      two: 'غطستان جاهزتان للاستيراد',
+      one: 'غطسة واحدة جاهزة للاستيراد',
+      zero: 'لا توجد غطسات جاهزة للاستيراد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suuntoFile_step_routeIncluded => 'يتضمن مسارًا مسجّلًا';
+
+  @override
+  String get suuntoFile_step_noRoute => 'لا يوجد مسار مسجّل';
+
+  @override
+  String get suuntoFile_rejection_notJson => 'ليس ملف JSON';
+
+  @override
+  String get suuntoFile_rejection_notSuuntoExport =>
+      'ليس تصديرًا من تطبيق Suunto';
+
+  @override
+  String get suuntoFile_rejection_notADive => 'ليست غطسة (نوع نشاط آخر)';
+
+  @override
+  String get universalImport_summary_importWithSuunto =>
+      'استيراد باستخدام مستورد Suunto';
+
+  @override
   String get navTrack_section_trackTitle => 'مسار تحت الماء';
 
   @override
@@ -48759,6 +49635,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get query_equipment_lastDived => 'آخر استخدام';
 
   @override
+  String get query_equipment_location => 'الموقع';
+
+  @override
   String get query_equipment_model => 'الطراز';
 
   @override
@@ -48964,6 +49843,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get query_weights_amount => 'الكمية';
+
+  @override
+  String get query_weights_label => 'الاسم';
 
   @override
   String get query_weights_notes => 'ملاحظات';
@@ -49397,4 +50279,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get query_saveNeedsDiver => 'أنشئ ملف غواص لحفظ الاستعلامات';
+
+  @override
+  String get builtIns_showColumnLabel => 'إظهار';
+
+  @override
+  String get builtIns_showInPickers => 'إظهار في قوائم الاختيار';
+
+  @override
+  String preDive_start_allTemplatesHidden(String path) {
+    return 'جميع قوائم التحقق مخفية. أظهر واحدة مجددًا من $path.';
+  }
+
+  @override
+  String get settings_conflict_field_hiddenBuiltInIds =>
+      'العناصر المضمنة المخفية';
 }

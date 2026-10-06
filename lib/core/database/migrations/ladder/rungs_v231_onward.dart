@@ -236,5 +236,47 @@ extension RungsFromV231 on AppDatabase {
       await _assertMediaSiteAttachmentColumns();
     }
     if (from < 266) await reportProgress();
+    // v267: custom certification agencies and levels (issue #690). Table
+    // and index only, no backfill: stored agency/level text are built-in
+    // enum names, which stay valid ids. Re-asserted in beforeOpen.
+    // Renumbered from 265 and 266, which main shipped first.
+    if (from < 267) {
+      await _assertCustomCertificationSchema();
+    }
+    if (from < 267) await reportProgress();
+    // v268: equipment locations and their move log (issue #3037).
+    // Re-asserted in beforeOpen.
+    if (from < 268) {
+      await _assertEquipmentLocationSchema();
+    }
+    if (from < 268) await reportProgress();
+    // v269: diver_settings.hidden_built_in_ids (issue #401). Column-only
+    // rung, no backfill: null reads back as "nothing hidden".
+    if (from < 269) {
+      await _assertHiddenBuiltInIdsColumn();
+    }
+    if (from < 269) await reportProgress();
+    // v270: dive_weights.label and weight_preset_entries.label, a diver's
+    // own name for a weight (issue #956). Defaulted columns, no backfill:
+    // existing rows read '' (unnamed). Re-asserted in beforeOpen.
+    if (from < 270) {
+      await _assertWeightLabelColumns();
+    }
+    if (from < 270) await reportProgress();
+    // v271: certification currency (issue #2267). Three synced tables and
+    // the seeded built-in rule catalog, no backfill. Re-asserted in
+    // beforeOpen. 268 is held by an open branch.
+    if (from < 271) {
+      await _assertCertificationCurrencySchema();
+    }
+    if (from < 271) await reportProgress();
+    // v272: the role junctions (issue #1221), several roles per person on a
+    // dive. Table-only rung, no backfill; re-asserted in beforeOpen.
+    // Renumbered from 262, 264, 267, 270 and 271 as main shipped those; 268
+    // is held by an open branch (#3043).
+    if (from < 272) {
+      await _assertDiveRoleLinkSchema();
+    }
+    if (from < 272) await reportProgress();
   }
 }

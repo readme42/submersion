@@ -1506,6 +1506,16 @@ class SyncService {
           (type: 'diveTypes', records: data.diveTypes, hasUpdatedAt: true),
           (type: 'siteTypes', records: data.siteTypes, hasUpdatedAt: true),
           (type: 'diveRoles', records: data.diveRoles, hasUpdatedAt: true),
+          (
+            type: 'customCertificationAgencies',
+            records: data.customCertificationAgencies,
+            hasUpdatedAt: true,
+          ),
+          (
+            type: 'customCertificationLevels',
+            records: data.customCertificationLevels,
+            hasUpdatedAt: true,
+          ),
           (type: 'tankPresets', records: data.tankPresets, hasUpdatedAt: true),
           (
             type: 'weightPresets',
@@ -1598,6 +1608,16 @@ class SyncService {
             records: data.diveDiveTypes,
             hasUpdatedAt: false,
           ),
+          (
+            type: 'diveDiverRoles',
+            records: data.diveDiverRoles,
+            hasUpdatedAt: false,
+          ),
+          (
+            type: 'diveBuddyRoles',
+            records: data.diveBuddyRoles,
+            hasUpdatedAt: false,
+          ),
           (type: 'diveBuddies', records: data.diveBuddies, hasUpdatedAt: false),
           (
             type: 'diveProfiles',
@@ -1688,6 +1708,17 @@ class SyncService {
             hasUpdatedAt: false,
           ),
           (
+            type: 'equipmentLocations',
+            records: data.equipmentLocations,
+            hasUpdatedAt: true,
+          ),
+          // After equipment and the places they point at.
+          (
+            type: 'equipmentLocationMoves',
+            records: data.equipmentLocationMoves,
+            hasUpdatedAt: false,
+          ),
+          (
             type: 'mediaSpecies',
             records: data.mediaSpecies,
             hasUpdatedAt: false,
@@ -1729,6 +1760,21 @@ class SyncService {
           (
             type: 'serviceSchedules',
             records: data.serviceSchedules,
+            hasUpdatedAt: true,
+          ),
+          (
+            type: 'certificationCurrencyRules',
+            records: data.certificationCurrencyRules,
+            hasUpdatedAt: true,
+          ),
+          (
+            type: 'certificationCurrencyPrefs',
+            records: data.certificationCurrencyPrefs,
+            hasUpdatedAt: true,
+          ),
+          (
+            type: 'certificationCurrencyEvents',
+            records: data.certificationCurrencyEvents,
             hasUpdatedAt: true,
           ),
           (type: 'settings', records: data.settings, hasUpdatedAt: true),
@@ -2575,6 +2621,8 @@ class SyncService {
     'diveTypes': true,
     'siteTypes': true,
     'diveRoles': true,
+    'customCertificationAgencies': true,
+    'customCertificationLevels': true,
     'tankPresets': true,
     'weightPresets': true,
     'weightPresetEntries': false,
@@ -2613,6 +2661,8 @@ class SyncService {
     'diveDataSources': false,
     'siteSpecies': false,
     'siteSiteTypes': false,
+    'diveDiverRoles': false,
+    'diveBuddyRoles': false,
     'siteTags': false,
     'equipmentTags': false,
     'equipmentShares': false,
@@ -2620,6 +2670,8 @@ class SyncService {
     'tripHides': false,
     'siteHides': false,
     'equipmentOwnershipEvents': false,
+    'equipmentLocations': true,
+    'equipmentLocationMoves': false,
     'mediaSpecies': false,
     'siteFeatures': true,
     'csvPresets': true,
@@ -2631,6 +2683,9 @@ class SyncService {
     'serviceRecords': true,
     'serviceKinds': true,
     'serviceSchedules': true,
+    'certificationCurrencyRules': true,
+    'certificationCurrencyPrefs': true,
+    'certificationCurrencyEvents': true,
     'settings': true,
     'media': false,
     'mediaEnrichment': false,
@@ -2788,6 +2843,11 @@ class SyncService {
       (field: 'tagId', parent: 'tags', nullable: false),
     ],
     'diveDiveTypes': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'diveDiverRoles': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'diveBuddyRoles': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'buddyId', parent: 'buddies', nullable: false),
+    ],
     'diveProfileEvents': [
       (field: 'diveId', parent: 'dives', nullable: false),
       (field: 'computerId', parent: 'diveComputers', nullable: true),
@@ -2889,6 +2949,12 @@ class SyncService {
     ],
     'equipmentOwnershipEvents': [
       (field: 'equipmentId', parent: 'equipment', nullable: false),
+    ],
+    // v268: an item's location log. The place reference is cleared, not
+    // skipped, when the place is gone: the move then reads "No location".
+    'equipmentLocationMoves': [
+      (field: 'equipmentId', parent: 'equipment', nullable: false),
+      (field: 'locationId', parent: 'equipmentLocations', nullable: true),
     ],
     'mediaSpecies': [
       (field: 'mediaId', parent: 'media', nullable: false),
@@ -3009,6 +3075,17 @@ class SyncService {
     'serviceSchedules': [
       (field: 'equipmentId', parent: 'equipment', nullable: false),
       (field: 'serviceKindId', parent: 'serviceKinds', nullable: false),
+    ],
+    // Currency rule and event ids on a pref or event are plain text with no
+    // FK, so only the certification and the owning diver gate them.
+    'certificationCurrencyRules': [
+      (field: 'diverId', parent: 'divers', nullable: true),
+    ],
+    'certificationCurrencyPrefs': [
+      (field: 'certificationId', parent: 'certifications', nullable: false),
+    ],
+    'certificationCurrencyEvents': [
+      (field: 'certificationId', parent: 'certifications', nullable: false),
     ],
   };
 

@@ -2011,6 +2011,142 @@
       }
     }
   },
+  "certifications_list_filter_needsAttention": "Needs attention",
+  "@certifications_list_filter_needsAttention": {
+    "description": "Label of the certification list filter chip that limits the list to certifications needing a refresher or renewal"
+  },
+  "certifications_list_filter_clear": "Clear",
+  "@certifications_list_filter_clear": {
+    "description": "Button that removes the needs-attention filter from the certification list"
+  },
+  "certifications_list_needsAttention_empty": "No certifications need attention",
+  "@certifications_list_needsAttention_empty": {
+    "description": "Empty state title when the needs-attention filter matches no certification"
+  },
+  "certifications_list_needsAttention_emptySubtitle": "Every certification is current or muted.",
+  "@certifications_list_needsAttention_emptySubtitle": {
+    "description": "Empty state subtitle when the needs-attention filter matches no certification"
+  },
+  "currencyRule_padi_reactivate_name": "PADI refresher (ReActivate)",
+  "@currencyRule_padi_reactivate_name": {
+    "description": "Name of the built-in PADI refresher currency rule"
+  },
+  "currencyRule_ssi_skills_update_name": "SSI Scuba Skills Update",
+  "@currencyRule_ssi_skills_update_name": {
+    "description": "Name of the built-in SSI Scuba Skills Update currency rule; the program name is not translated"
+  },
+  "currencyRule_generic_refresher_name": "Refresher",
+  "@currencyRule_generic_refresher_name": {
+    "description": "Name of the built-in generic refresher currency rule"
+  },
+  "currencyRule_first_aid_24mo_name": "First aid and CPR renewal",
+  "@currencyRule_first_aid_24mo_name": {
+    "description": "Name of the built-in first aid and CPR renewal currency rule"
+  },
+  "currencyRule_pro_membership_annual_name": "Professional membership renewal",
+  "@currencyRule_pro_membership_annual_name": {
+    "description": "Name of the built-in professional membership renewal currency rule"
+  },
+  "currencyRule_gue_revalidation_name": "GUE revalidation",
+  "@currencyRule_gue_revalidation_name": {
+    "description": "Name of the built-in GUE revalidation currency rule"
+  },
+  "currencyRule_ffessm_licence_annual_name": "FFESSM licence and medical certificate",
+  "@currencyRule_ffessm_licence_annual_name": {
+    "description": "Name of the built-in FFESSM licence currency rule"
+  },
+  "currencyRule_cave_currency_name": "Cave currency",
+  "@currencyRule_cave_currency_name": {
+    "description": "Name of the built-in cave currency rule: recent cave diving practice"
+  },
+  "currencyRule_rebreather_currency_name": "Rebreather currency",
+  "@currencyRule_rebreather_currency_name": {
+    "description": "Name of the built-in rebreather currency rule: recent rebreather practice"
+  },
+  "currencyRule_deco_currency_name": "Decompression currency",
+  "@currencyRule_deco_currency_name": {
+    "description": "Name of the built-in decompression currency rule: recent decompression diving practice"
+  },
+  "currencyRule_card_expiry_name": "Card expiry",
+  "@currencyRule_card_expiry_name": {
+    "description": "Name of the currency status that follows the expiry date printed on a card"
+  },
+  "currencyRule_padi_reactivate_advisory": "PADI suggests a ReActivate refresher after six to twelve months out of the water.",
+  "@currencyRule_padi_reactivate_advisory": {
+    "description": "Advisory sentence of the PADI refresher rule; guidance, never a requirement"
+  },
+  "currencyRule_ssi_skills_update_advisory": "SSI suggests a Scuba Skills Update after six to twelve months without diving.",
+  "@currencyRule_ssi_skills_update_advisory": {
+    "description": "Advisory sentence of the SSI Scuba Skills Update rule"
+  },
+  "currencyRule_generic_refresher_advisory": "Most agencies suggest a refresher after six to twelve months without diving.",
+  "@currencyRule_generic_refresher_advisory": {
+    "description": "Advisory sentence of the generic refresher rule"
+  },
+  "currencyRule_first_aid_advisory": "First aid, CPR and oxygen provider credentials typically renew every two years.",
+  "@currencyRule_first_aid_advisory": {
+    "description": "Advisory sentence of the first aid renewal rule"
+  },
+  "currencyRule_pro_membership_advisory": "Professional memberships typically renew every year to keep teaching status active.",
+  "@currencyRule_pro_membership_advisory": {
+    "description": "Advisory sentence of the professional membership rule"
+  },
+  "currencyRule_gue_revalidation_advisory": "GUE ratings are typically revalidated every three years.",
+  "@currencyRule_gue_revalidation_advisory": {
+    "description": "Advisory sentence of the GUE revalidation rule"
+  },
+  "currencyRule_ffessm_licence_advisory": "The FFESSM licence and its medical certificate are renewed every year.",
+  "@currencyRule_ffessm_licence_advisory": {
+    "description": "Advisory sentence of the FFESSM licence rule"
+  },
+  "currencyRule_cave_currency_advisory": "Cave skills fade without practice; a check-out dive is commonly advised after a year away.",
+  "@currencyRule_cave_currency_advisory": {
+    "description": "Advisory sentence of the cave currency rule"
+  },
+  "currencyRule_rebreather_currency_advisory": "Rebreather skills fade quickly; many agencies advise a refresher after six months away.",
+  "@currencyRule_rebreather_currency_advisory": {
+    "description": "Advisory sentence of the rebreather currency rule"
+  },
+  "currencyRule_deco_currency_advisory": "Decompression procedures are commonly refreshed after a year without a decompression dive.",
+  "@currencyRule_deco_currency_advisory": {
+    "description": "Advisory sentence of the decompression currency rule"
+  },
+  "currencyRule_card_expiry_advisory": "The expiry date printed on this card.",
+  "@currencyRule_card_expiry_advisory": {
+    "description": "Advisory sentence of the card expiry status"
+  },
+  "certifications_currency_status_current": "Current",
+  "@certifications_currency_status_current": {
+    "description": "Currency severity: the credential is current"
+  },
+  "certifications_currency_status_dueSoon": "Due soon",
+  "@certifications_currency_status_dueSoon": {
+    "description": "Currency severity: a refresher or renewal is due soon"
+  },
+  "certifications_currency_status_lapsed": "Lapsed",
+  "@certifications_currency_status_lapsed": {
+    "description": "Currency severity: the refresher or renewal interval has passed"
+  },
+  "certifications_currency_eventType_refresher": "Refresher",
+  "@certifications_currency_eventType_refresher": {
+    "description": "Currency ledger event type: a refresher course or dive"
+  },
+  "certifications_currency_eventType_renewal": "Renewal",
+  "@certifications_currency_eventType_renewal": {
+    "description": "Currency ledger event type: a renewal"
+  },
+  "certifications_currency_eventType_revalidation": "Revalidation",
+  "@certifications_currency_eventType_revalidation": {
+    "description": "Currency ledger event type: an agency revalidation"
+  },
+  "certifications_currency_eventType_skillsUpdate": "Skills update",
+  "@certifications_currency_eventType_skillsUpdate": {
+    "description": "Currency ledger event type: a skills update"
+  },
+  "certifications_currency_eventType_other": "Other",
+  "@certifications_currency_eventType_other": {
+    "description": "Currency ledger event type: anything else"
+  },
   "certifications_detail_action_delete": "Delete",
   "certifications_detail_appBar_title": "Certification",
   "certifications_detail_courseCompleted": "Completed",
@@ -2037,6 +2173,198 @@
   "certifications_detail_photo_unableToLoad": "Unable to load image",
   "certifications_detail_sectionTitle_cardPhotos": "Card Photos",
   "certifications_detail_sectionTitle_dates": "Dates",
+  "certifications_detail_sectionTitle_currency": "Currency",
+  "@certifications_detail_sectionTitle_currency": {
+    "description": "Certification detail section title for refresher and renewal currency"
+  },
+  "certifications_currency_dueOn": "Due {date}",
+  "@certifications_currency_dueOn": {
+    "description": "When a refresher or renewal falls due; date is preformatted",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "certifications_currency_lapsedSince": "Lapsed since {date}",
+  "@certifications_currency_lapsedSince": {
+    "description": "When a refresher or renewal lapsed; date is preformatted",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "certifications_currency_anchor_lastDive": "Last dive {date}",
+  "@certifications_currency_anchor_lastDive": {
+    "description": "What a currency clock counts from: the last dive",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "certifications_currency_anchor_lastQualifyingDive": "Last qualifying dive {date}",
+  "@certifications_currency_anchor_lastQualifyingDive": {
+    "description": "What a currency clock counts from: the last dive of a counted type or mode",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "certifications_currency_anchor_cardExpiry": "Card expiry {date}",
+  "@certifications_currency_anchor_cardExpiry": {
+    "description": "What a currency clock counts from: the card's expiry date",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "certifications_currency_anchor_cardIssue": "Issued {date}",
+  "@certifications_currency_anchor_cardIssue": {
+    "description": "What a currency clock counts from: the card's issue date",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "certifications_currency_anchor_ledgerEvent": "{event} logged {date}",
+  "@certifications_currency_anchor_ledgerEvent": {
+    "description": "What a currency clock counts from: a logged refresher or renewal; event is its type",
+    "placeholders": {
+      "event": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "certifications_currency_alsoCovers": "Also covers {names}",
+  "@certifications_currency_alsoCovers": {
+    "description": "The other cards a collapsed currency row stands for; names is a list",
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "certifications_currency_muted": "Muted",
+  "@certifications_currency_muted": {
+    "description": "A currency rule the diver muted for this card"
+  },
+  "certifications_currency_noCountedDive": "No counted dive logged yet",
+  "@certifications_currency_noCountedDive": {
+    "description": "A currency rule applies to the card but no counted dive or refresher has been logged yet; it never warns"
+  },
+  "certifications_currency_action_log": "Log refresher",
+  "@certifications_currency_action_log": {
+    "description": "Action: log a refresher, renewal or revalidation"
+  },
+  "certifications_currency_action_interval": "Edit interval",
+  "@certifications_currency_action_interval": {
+    "description": "Action: edit a currency rule's interval for this card"
+  },
+  "certifications_currency_action_mapping": "Which dives count",
+  "@certifications_currency_action_mapping": {
+    "description": "Action: choose which dive types and modes count toward a currency rule"
+  },
+  "certifications_currency_action_mute": "Mute",
+  "@certifications_currency_action_mute": {
+    "description": "Action: mute a currency rule for this card"
+  },
+  "certifications_currency_action_unmute": "Unmute",
+  "@certifications_currency_action_unmute": {
+    "description": "Action: unmute a currency rule for this card"
+  },
+  "certifications_currency_history": "Currency history",
+  "@certifications_currency_history": {
+    "description": "Heading of a certification's logged refreshers and renewals"
+  },
+  "certifications_currency_deleteEvent_title": "Delete entry?",
+  "@certifications_currency_deleteEvent_title": {
+    "description": "Title of the dialog confirming a refresher entry deletion"
+  },
+  "certifications_currency_deleteEvent_content": "This removes the {event} logged {date}.",
+  "@certifications_currency_deleteEvent_content": {
+    "description": "Body of the dialog confirming a refresher entry deletion",
+    "placeholders": {
+      "event": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "certifications_currency_eventDialog_title": "Log refresher or renewal",
+  "@certifications_currency_eventDialog_title": {
+    "description": "Title of the dialog that logs a refresher or renewal"
+  },
+  "certifications_currency_eventDialog_type": "Type",
+  "@certifications_currency_eventDialog_type": {
+    "description": "Field label: the kind of refresher or renewal"
+  },
+  "certifications_currency_eventDialog_date": "Date",
+  "@certifications_currency_eventDialog_date": {
+    "description": "Field label: when the refresher or renewal took place"
+  },
+  "certifications_currency_eventDialog_provider": "Shop, club or instructor",
+  "@certifications_currency_eventDialog_provider": {
+    "description": "Field label: who ran the refresher"
+  },
+  "certifications_currency_eventDialog_notes": "Notes",
+  "@certifications_currency_eventDialog_notes": {
+    "description": "Field label: notes on the refresher"
+  },
+  "certifications_currency_intervalDialog_title": "Interval",
+  "@certifications_currency_intervalDialog_title": {
+    "description": "Title of the dialog that tunes a currency rule's interval for one card"
+  },
+  "certifications_currency_intervalDialog_lapse": "Lapses after (days)",
+  "@certifications_currency_intervalDialog_lapse": {
+    "description": "Field label: days until the rule lapses"
+  },
+  "certifications_currency_intervalDialog_lead": "Warn this many days before",
+  "@certifications_currency_intervalDialog_lead": {
+    "description": "Field label: days of warning before the rule lapses"
+  },
+  "certifications_currency_intervalDialog_inheritHint": "Blank uses the rule's value ({days})",
+  "@certifications_currency_intervalDialog_inheritHint": {
+    "description": "Hint under an interval field: leaving it blank uses the rule's own value",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "certifications_currency_intervalDialog_leadTooLong": "The warning cannot start before the interval does",
+  "@certifications_currency_intervalDialog_leadTooLong": {
+    "description": "Validation: the warning window is longer than the interval"
+  },
+  "certifications_currency_mappingDialog_title": "Which dives count",
+  "@certifications_currency_mappingDialog_title": {
+    "description": "Title of the dialog choosing which dives count toward a currency rule"
+  },
+  "certifications_currency_mappingDialog_types": "Dive types",
+  "@certifications_currency_mappingDialog_types": {
+    "description": "Field label: dive types that count"
+  },
+  "certifications_currency_mappingDialog_modes": "Dive modes",
+  "@certifications_currency_mappingDialog_modes": {
+    "description": "Field label: dive modes that count"
+  },
+  "certifications_currency_mappingDialog_anyHint": "Nothing selected means any dive counts",
+  "@certifications_currency_mappingDialog_anyHint": {
+    "description": "Hint: selecting nothing means any dive counts"
+  },
+  "certifications_currency_mappingDialog_reset": "Use the rule's default",
+  "@certifications_currency_mappingDialog_reset": {
+    "description": "Button: go back to the rule's own dive mapping"
+  },
   "certifications_detail_sectionTitle_details": "Certification Details",
   "certifications_detail_sectionTitle_instructor": "Instructor",
   "certifications_detail_sectionTitle_notes": "Notes",
@@ -2083,6 +2411,41 @@
   "certifications_edit_hint_instructorNumber": "Instructor certification number",
   "certifications_edit_hint_notes": "Any additional notes",
   "certifications_edit_label_agency": "Agency *",
+  "certificationAgencies_unknownAgency": "Unknown agency",
+  "@certificationAgencies_unknownAgency": {"description": "Shown for a certification agency id that matches no built-in or custom agency (not yet synced, or deleted)."},
+  "certificationAgencies_unknownCertification": "Unknown certification",
+  "@certificationAgencies_unknownCertification": {"description": "Shown for a certification level id that matches nothing known."},
+  "certificationAgencies_addCustomAgency": "Add custom agency...",
+  "certificationAgencies_addCustomCertification": "Add custom certification...",
+  "certificationAgencies_dialog_newAgencyTitle": "New agency",
+  "certificationAgencies_dialog_editAgencyTitle": "Edit agency",
+  "certificationAgencies_dialog_newCertificationTitle": "New certification",
+  "certificationAgencies_dialog_editCertificationTitle": "Edit certification",
+  "certificationAgencies_dialog_nameLabel": "Name",
+  "certificationAgencies_dialog_colorLabel": "Card color",
+  "certificationAgencies_dialog_specialty": "Specialty",
+  "certificationAgencies_error_nameRequired": "Enter a name",
+  "certificationAgencies_error_nameTaken": "That name is already in use",
+  "settings_manage_certificationAgencies": "Certification Agencies",
+  "settings_manage_certificationAgencies_subtitle": "Manage custom agencies and certifications",
+  "certificationAgencies_section_yours": "Your agencies",
+  "certificationAgencies_section_builtIn": "Built-in agencies",
+  "certificationAgencies_addAgency": "Add agency",
+  "certificationAgencies_sharedBy": "Shared by {name}",
+  "@certificationAgencies_sharedBy": {"placeholders": {"name": {"type": "String"}}},
+  "certificationAgencies_editor_addCertification": "Add certification",
+  "certificationAgencies_editor_builtInHint": "Built-in certifications cannot be changed. You can add your own.",
+  "certificationAgencies_delete_confirmTitle": "Delete {name}?",
+  "@certificationAgencies_delete_confirmTitle": {"placeholders": {"name": {"type": "String"}}},
+  "certificationAgencies_delete_refusedTitle": "Still in use",
+  "certificationAgencies_delete_refusedBody": "Used by {usage}. Change those first.",
+  "@certificationAgencies_delete_refusedBody": {"placeholders": {"usage": {"type": "String"}}},
+  "certificationAgencies_usage_certifications": "{count, plural, =1{1 certification} other{{count} certifications}}",
+  "@certificationAgencies_usage_certifications": {"placeholders": {"count": {"type": "int"}}},
+  "certificationAgencies_usage_courses": "{count, plural, =1{1 course} other{{count} courses}}",
+  "@certificationAgencies_usage_courses": {"placeholders": {"count": {"type": "int"}}},
+  "certificationAgencies_usage_and": "{first} and {second}",
+  "@certificationAgencies_usage_and": {"placeholders": {"first": {"type": "String"}, "second": {"type": "String"}}},
   "certifications_edit_addRecognition": "Add another recognition",
   "certifications_edit_removeRecognition": "Remove this recognition",
   "certifications_edit_label_cardNumber": "Card Number",
@@ -3124,7 +3487,7 @@
   "settings_homeChips_insurance": "Insurance",
   "settings_homeChips_noFly": "No-fly timer",
   "settings_homeChips_lastDive": "Dive currency",
-  "settings_homeChips_certifications": "Certification expiry",
+  "settings_homeChips_certifications": "Certification currency",
   "settings_homeChips_trip": "Upcoming trip",
   "settings_homeChips_checklist": "Active checklist",
   "settings_homeChips_course": "Course progress",
@@ -3132,8 +3495,9 @@
   "settings_homeChips_backup": "Backup age",
   "settings_homeChips_sync": "Sync status",
   "settings_homeChips_dataQuality": "Data quality",
-  "dashboard_gauges_certsExpiring": "{count} certifications expiring",
-  "@dashboard_gauges_certsExpiring": {
+  "dashboard_gauges_certsNeedAttention": "{count, plural, =1{{count} certification needs attention} other{{count} certifications need attention}}",
+  "@dashboard_gauges_certsNeedAttention": {
+    "description": "Home strip chip: how many certifications need a refresher or renewal",
     "placeholders": {
       "count": {
         "type": "int"
@@ -3998,6 +4362,10 @@
   "diveLog_edit_label_visibility": "Visibility",
   "diveLog_edit_label_waterTemp": "Water Temp",
   "diveLog_edit_label_waterType": "Water Type",
+  "diveLog_edit_label_weightName": "Name (optional)",
+  "@diveLog_edit_label_weightName": {"description": "Label of the optional name field under a weight row in the dive and weight preset editors"},
+  "diveLog_edit_hint_weightName": "e.g. Top pocket",
+  "@diveLog_edit_hint_weightName": {"description": "Example name shown in the empty weight name field"},
   "diveLog_edit_marineLifeHint": "Tap \"Add\" to record sightings",
   "diveLog_edit_nearbySitesFirst": "Nearby sites first",
   "diveLog_edit_noEquipmentSelected": "No equipment selected",
@@ -6926,6 +7294,8 @@
   "enum_certificationAgency_bsac": "BSAC",
   "enum_certificationAgency_cmas": "CMAS",
   "enum_certificationAgency_ffessm": "FFESSM",
+  "enum_certificationAgency_acuc": "ACUC",
+  "enum_certificationAgency_dan": "DAN",
   "enum_certificationAgency_gue": "GUE",
   "enum_certificationAgency_iantd": "IANTD",
   "enum_certificationAgency_naui": "NAUI",
@@ -6953,6 +7323,14 @@
   "enum_certificationLevel_rescue": "Rescue Diver",
   "enum_certificationLevel_sidemount": "Sidemount",
   "enum_certificationLevel_techDiver": "Tech Diver",
+  "enum_certificationLevel_firstAid": "First Aid / CPR",
+  "@enum_certificationLevel_firstAid": {
+    "description": "Certification level: a first aid and CPR credential"
+  },
+  "enum_certificationLevel_oxygenProvider": "Emergency Oxygen Provider",
+  "@enum_certificationLevel_oxygenProvider": {
+    "description": "Certification level: an emergency oxygen provider credential"
+  },
   "enum_certificationLevel_trimix": "Trimix",
   "enum_certificationLevel_wreck": "Wreck",
   "enum_certificationLevel_masterDiver": "Master Diver",
@@ -8468,6 +8846,130 @@
   "equipment_filter_section_status": "Status",
   "equipment_filter_section_tags": "Tags",
   "equipment_filter_section_category": "Category",
+  "equipment_location_kind_storage": "Storage",
+  "@equipment_location_kind_storage": {"description": "Kind of place where gear is kept: a shelf, bin, locker or room"},
+  "equipment_location_kind_serviceShop": "Service shop",
+  "@equipment_location_kind_serviceShop": {"description": "Kind of place: a shop or technician servicing gear"},
+  "equipment_location_kind_person": "Person",
+  "@equipment_location_kind_person": {"description": "Kind of place: a person the gear is lent to"},
+  "equipment_location_kind_other": "Other",
+  "@equipment_location_kind_other": {"description": "Kind of place that is none of the others"},
+  "equipment_location_noLocation": "No location",
+  "@equipment_location_noLocation": {"description": "Choice and heading for gear with no recorded location"},
+  "equipment_location_picker_title": "Choose a place",
+  "@equipment_location_picker_title": {"description": "Title of the sheet that picks where gear is"},
+  "equipment_location_picker_search": "Search places",
+  "@equipment_location_picker_search": {"description": "Hint of the search field in the place picker"},
+  "equipment_location_picker_newPlace": "New place",
+  "@equipment_location_picker_newPlace": {"description": "Row in the place picker that creates a new place"},
+  "equipment_location_move_title": "{count, plural, one{Move {count} item} other{Move {count} items}}",
+  "@equipment_location_move_title": {"description": "Title of the sheet that moves gear to a place", "placeholders": {"count": {"type": "int"}}},
+  "equipment_location_move_to": "To",
+  "@equipment_location_move_to": {"description": "Label of the destination place in the move sheet"},
+  "equipment_location_move_choose": "Choose a place",
+  "@equipment_location_move_choose": {"description": "Shown in the move sheet before a destination is chosen"},
+  "equipment_location_move_date": "Date",
+  "@equipment_location_move_date": {"description": "Label of the move date in the move sheet"},
+  "equipment_location_move_time": "Time",
+  "@equipment_location_move_time": {"description": "Label of the move time in the move sheet and the history editor; sets where a move falls among same-day moves"},
+  "equipment_location_move_note": "Note",
+  "@equipment_location_move_note": {"description": "Label of the optional note on a move"},
+  "equipment_location_move_noteHint": "e.g. annual regulator service",
+  "@equipment_location_move_noteHint": {"description": "Hint of the note field on a move"},
+  "equipment_location_move_confirm": "Move",
+  "@equipment_location_move_confirm": {"description": "Button that records the move"},
+  "equipment_location_parts_title": "Move parts too?",
+  "@equipment_location_parts_title": {"description": "Title of the prompt offering to move an assembly's parts with it"},
+  "equipment_location_parts_body": "{count, plural, one{Also move its {count} part to the same place?} other{Also move its {count} parts to the same place?}}",
+  "@equipment_location_parts_body": {"description": "Body of the parts prompt", "placeholders": {"count": {"type": "int"}}},
+  "equipment_location_parts_yes": "Move parts",
+  "@equipment_location_parts_yes": {"description": "Accepts moving the parts too"},
+  "equipment_location_parts_no": "Just this",
+  "@equipment_location_parts_no": {"description": "Declines moving the parts"},
+  "equipment_location_status_title": "Update status?",
+  "@equipment_location_status_title": {"description": "Title of the prompt offering a status change after a move"},
+  "equipment_location_status_body": "{count, plural, one{Also mark {count} item as {status}?} other{Also mark {count} items as {status}?}}",
+  "@equipment_location_status_body": {"description": "Body of the status offer; status is a status name such as In Service", "placeholders": {"count": {"type": "int"}, "status": {"type": "String"}}},
+  "equipment_location_status_yes": "Update",
+  "@equipment_location_status_yes": {"description": "Accepts the status change"},
+  "equipment_location_status_no": "Keep status",
+  "@equipment_location_status_no": {"description": "Declines the status change"},
+  "equipment_location_moved": "{count, plural, one{Moved {count} item} other{Moved {count} items}}",
+  "@equipment_location_moved": {"description": "Snackbar after a move", "placeholders": {"count": {"type": "int"}}},
+  "equipment_location_card_title": "Location",
+  "@equipment_location_card_title": {"description": "Title of the card showing where an item is"},
+  "equipment_location_none": "No location set",
+  "@equipment_location_none": {"description": "Shown when an item has no recorded location"},
+  "equipment_location_since": "Since {date}",
+  "@equipment_location_since": {"description": "When the item arrived at its current place", "placeholders": {"date": {"type": "String"}}},
+  "equipment_location_moveButton": "Move",
+  "@equipment_location_moveButton": {"description": "Button on the location card that moves the item"},
+  "equipment_location_showAll": "Show all",
+  "@equipment_location_showAll": {"description": "Expands the location history to every move"},
+  "equipment_location_history_cleared": "Location cleared",
+  "@equipment_location_history_cleared": {"description": "A history entry recording that the location was cleared"},
+  "equipment_location_editMove_title": "Edit move",
+  "@equipment_location_editMove_title": {"description": "Title of the dialog editing one history entry"},
+  "equipment_location_editMove_delete": "Delete move",
+  "@equipment_location_editMove_delete": {"description": "Deletes one history entry"},
+  "equipment_location_deleteMoveConfirm": "Delete this history entry? The item's location is worked out again from the moves that are left.",
+  "@equipment_location_deleteMoveConfirm": {"description": "Confirmation before deleting one entry of an item's location history"},
+  "equipment_location_bulkAction": "Move to location",
+  "@equipment_location_bulkAction": {"description": "Bulk action moving the selected gear to a place"},
+  "equipment_location_groupCount": "{count, plural, one{{count} item} other{{count} items}}",
+  "@equipment_location_groupCount": {"description": "Item count beside a location heading and on the Locations page", "placeholders": {"count": {"type": "int"}}},
+  "equipment_location_activeFilter": "Location",
+  "@equipment_location_activeFilter": {"description": "Chip in the active filters bar when the list is filtered by location"},
+  "equipment_filter_section_location": "Location",
+  "@equipment_filter_section_location": {"description": "Heading of the location section in the equipment filter"},
+  "equipment_arrange_groupByLocation": "Group by location",
+  "@equipment_arrange_groupByLocation": {"description": "Switch on the Equipment page's sort sheet grouping the list under one heading per place"},
+  "equipment_arrange_groupByLocationSubtitle": "One heading per place, on this page only",
+  "@equipment_arrange_groupByLocationSubtitle": {"description": "Subtitle of the group by location switch"},
+  "equipment_edit_locationLabel": "Location",
+  "@equipment_edit_locationLabel": {"description": "Label of the optional place picker on the new equipment form"},
+  "equipment_edit_locationNone": "Not set",
+  "@equipment_edit_locationNone": {"description": "Shown in the new equipment form's location picker when none is chosen"},
+  "equipment_edit_locationFailed": "Saved, but its location could not be set. Use Move on the item to set it.",
+  "@equipment_edit_locationFailed": {"description": "Shown after a new item saved but its chosen first location failed to save"},
+  "equipment_locations_title": "Locations",
+  "@equipment_locations_title": {"description": "Title of the page listing places where gear is kept"},
+  "equipment_locations_empty": "No places yet. Add one to start tracking where your gear is.",
+  "@equipment_locations_empty": {"description": "Empty state of the Locations page"},
+  "equipment_locations_add": "Add place",
+  "@equipment_locations_add": {"description": "Button adding a place on the Locations page"},
+  "equipment_locations_archivedSection": "Archived ({count})",
+  "@equipment_locations_archivedSection": {"description": "Collapsed section of archived places", "placeholders": {"count": {"type": "int"}}},
+  "equipment_locations_archive": "Archive",
+  "@equipment_locations_archive": {"description": "Archives a place that history still names"},
+  "equipment_locations_restore": "Restore",
+  "@equipment_locations_restore": {"description": "Restores an archived place"},
+  "equipment_locations_delete": "Delete",
+  "@equipment_locations_delete": {"description": "Deletes a place no item has ever been at"},
+  "equipment_locations_deleteConfirm": "Delete {name}?",
+  "@equipment_locations_deleteConfirm": {"description": "Confirmation before deleting a place where gear is kept", "placeholders": {"name": {"type": "String"}}},
+  "equipment_locations_itemsHere": "Items here",
+  "@equipment_locations_itemsHere": {"description": "Heading of the list of items currently at a place"},
+  "equipment_locations_noItemsHere": "Nothing is here right now.",
+  "@equipment_locations_noItemsHere": {"description": "Shown when no item is currently at a place"},
+  "equipment_locations_moveItems": "Move the items here",
+  "@equipment_locations_moveItems": {"description": "Tooltip of the action on a place's page that moves every item currently there"},
+  "equipment_locations_newTitle": "New place",
+  "@equipment_locations_newTitle": {"description": "Title of the dialog creating a place where gear is kept"},
+  "equipment_locations_editTitle": "Edit place",
+  "@equipment_locations_editTitle": {"description": "Title of the dialog editing a place where gear is kept"},
+  "equipment_locations_nameLabel": "Name",
+  "@equipment_locations_nameLabel": {"description": "Label of a place's name field"},
+  "equipment_locations_nameRequired": "Enter a name",
+  "@equipment_locations_nameRequired": {"description": "Validation error when a place has no name"},
+  "equipment_locations_duplicateWarning": "You already have a place with this name",
+  "@equipment_locations_duplicateWarning": {"description": "Warning under a place name that matches another of the diver's places; saving is still allowed"},
+  "equipment_locations_kindLabel": "Kind",
+  "@equipment_locations_kindLabel": {"description": "Label of a place's kind selector"},
+  "equipment_locations_notesLabel": "Notes",
+  "@equipment_locations_notesLabel": {"description": "Label of a place's notes field"},
+  "equipment_locations_notesHint": "Address, phone, locker number",
+  "@equipment_locations_notesHint": {"description": "Hint of a place's notes field"},
   "equipment_list_retryButton": "Retry",
   "equipment_list_searchTooltip": "Search Equipment",
   "equipment_list_sortTitle": "Sort Equipment",
@@ -9295,6 +9797,19 @@
   "gasCalculators_blender_scanTag": "Scan tag",
   "gasCalculators_blender_notYourCylinder": "That cylinder is not in your gear",
   "gasCalculators_blender_cylinderFailed": "Could not open that cylinder. Try again.",
+  "gasCalculators_blender_cylinderNoVolume": "{name} has no recorded water volume",
+  "@gasCalculators_blender_cylinderNoVolume": {
+    "description": "Choosing a cylinder whose equipment entry has no volume attribute, in a spot that only reads the volume (the cost card, a billed line).",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "gasCalculators_blender_noCylinders": "No cylinders in your gear yet. Type the water capacity instead.",
+  "@gasCalculators_blender_noCylinders": {
+    "description": "Choose cylinder tapped on the cost card or a billed gas line while the diver has no tanks in their gear; the cylinder picker is not opened. Points at the water-capacity field next to the button."
+  },
   "gasCalculators_blender_filledFrom": "{name}: {mix}",
   "@gasCalculators_blender_filledFrom": {
     "description": "After Choose cylinder: the cylinder chosen and the mix of its last fill, now what is in it.",
@@ -9359,9 +9874,7 @@
   "gasCalculators_blender_templateAdjust": "Adjust values",
   "gasCalculators_blender_billing": "Cost",
   "gasCalculators_blender_cylinderVolume": "Cylinder water capacity",
-  "gasCalculators_blender_cylinderPresets": "Presets",
   "gasCalculators_blender_unitPrice": "Price per 100 {unit}",
-  "gasCalculators_blender_manageCylinderSizes": "Manage cylinder sizes",
   "gasCalculators_blender_costTotal": "Total",
   "gasCalculators_blender_costBasis": "Billed on the pressure delivered (cylinder water capacity × bar added), the way a fill station meters it.",
   "gasCalculators_blender_costMissingPrice": "Enter a price for every gas to see the total.",
@@ -12241,6 +12754,10 @@
   "settings_conflict_field_accessNotes": "Access notes",
   "settings_conflict_field_accountIdentifier": "Account",
   "settings_conflict_field_additionalCredentials": "Additional credentials",
+  "settings_conflict_field_advisoryKey": "Built-in advice",
+  "@settings_conflict_field_advisoryKey": {
+    "description": "Sync conflict field label: which built-in advice text a certification currency rule shows."
+  },
   "settings_conflict_field_airBreakBreakSeconds": "Air break length",
   "settings_conflict_field_airBreakO2Seconds": "Oxygen time between air breaks",
   "settings_conflict_field_allergies": "Allergies",
@@ -12522,6 +13039,7 @@
   "settings_conflict_field_intervalDays": "Interval in days",
   "settings_conflict_field_intervalDives": "Interval in dives",
   "settings_conflict_field_intervalHours": "Interval in hours",
+  "settings_conflict_field_isArchived": "Archived",
   "settings_conflict_field_isBuiltIn": "Built in",
   "settings_conflict_field_isCustom": "Custom",
   "settings_conflict_field_isDefault": "Default",
@@ -12571,6 +13089,7 @@
   "settings_conflict_field_medications": "Medications",
   "settings_conflict_field_mergeSourceSlot": "Position among merged sources",
   "settings_conflict_field_mode": "Breathing mode",
+  "settings_conflict_field_movedAt": "Moved on",
   "settings_conflict_field_name": "Name",
   "settings_conflict_field_narrative": "What happened",
   "settings_conflict_field_noFlyPreset": "No-fly rule",
@@ -12736,6 +13255,10 @@
   "settings_conflict_field_summaryMaxDepth": "Planned maximum depth",
   "settings_conflict_field_summaryRuntimeSeconds": "Planned runtime",
   "settings_conflict_field_summaryTtsSeconds": "Planned time to surface",
+  "settings_conflict_field_supersedesRuleId": "Replaces built-in rule",
+  "@settings_conflict_field_supersedesRuleId": {
+    "description": "Sync conflict field label: the built-in certification currency rule that a custom rule replaces."
+  },
   "settings_conflict_field_surfaceConditions": "Surface conditions",
   "settings_conflict_field_surfaceSwimLimitM": "Longest surface swim",
   "settings_conflict_field_swimSpeedMps": "Swim speed",
@@ -12851,6 +13374,7 @@
   "settings_conflict_ref_diveType": "Dive type",
   "settings_conflict_ref_diver": "Diver",
   "settings_conflict_ref_equipment": "Equipment",
+  "settings_conflict_ref_equipmentLocation": "Equipment location",
   "settings_conflict_ref_equipmentSet": "Equipment set",
   "settings_conflict_ref_finding": "Finding",
   "settings_conflict_ref_importedFile": "Imported file",
@@ -13207,6 +13731,139 @@
   },
   "settings_manage_serviceTypes": "Service types",
   "settings_manage_serviceTypes_subtitle": "Maintenance your gear needs, and how often",
+  "settings_manage_locations": "Locations",
+  "@settings_manage_locations": {"description": "Settings > Manage tile opening the list of places where gear is kept"},
+  "settings_manage_locations_subtitle": "Where your gear is kept, serviced or lent",
+  "@settings_manage_locations_subtitle": {"description": "Subtitle of the Locations tile in Settings > Manage"},
+  "settings_manage_currencyRules": "Certification currency",
+  "@settings_manage_currencyRules": {
+    "description": "Settings > Manage tile: the certification currency rule catalog"
+  },
+  "settings_manage_currencyRules_subtitle": "Refresher and renewal rules",
+  "@settings_manage_currencyRules_subtitle": {
+    "description": "Subtitle of the certification currency Manage tile"
+  },
+  "currencyRules_title": "Certification currency",
+  "@currencyRules_title": {
+    "description": "Title of the certification currency rules page"
+  },
+  "currencyRules_addTooltip": "Add rule",
+  "@currencyRules_addTooltip": {
+    "description": "Button and tooltip: add a custom currency rule"
+  },
+  "currencyRules_editTooltip": "Edit rule",
+  "@currencyRules_editTooltip": {
+    "description": "Tooltip: edit a custom currency rule"
+  },
+  "currencyRules_deleteTooltip": "Delete rule",
+  "@currencyRules_deleteTooltip": {
+    "description": "Tooltip: delete a custom currency rule"
+  },
+  "currencyRules_builtIn": "Built-in",
+  "@currencyRules_builtIn": {
+    "description": "Section header: the built-in currency rules"
+  },
+  "currencyRules_custom": "Your rules",
+  "@currencyRules_custom": {
+    "description": "Section header: the diver's own currency rules"
+  },
+  "currencyRules_replaces": "Replaces {name}",
+  "@currencyRules_replaces": {
+    "description": "On a custom rule: the built-in rule it replaces",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyRules_replacedBy": "Replaced by {name}",
+  "@currencyRules_replacedBy": {
+    "description": "On a built-in rule: the custom rule that replaces it",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyRules_summary_activity": "{lapse, plural, =1{Lapses {lapse} day after the last qualifying dive} other{Lapses {lapse} days after the last qualifying dive}}",
+  "@currencyRules_summary_activity": {
+    "description": "Summary of an activity currency rule's interval",
+    "placeholders": {
+      "lapse": {
+        "type": "int"
+      }
+    }
+  },
+  "currencyRules_summary_date": "{lapse, plural, =1{Lapses {lapse} day after the date on the card} other{Lapses {lapse} days after the date on the card}}",
+  "@currencyRules_summary_date": {
+    "description": "Summary of a date currency rule's interval",
+    "placeholders": {
+      "lapse": {
+        "type": "int"
+      }
+    }
+  },
+  "currencyRules_deleteDialog_title": "Delete rule?",
+  "@currencyRules_deleteDialog_title": {
+    "description": "Title of the dialog confirming a custom rule deletion"
+  },
+  "currencyRules_deleteDialog_content": "{name} is removed. Logged refreshers stay in each card's history.",
+  "@currencyRules_deleteDialog_content": {
+    "description": "Body of the dialog confirming a custom rule deletion",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyRules_dialog_addTitle": "New rule",
+  "@currencyRules_dialog_addTitle": {
+    "description": "Title of the dialog creating a custom currency rule"
+  },
+  "currencyRules_dialog_editTitle": "Edit rule",
+  "@currencyRules_dialog_editTitle": {
+    "description": "Title of the dialog editing a currency rule"
+  },
+  "currencyRules_dialog_copyNote": "Saving creates your own copy that replaces this built-in rule.",
+  "@currencyRules_dialog_copyNote": {
+    "description": "Shown when editing a built-in rule: saving makes a custom copy"
+  },
+  "currencyRules_dialog_name": "Name",
+  "@currencyRules_dialog_name": {
+    "description": "Field label: rule name"
+  },
+  "currencyRules_dialog_nameRequired": "Enter a name",
+  "@currencyRules_dialog_nameRequired": {
+    "description": "Validation: a rule needs a name"
+  },
+  "currencyRules_dialog_clock": "Counts from",
+  "@currencyRules_dialog_clock": {
+    "description": "Field label: what the rule's clock counts from"
+  },
+  "currencyRules_dialog_clock_activity": "Last qualifying dive",
+  "@currencyRules_dialog_clock_activity": {
+    "description": "Clock option: the last qualifying dive"
+  },
+  "currencyRules_dialog_clock_date": "A date on the card",
+  "@currencyRules_dialog_clock_date": {
+    "description": "Clock option: a date on the card"
+  },
+  "currencyRules_dialog_agencies": "Agencies",
+  "@currencyRules_dialog_agencies": {
+    "description": "Field label: agencies a rule applies to"
+  },
+  "currencyRules_dialog_levels": "Levels",
+  "@currencyRules_dialog_levels": {
+    "description": "Field label: certification levels a rule applies to"
+  },
+  "currencyRules_dialog_anyHint": "Nothing selected means any",
+  "@currencyRules_dialog_anyHint": {
+    "description": "Hint: selecting nothing applies the rule to everything"
+  },
+  "currencyRules_dialog_note": "Note",
+  "@currencyRules_dialog_note": {
+    "description": "Field label: the diver's own note on a custom rule"
+  },
   "settings_migrationProgress_doNotClose": "Please do not close the app",
   "settings_migration_backupInfo": "A backup will be created before the move. Your data will not be lost.",
   "settings_migration_cancel": "Cancel",
@@ -14036,7 +14693,7 @@
   "insights_focus_title": "Dive focus",
   "insights_focus_error": "Failed to load dive focus",
   "insights_focus_empty": "No dives have this value yet",
-  "insights_focus_summary": "{count} of {total} dives, group average {group} vs {overall} overall",
+  "insights_focus_summary": "{count} of {total, plural, =1{1 dive} other{{total} dives}}, group average {group} vs {overall} overall",
   "@insights_focus_summary": {
     "placeholders": {
       "count": { "type": "int" },
@@ -14045,7 +14702,7 @@
       "overall": { "type": "String" }
     }
   },
-  "insights_focus_summary_allShown": "Only {total} dives have this value, so all of them are shown",
+  "insights_focus_summary_allShown": "{total, plural, =1{Only 1 dive has this value, so it is shown} other{Only {total} dives have this value, so all of them are shown}}",
   "@insights_focus_summary_allShown": {
     "placeholders": { "total": { "type": "int" } }
   },
@@ -14100,7 +14757,7 @@
   "@insights_focus_factors_versus": {
     "placeholders": { "group": { "type": "String" }, "baseline": { "type": "String" } }
   },
-  "insights_focus_factors_coverage": "{covered} of {total} dives",
+  "insights_focus_factors_coverage": "{covered} of {total, plural, =1{1 dive} other{{total} dives}}",
   "@insights_focus_factors_coverage": {
     "placeholders": { "covered": { "type": "int" }, "total": { "type": "int" } }
   },
@@ -16673,6 +17330,14 @@
   "universalImport_triage_readyCount": "{count, plural, =1{1 file ready to import} other{{count} files ready to import}}",
   "universalImport_label_filesSelected": "{count, plural, =1{1 file selected} other{{count} files selected}}",
   "universalImport_triage_excludedCsv": "Import individually (CSV)",
+  "universalImport_triage_excludedHandoff": "Import individually ({format})",
+  "@universalImport_triage_excludedHandoff": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
   "universalImport_triage_unsupported": "Unsupported format",
   "universalImport_triage_parseFailed": "Could not be read",
   "universalImport_triage_parsing": "Parsing file {current} of {total}…",
@@ -28211,6 +28876,26 @@
   "navTrack_handoff_recognized": "Seacraft ENC navigation log recognised",
   "navTrack_handoff_trackDescription": "This is an underwater track, not a dive log. It has its own place in Submersion, separate from your dive import.",
   "navTrack_handoff_reviewTrackButton": "Review underwater track",
+  "suuntoJson_handoff_recognized": "Suunto dive export recognised",
+  "suuntoJson_handoff_description": "This file was exported from the Suunto app. The Suunto importer reads it the same way as the Suunto Cloud import, including the dive's recorded route.",
+  "suuntoJson_handoff_importButton": "Import Suunto dive",
+  "suuntoFile_step_title": "Suunto app exports",
+  "suuntoFile_step_description": "Choose one or more dives exported from the Suunto app as JSON. Dives recorded with a route bring it along.",
+  "suuntoFile_step_chooseFiles": "Choose files",
+  "suuntoFile_step_readyCount": "{count, plural, one{{count} dive ready to import} other{{count} dives ready to import}}",
+  "@suuntoFile_step_readyCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "suuntoFile_step_routeIncluded": "Includes recorded route",
+  "suuntoFile_step_noRoute": "No recorded route",
+  "suuntoFile_rejection_notJson": "Not a JSON file",
+  "suuntoFile_rejection_notSuuntoExport": "Not a Suunto app export",
+  "suuntoFile_rejection_notADive": "Not a dive (another activity type)",
+  "universalImport_summary_importWithSuunto": "Import with Suunto importer",
   "navTrack_section_trackTitle": "Underwater Track",
   "navTrack_section_trackCount": "{count, plural, one{{count} track} other{{count} tracks}}",
   "@navTrack_section_trackCount": {
@@ -28666,6 +29351,8 @@
   "@query_equipment_dives": {"description": "Relation label in the query builder: the dives an item was used on"},
   "query_equipment_lastDived": "Last used",
   "@query_equipment_lastDived": {"description": "Field label in the query builder: the date of the newest counted dive the item was used on"},
+  "query_equipment_location": "Location",
+  "@query_equipment_location": {"description": "Field label in the query builder: the place an item is now"},
   "query_equipment_model": "Model",
   "@query_equipment_model": {"description": "Field label in the query builder"},
   "query_equipment_name": "Name",
@@ -28804,6 +29491,8 @@
   "@query_trips_tripType": {"description": "Field label in the query builder"},
   "query_weights_amount": "Amount",
   "@query_weights_amount": {"description": "Field label in the query builder"},
+  "query_weights_label": "Name",
+  "@query_weights_label": {"description": "Field label in the query builder"},
   "query_weights_notes": "Notes",
   "@query_weights_notes": {"description": "Field label in the query builder"},
   "query_weights_type": "Type",
@@ -29025,5 +29714,13 @@
   "query_editor_needsText": "Enter at least one word",
   "@query_editor_needsText": {"description": "Builder text row left empty: it needs at least one word"},
   "query_saveNeedsDiver": "Create a diver profile to save queries",
-  "@query_saveNeedsDiver": {"description": "Snackbar when Save is tapped with no diver profile"}
+  "@query_saveNeedsDiver": {"description": "Snackbar when Save is tapped with no diver profile"},
+  "builtIns_showColumnLabel": "Show",
+  "@builtIns_showColumnLabel": {"description": "Column header above the switches that hide built-in entries from the pickers on the Manage pages"},
+  "builtIns_showInPickers": "Show in pickers",
+  "@builtIns_showInPickers": {"description": "Tooltip on a built-in entry's show/hide switch on a Manage page"},
+  "preDive_start_allTemplatesHidden": "Every checklist is hidden. Show one again in {path}.",
+  "@preDive_start_allTemplatesHidden": {"description": "Helper under the start sheet's checklist field when the diver hid every checklist template; path is the localized Settings > Manage > Pre-Dive Checklists trail", "placeholders": {"path": {"type": "String"}}},
+  "settings_conflict_field_hiddenBuiltInIds": "Hidden built-in entries",
+  "@settings_conflict_field_hiddenBuiltInIds": {"description": "Sync conflict dialog label for the built-in dive types, roles, site types, service types and checklists a diver hid from the pickers"}
 }
