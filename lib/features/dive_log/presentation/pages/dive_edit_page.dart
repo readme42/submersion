@@ -1387,6 +1387,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
                   onClear: _selectedCourse == null
                       ? null
                       : () => setState(() => _selectedCourse = null),
+                  clearTooltip: l10n.courses_picker_clearSelection,
                 ),
               ),
               _gatedRow(
@@ -3055,27 +3056,14 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     }
   }
 
-  Future<void> _showBulkCoursePicker() async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (sheetContext) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (_, scrollController) => CoursePickerSheet(
-          scrollController: scrollController,
-          selectedCourse: _selectedCourse,
-          onCourseSelected: (course) {
-            Navigator.of(sheetContext).pop();
-            _markDirty();
-            setState(() => _selectedCourse = course);
-          },
-        ),
-      ),
-    );
-  }
+  Future<void> _showBulkCoursePicker() => showCoursePickerSheet(
+    context,
+    selectedCourse: _selectedCourse,
+    onCourseSelected: (course) {
+      _markDirty();
+      setState(() => _selectedCourse = course);
+    },
+  );
 
   Widget _buildCourseGroupSection() {
     return RareSection(

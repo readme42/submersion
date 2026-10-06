@@ -429,6 +429,43 @@ void main() {
       expect((await repository.getDiveById(d2.id))!.courseId, isNull);
     });
 
+    testWidgets('clearing a picked course unlinks every dive', (tester) async {
+      final course = await insertCourse();
+      final d1 = await repository.createDive(
+        createTestDiveWithBottomTime().copyWith(
+          id: 'course-pick-clear-1',
+          courseId: 'aow',
+        ),
+      );
+      await pumpBulkFor(tester, [d1.id], [course]);
+
+      await enableCourseGate(tester);
+      await tester.tap(
+        find.descendant(of: courseGate(), matching: find.byType(FormRow)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Advanced Open Water'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: courseGate(),
+          matching: find.byTooltip('Clear selection'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: courseGate(),
+          matching: find.text('Advanced Open Water'),
+        ),
+        findsNothing,
+      );
+
+      await saveAndApply(tester);
+
+      expect((await repository.getDiveById(d1.id))!.courseId, isNull);
+    });
+
     testWidgets('a disabled Course gate leaves existing links alone', (
       tester,
     ) async {

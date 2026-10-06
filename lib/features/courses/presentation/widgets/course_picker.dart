@@ -59,30 +59,40 @@ class CoursePicker extends ConsumerWidget {
           const Icon(Icons.chevron_right),
         ],
       ),
-      onTap: () => _showCoursePickerSheet(context, ref),
-    );
-  }
-
-  void _showCoursePickerSheet(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (sheetContext) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (_, scrollController) => CoursePickerSheet(
-          scrollController: scrollController,
-          selectedCourse: selectedCourse,
-          onCourseSelected: (course) {
-            Navigator.of(sheetContext).pop();
-            onCourseSelected(course);
-          },
-        ),
+      onTap: () => showCoursePickerSheet(
+        context,
+        selectedCourse: selectedCourse,
+        onCourseSelected: onCourseSelected,
       ),
     );
   }
+}
+
+/// Opens [CoursePickerSheet] in a draggable modal sheet. The sheet closes
+/// before [onCourseSelected] runs.
+Future<void> showCoursePickerSheet(
+  BuildContext context, {
+  required Course? selectedCourse,
+  required ValueChanged<Course> onCourseSelected,
+}) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    builder: (sheetContext) => DraggableScrollableSheet(
+      initialChildSize: 0.7,
+      minChildSize: 0.5,
+      maxChildSize: 0.9,
+      expand: false,
+      builder: (_, scrollController) => CoursePickerSheet(
+        scrollController: scrollController,
+        selectedCourse: selectedCourse,
+        onCourseSelected: (course) {
+          Navigator.of(sheetContext).pop();
+          onCourseSelected(course);
+        },
+      ),
+    ),
+  );
 }
 
 /// A bottom sheet widget for selecting a course from a list.
