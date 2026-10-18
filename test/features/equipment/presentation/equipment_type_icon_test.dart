@@ -92,8 +92,6 @@ void main() {
     // font's cmap.
     const drawn = <EquipmentType, IconData>{
       EquipmentType.regulator: SubmersionIcons.regulator,
-      // Drawn under #3363, so the two parts read apart from the whole
-      // regulator and from each other.
       EquipmentType.firstStage: SubmersionIcons.firstStage,
       EquipmentType.secondStage: SubmersionIcons.secondStage,
       EquipmentType.bcd: SubmersionIcons.bcd,

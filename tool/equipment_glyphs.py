@@ -670,14 +670,11 @@ add(
     ),
 )
 
-# --- First stage (DIN, side-on) --------------------------------------------
-# A Scubapro Mk17 EVO2 turned on its side: the DIN connector points left, the
-# environmental cap runs along the top, the turret hangs underneath.
+# --- Regulator stages -------------------------------------------------------
 
 
 def din_thread(x0, x1, cy, root, crest, teeth):
-    """The male DIN thread in profile: a cylinder whose top and bottom edges
-    are cut into teeth."""
+    """Male DIN thread in profile, top and bottom edges cut into teeth."""
     pitch = (x1 - x0) / teeth
     top, bottom = [], []
     for i in range(teeth):
@@ -690,8 +687,7 @@ def din_thread(x0, x1, cy, root, crest, teeth):
 
 
 def knurled_wheel(x, y, w, h, grooves):
-    """Handwheel edge-on. Its knurl runs parallel to the axis, so side-on the
-    ridges show as grooves across the rim."""
+    """Handwheel edge-on, its knurl drawn as grooves across the rim."""
     parts = [rrect(x, y, w, h, 0.9)]
     for i in range(1, grooves + 1):
         gy = y + h * i / (grooves + 1)
@@ -699,9 +695,7 @@ def knurled_wheel(x, y, w, h, grooves):
     return g(*parts)
 
 
-# A hole only cancels one layer of winding, so the collar and the turret
-# overlap their neighbours by 0.2 at most: every rib and ring sits on a single
-# contour and cuts cleanly.
+# Holes cut one winding layer, so each rib and ring sits on a single contour.
 add(
     "first_stage",
     "First Stage",
@@ -727,16 +721,8 @@ add(
 )
 
 
-# --- Second stage (face-on) -------------------------------------------------
-# The purge cover is what makes a second stage recognisable, so unlike the
-# first stage this one is drawn face-on: the round body and purge cover, the
-# mouthpiece on top, the hose fitting on the left, the adjustment knob on the
-# right.
-
-
 def dashed_ring(cx, cy, r, count, length, w):
-    """Straight dashes cut round a circle of radius r, each one a chord of
-    the given length."""
+    """Straight dashes cut round a circle, each a chord of the given length."""
     half = length / 2 / r
     dashes = []
     for i in range(count):
@@ -747,9 +733,8 @@ def dashed_ring(cx, cy, r, count, length, w):
     return g(*dashes)
 
 
-# A hole only cancels one layer of winding, so the mouthpiece, the hose
-# fitting and the knob overlap only the body's outer band: the gap inside the
-# band never runs under them, and it cuts cleanly all the way round.
+# Parts attached to the body overlap only its outer band, so the gap inside
+# it cuts cleanly.
 add(
     "second_stage",
     "Second Stage",

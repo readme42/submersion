@@ -29,9 +29,7 @@ IconData equipmentTypeIcon(EquipmentType type) {
   switch (type) {
     case EquipmentType.regulator:
       return SubmersionIcons.regulator;
-    // Regulator parts (issue #1487). The two stages are drawn (#3363): the
-    // first stage side-on, the second face-on so it reads apart from the
-    // whole regulator. The hose is still a Material cable.
+    // Regulator parts (issue #1487).
     case EquipmentType.firstStage:
       return SubmersionIcons.firstStage;
     case EquipmentType.secondStage:
