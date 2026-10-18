@@ -4910,17 +4910,19 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const Divider(),
-            Text(
-              dive.notes.isNotEmpty
-                  ? dive.notes
-                  : context.l10n.diveLog_detail_noNotes,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: dive.notes.isEmpty
-                    ? Theme.of(context).colorScheme.onSurfaceVariant
-                    : null,
-                fontStyle: dive.notes.isEmpty ? FontStyle.italic : null,
+            if (dive.notes.isNotEmpty)
+              SelectableText(
+                dive.notes,
+                style: Theme.of(context).textTheme.bodyMedium,
+              )
+            else
+              Text(
+                context.l10n.diveLog_detail_noNotes,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
-            ),
           ],
         ),
       ),
