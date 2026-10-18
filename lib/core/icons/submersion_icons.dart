@@ -136,4 +136,14 @@ abstract final class SubmersionIcons {
     0xe91c,
     fontFamily: fontFamily,
   );
+
+  // Regulator parts (#3363), drawn so neither reads as the whole regulator.
+
+  /// A DIN first stage side-on: thread, handwheel, a ported body under its
+  /// environmental cap, and a turret.
+  static const IconData firstStage = IconData(0xe91d, fontFamily: fontFamily);
+
+  /// A second stage face-on: the purge cover with its button, the mouthpiece
+  /// on top, the hose fitting and the adjustment knob.
+  static const IconData secondStage = IconData(0xe91e, fontFamily: fontFamily);
 }

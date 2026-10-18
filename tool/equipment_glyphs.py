@@ -670,6 +670,106 @@ add(
     ),
 )
 
+# --- First stage (DIN, side-on) --------------------------------------------
+# A Scubapro Mk17 EVO2 turned on its side: the DIN connector points left, the
+# environmental cap runs along the top, the turret hangs underneath.
+
+
+def din_thread(x0, x1, cy, root, crest, teeth):
+    """The male DIN thread in profile: a cylinder whose top and bottom edges
+    are cut into teeth."""
+    pitch = (x1 - x0) / teeth
+    top, bottom = [], []
+    for i in range(teeth):
+        a = x0 + i * pitch
+        top += [(a, cy - root), (a + pitch * 0.5, cy - crest)]
+        bottom += [(a, cy + root), (a + pitch * 0.5, cy + crest)]
+    top.append((x1, cy - root))
+    bottom.append((x1, cy + root))
+    return poly(top + bottom[::-1])
+
+
+def knurled_wheel(x, y, w, h, grooves):
+    """Handwheel edge-on. Its knurl runs parallel to the axis, so side-on the
+    ridges show as grooves across the rim."""
+    parts = [rrect(x, y, w, h, 0.9)]
+    for i in range(1, grooves + 1):
+        gy = y + h * i / (grooves + 1)
+        parts.append(slot((x + 0.6, gy), (x + w - 0.6, gy), 0.75))
+    return g(*parts)
+
+
+# A hole only cancels one layer of winding, so the collar and the turret
+# overlap their neighbours by 0.2 at most: every rib and ring sits on a single
+# contour and cuts cleanly.
+add(
+    "first_stage",
+    "First Stage",
+    "DIN first stage side-on: thread, knurled wheel, a body with a ribbed "
+    "collar under its cap, a big and a small port, a side boss and a turret.",
+    g(
+        rrect(0.4, 10.6, 1.4, 2.8, 0.5),                     # O-ring nose
+        din_thread(1.4, 4.6, 12.0, 2.0, 2.9, 3),             # DIN thread
+        knurled_wheel(4.4, 4.69, 3.4, 14.62, 3),             # handwheel
+        rrect(7.6, 9.6, 1.4, 5.6, 0.2),                      # neck under the wheel
+        rrect(9.1, 3.4, 9.8, 3.0, 1.2),                      # environmental cap
+        rrect(10.1, 6.2, 7.8, 2.7, 0.3),                     # collar
+        slot((11.66, 6.7), (11.66, 8.4), 0.8),               # collar ribs
+        slot((14.0, 6.7), (14.0, 8.4), 0.8),
+        slot((16.34, 6.7), (16.34, 8.4), 0.8),
+        rrect(8.8, 8.7, 10.4, 10.3, 1.6),                    # body
+        circle(14.4, 13.6, 2.0, solid=False),                # big port
+        circle(17.4, 17.0, 0.8, solid=False),                # small port
+        rrect(18.8, 12.0, 1.3, 3.4, 0.5),                    # side port boss
+        rrect(10.5, 18.8, 7.0, 3.6, 1.6),                    # turret
+        slot((11.0, 20.6), (17.0, 20.6), 0.75),              # turret ring
+    ),
+)
+
+
+# --- Second stage (face-on) -------------------------------------------------
+# The purge cover is what makes a second stage recognisable, so unlike the
+# first stage this one is drawn face-on: the round body and purge cover, the
+# mouthpiece on top, the hose fitting on the left, the adjustment knob on the
+# right.
+
+
+def dashed_ring(cx, cy, r, count, length, w):
+    """Straight dashes cut round a circle of radius r, each one a chord of
+    the given length."""
+    half = length / 2 / r
+    dashes = []
+    for i in range(count):
+        a = 2 * math.pi * i / count
+        p1 = (cx + r * math.cos(a - half), cy + r * math.sin(a - half))
+        p2 = (cx + r * math.cos(a + half), cy + r * math.sin(a + half))
+        dashes.append(slot(p1, p2, w))
+    return g(*dashes)
+
+
+# A hole only cancels one layer of winding, so the mouthpiece, the hose
+# fitting and the knob overlap only the body's outer band: the gap inside the
+# band never runs under them, and it cuts cleanly all the way round.
+add(
+    "second_stage",
+    "Second Stage",
+    "Second stage face-on: the body and its purge cover with six dashes and a "
+    "centre button, the mouthpiece on top, the hose fitting and the knob.",
+    g(
+        rrect(7.2, 1.8, 9.6, 3.0, 1.3),                      # mouthpiece bite block
+        poly([(8.2, 4.0), (15.8, 4.0), (14.6, 6.2), (9.4, 6.2)]),  # flare to the body
+        rrect(0.6, 11.6, 2.8, 3.2, 0.5),                     # hose end
+        rrect(2.8, 10.4, 2.3, 5.6, 0.5),                     # hose fitting collar
+        rrect(19.0, 9.4, 2.6, 6.4, 1.0),                     # adjustment knob
+        circle(12.0, 13.2, 8.0),                             # body
+        circle(12.0, 13.2, 6.6, solid=False),                # gap round the cover
+        circle(12.0, 13.2, 5.5),                             # purge cover
+        dashed_ring(12.0, 13.2, 3.9, 6, 1.8, 0.85),          # cover ribs
+        circle(12.0, 13.2, 2.2, solid=False),                # button surround
+        circle(12.0, 13.2, 1.3),                             # purge button
+    ),
+)
+
 # Private Use Area code points, assigned in declaration order and never
 # renumbered: they are baked into the committed font and into
 # lib/core/icons/submersion_icons.dart.
