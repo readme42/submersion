@@ -8706,6 +8706,14 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get diveLog_scrubber_unrated => 'غير مقيّم';
+
+  @override
+  String diveLog_scrubber_valueWithTrip(String value, String trip) {
+    return '$value · $trip';
+  }
+
+  @override
   String get diveLog_sighting_decreaseCount => 'تقليل العدد';
 
   @override

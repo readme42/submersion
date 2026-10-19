@@ -13597,6 +13597,18 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{Stopped early; 1 dive was processed.} other{Stopped early; {count} dives were processed.}}'**
   String diveLog_fetchConditions_summaryCancelled(int count);
 
+  /// Track marker and current value for dives without a rating, in the dive list scrubber
+  ///
+  /// In en, this message translates to:
+  /// **'Unrated'**
+  String get diveLog_scrubber_unrated;
+
+  /// Dive list scrubber value while dragging over a dive on a trip in date sort: the month, then the trip name
+  ///
+  /// In en, this message translates to:
+  /// **'{value} · {trip}'**
+  String diveLog_scrubber_valueWithTrip(String value, String trip);
+
   /// Tooltip: decrease the sighting count
   ///
   /// In en, this message translates to:
