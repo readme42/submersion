@@ -34,6 +34,7 @@ import 'package:submersion/features/dive_log/presentation/helpers/dive_list_sect
 import 'package:submersion/features/dive_log/presentation/providers/trip_group_collapse_provider.dart';
 import 'package:submersion/features/dive_log/presentation/helpers/dive_list_nav_stops.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_list_item.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/dive_list_scrubber.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/trip_group_header.dart';
 import 'package:submersion/shared/widgets/export_destination_sheet.dart';
 import 'package:submersion/shared/widgets/list_view_mode_toggle.dart';
@@ -424,6 +425,17 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
       }
     }
     return headers;
+  }
+
+  void _landOnDive(BuildContext context, String diveId) {
+    for (final (index, section) in _lastSections.indexed) {
+      if (!section.entries.any((e) => e.dive.id == diveId)) continue;
+      final key = section is TripSection && section.collapsed
+          ? diveListTripHeaderKey(index, section.tripId)
+          : diveId;
+      KeyboardListNavigator.revealRow(context, key);
+      return;
+    }
   }
 
   void _scrollToSelectedItem([String? overrideId]) {
@@ -2040,44 +2052,53 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
                 }
                 return header;
               },
-              child: CustomScrollView(
+              child: DiveListScrubber(
                 controller: _scrollController,
-                slivers: [
-                  if (ref.watch(diveListGroupingPausedBySortProvider))
+                loadedDives: dives,
+                groupingEnabled: groupingEnabled,
+                collapsedTripIds: collapsedTripIds,
+                onLand: _landOnDive,
+                selectedDiveId:
+                    widget.selectedId ?? ref.watch(highlightedDiveIdProvider),
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  slivers: [
+                    if (ref.watch(diveListGroupingPausedBySortProvider))
+                      SliverToBoxAdapter(
+                        child: _buildGroupingPausedNotice(context),
+                      ),
+                    for (final (index, section) in sections.indexed)
+                      if (section is TripSection)
+                        _buildTripSectionSliver(
+                          context,
+                          section,
+                          sliverForEntries,
+                          diveListTripHeaderKey(index, section.tripId),
+                        )
+                      else
+                        sliverForEntries(section.entries),
+                    // Its own consumer, so a page load starting or finishing
+                    // rebuilds this row alone rather than every card (#3506).
                     SliverToBoxAdapter(
-                      child: _buildGroupingPausedNotice(context),
+                      child: Consumer(
+                        builder: (context, ref, _) {
+                          final latest = ref
+                              .watch(paginatedDiveListProvider)
+                              .value;
+                          if (latest == null ||
+                              !(latest.hasMore || latest.isLoadingMore)) {
+                            return const SizedBox.shrink();
+                          }
+                          return _buildTrailingRow(context, latest);
+                        },
+                      ),
                     ),
-                  for (final (index, section) in sections.indexed)
-                    if (section is TripSection)
-                      _buildTripSectionSliver(
-                        context,
-                        section,
-                        sliverForEntries,
-                        diveListTripHeaderKey(index, section.tripId),
-                      )
-                    else
-                      sliverForEntries(section.entries),
-                  // Its own consumer, so a page load starting or finishing
-                  // rebuilds this row alone rather than every card (#3506).
-                  SliverToBoxAdapter(
-                    child: Consumer(
-                      builder: (context, ref, _) {
-                        final latest = ref
-                            .watch(paginatedDiveListProvider)
-                            .value;
-                        if (latest == null ||
-                            !(latest.hasMore || latest.isLoadingMore)) {
-                          return const SizedBox.shrink();
-                        }
-                        return _buildTrailingRow(context, latest);
-                      },
+                    // Clears the FAB, matching the old list's bottom padding.
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: _kListBottomSpacer),
                     ),
-                  ),
-                  // Clears the FAB, matching the old list's bottom padding.
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: _kListBottomSpacer),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

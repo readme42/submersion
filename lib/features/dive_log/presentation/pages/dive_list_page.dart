@@ -13,6 +13,7 @@ import 'package:submersion/core/constants/map_style.dart';
 import 'package:submersion/core/constants/map_tile_config.dart';
 import 'package:submersion/core/utils/log_failure.dart';
 import 'package:submersion/core/providers/provider.dart';
+import 'package:submersion/core/theme/app_colors.dart';
 import 'package:submersion/core/utils/slippy_tiles.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
@@ -29,12 +30,14 @@ import 'package:submersion/features/dive_sites/presentation/pages/site_edit_page
 import 'package:submersion/features/dive_log/presentation/providers/dive_list_count_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_profile_batcher.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
+import 'package:submersion/features/dive_log/presentation/providers/dive_scrubber_providers.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/weather/presentation/providers/weather_providers.dart';
 import 'package:submersion/features/weather/presentation/widgets/fetch_all_conditions_flow.dart';
 import 'package:submersion/features/dive_log/presentation/providers/highlight_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/view_config_providers.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/add_dive_bottom_sheet.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/dive_list_add_fab.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_list_content.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_map_content.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_numbering_dialog.dart';
@@ -101,6 +104,7 @@ class _DiveListPageState extends ConsumerState<DiveListPage>
   }
 
   void _showAddDiveSheet(BuildContext context) {
+    if (ref.read(diveListScrubbingProvider)) return;
     final isDesktop = ResponsiveBreakpoints.isMasterDetail(context);
     final viewMode = ref.read(diveListViewModeProvider);
     showAddDiveBottomSheet(
@@ -169,12 +173,7 @@ class _DiveListPageState extends ConsumerState<DiveListPage>
     // Use desktop breakpoint (800px) to show master-detail when NavigationRail appears
     final showMasterDetail = ResponsiveBreakpoints.isMasterDetail(context);
 
-    final fab = FloatingActionButton.extended(
-      onPressed: () => _showAddDiveSheet(context),
-      tooltip: context.l10n.diveLog_listPage_fab_logDive,
-      icon: const Icon(Icons.add),
-      label: Text(context.l10n.diveLog_listPage_fab_logDive),
-    );
+    final fab = DiveListAddFab(onPressed: () => _showAddDiveSheet(context));
 
     resetTableSelectionOffTable(diveListViewModeProvider);
 
@@ -856,11 +855,11 @@ class DiveListTile extends ConsumerWidget {
                               ],
                               if (isFavorite) ...[
                                 const SizedBox(width: 4),
-                                ExcludeSemantics(
+                                const ExcludeSemantics(
                                   child: Icon(
                                     Icons.favorite,
                                     size: 18,
-                                    color: Colors.red.shade400,
+                                    color: AppColors.favorite,
                                   ),
                                 ),
                               ],
