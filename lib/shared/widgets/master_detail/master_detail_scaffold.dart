@@ -32,6 +32,14 @@ const double _kDetailPaneReservedWidth = 400;
 /// Width of the draggable divider between the master and detail panes.
 const double _kResizeHandleWidth = 8;
 
+/// A create button that [MasterDetailScaffold] re-targets at its create
+/// handler instead of wrapping in its own tap and semantics layer, so the
+/// button alone decides when it takes taps, focus and semantics.
+abstract interface class MasterDetailCreateFab implements Widget {
+  /// This button, calling [onPressed] when pressed.
+  Widget withOnPressed(VoidCallback onPressed);
+}
+
 /// Master pane width, user-resizable via the divider and shared across every
 /// [MasterDetailScaffold] instance for the lifetime of the app session (not
 /// persisted to disk, so it resets on restart).
@@ -443,6 +451,7 @@ class _MasterDetailScaffoldState extends ConsumerState<MasterDetailScaffold> {
   /// If [onFabPressed] is provided, it replaces the default create behavior.
   Widget _wrapFabForCreate(Widget fab) {
     final handler = widget.onFabPressed ?? _onCreate;
+    if (fab is MasterDetailCreateFab) return fab.withOnPressed(handler);
     if (fab is FloatingActionButton && !fab.isExtended) {
       return FloatingActionButton(
         onPressed: handler,
