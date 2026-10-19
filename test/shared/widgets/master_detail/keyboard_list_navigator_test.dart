@@ -579,4 +579,49 @@ void main() {
       findsOneWidget,
     );
   });
+
+  group('revealRow', () {
+    testWidgets('brings an unbuilt row to the top without moving the cursor', (
+      tester,
+    ) async {
+      final keys = [for (var i = 0; i < 300; i++) 'row$i'];
+      late BuildContext inside;
+      String? moved;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: KeyboardListNavigator(
+              keys: keys,
+              currentKey: null,
+              onMove: (key) => moved = key,
+              onActivate: (_) {},
+              child: Builder(
+                builder: (context) {
+                  inside = context;
+                  return ListView.builder(
+                    itemCount: keys.length,
+                    itemBuilder: (_, i) => KeyboardListItem(
+                      navigationKey: keys[i],
+                      child: SizedBox(
+                        height: 40 + (i % 3) * 10.0,
+                        child: Text(keys[i]),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      KeyboardListNavigator.revealRow(inside, 'row250');
+      await tester.pumpAndSettle();
+
+      expect(find.text('row250'), findsOneWidget);
+      final listTop = tester.getTopLeft(find.byType(ListView)).dy;
+      expect(tester.getTopLeft(find.text('row250')).dy, closeTo(listTop, 1));
+      expect(moved, isNull);
+    });
+  });
 }

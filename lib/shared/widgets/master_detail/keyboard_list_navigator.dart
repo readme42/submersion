@@ -85,6 +85,17 @@ class KeyboardListNavigator extends StatefulWidget {
 
   final Widget child;
 
+  /// Scrolls the row registered under [key] to the top of the list, building
+  /// it first when it is off screen. Moves neither the cursor nor the
+  /// selection. [context] must sit below the navigator.
+  static void revealRow(BuildContext context, String key) {
+    context.getInheritedWidgetOfExactType<_KeyboardListScope>()?.state._reveal(
+      key,
+      forward: false,
+      land: true,
+    );
+  }
+
   @override
   State<KeyboardListNavigator> createState() => _KeyboardListNavigatorState();
 }
@@ -239,17 +250,26 @@ class _KeyboardListNavigatorState extends State<KeyboardListNavigator> {
   /// attempt steps a viewport towards the row, judged from the indices of
   /// the rows that did get built, until it registers or [_maxRevealAttempts]
   /// runs out.
-  void _reveal(String key, {required bool forward, int attempt = 0}) {
-    if (!mounted || _cursor != key) return;
+  void _reveal(
+    String key, {
+    required bool forward,
+    int attempt = 0,
+    bool land = false,
+  }) {
+    if (!mounted || (!land && _cursor != key)) return;
     final row = _rows[key];
     if (row != null && row.mounted) {
-      Scrollable.ensureVisible(
-        row,
-        duration: const Duration(milliseconds: 120),
-        alignmentPolicy: forward
-            ? ScrollPositionAlignmentPolicy.keepVisibleAtEnd
-            : ScrollPositionAlignmentPolicy.keepVisibleAtStart,
-      );
+      if (land) {
+        Scrollable.ensureVisible(row);
+      } else {
+        Scrollable.ensureVisible(
+          row,
+          duration: const Duration(milliseconds: 120),
+          alignmentPolicy: forward
+              ? ScrollPositionAlignmentPolicy.keepVisibleAtEnd
+              : ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+        );
+      }
       return;
     }
     if (attempt >= _maxRevealAttempts) return;
@@ -282,7 +302,7 @@ class _KeyboardListNavigatorState extends State<KeyboardListNavigator> {
     if (attempt > 0 && clamped == position.pixels) return;
     position.jumpTo(clamped);
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _reveal(key, forward: forward, attempt: attempt + 1),
+      (_) => _reveal(key, forward: forward, attempt: attempt + 1, land: land),
     );
     WidgetsBinding.instance.scheduleFrame();
   }
