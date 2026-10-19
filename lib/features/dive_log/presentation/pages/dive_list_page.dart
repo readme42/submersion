@@ -27,6 +27,7 @@ import 'package:submersion/features/dive_log/presentation/pages/dive_detail_page
 import 'package:submersion/features/dive_log/presentation/pages/dive_edit_page.dart';
 import 'package:submersion/features/dive_sites/presentation/pages/site_edit_page.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_list_count_providers.dart';
+import 'package:submersion/features/dive_log/presentation/providers/dive_profile_batcher.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/weather/presentation/providers/weather_providers.dart';
@@ -657,9 +658,11 @@ class DiveListTile extends ConsumerWidget {
     // watching the whole map re-rendered every card on screen for it (#3506).
     // The merge keeps existing entries' lists, so an unchanged entry selects
     // the identical list and the card stays put.
-    final profile =
-        ref.watch(batchProfileCacheProvider.select((cache) => cache[diveId])) ??
-        const [];
+    final cached = ref.watch(
+      batchProfileCacheProvider.select((cache) => cache[diveId]),
+    );
+    if (cached == null) ref.read(diveProfileBatcherProvider).request(diveId);
+    final profile = cached ?? const <DiveProfilePoint>[];
 
     // Check if attribute-colored cards are enabled
     final colorAttribute = ref.watch(cardColorAttributeProvider);
