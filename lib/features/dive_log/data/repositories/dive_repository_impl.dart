@@ -39,6 +39,7 @@ import 'package:submersion/features/dive_log/domain/entities/tank_shared_compute
 import 'package:submersion/features/dive_log/domain/entities/weight_label.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_data_source.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_source_export.dart';
+import 'package:submersion/features/dive_log/domain/entities/dive_scrubber_entry.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_summary.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_times.dart'
     as domain;
@@ -2737,6 +2738,94 @@ class DiveRepository {
     } catch (e, stackTrace) {
       _log.error(
         'Failed to get ordered dive ids',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// One [DiveScrubberEntry] per dive [filter] keeps, in [sort] order: the
+  /// order of [getDiveSummaries], unpaginated and with only the columns the
+  /// list scrubber reads.
+  // stats-scope-exempt: backs the dive list scrubber over the displayed list
+  Future<List<DiveScrubberEntry>> getDiveScrubberIndex({
+    String? diverId,
+    DiveFilterState filter = const DiveFilterState(),
+    SortState<DiveSortField>? sort,
+  }) async {
+    try {
+      return await PerfTimer.measure('getDiveScrubberIndex', () async {
+        final whereClauses = <String>[];
+        final args = <Variable<Object>>[];
+
+        if (diverId != null) {
+          whereClauses.add('d.diver_id = ?');
+          args.add(Variable(diverId));
+        }
+
+        final compiled = compileDiveFilter(filter, rootAlias: 'd');
+        _buildFilterWhereClauses(compiled, whereClauses, args);
+
+        final whereClause = whereClauses.isNotEmpty
+            ? 'WHERE ${whereClauses.join(' AND ')}'
+            : '';
+
+        final sql =
+            'SELECT d.id, t.id AS trip_id, t.name AS trip_name, '
+            'd.dive_number, d.max_depth, '
+            'd.bottom_time, d.rating, d.is_favorite, '
+            'COALESCE(d.entry_time, d.dive_date_time) AS sort_timestamp, '
+            's.name AS site_name, gas.max_o2, gas.max_he '
+            'FROM dives d '
+            'LEFT JOIN dive_sites s ON d.site_id = s.id '
+            'LEFT JOIN trips t ON d.trip_id = t.id '
+            'LEFT JOIN (SELECT dive_id, MAX(o2_percent) AS max_o2, '
+            'MAX(he_percent) AS max_he FROM dive_tanks GROUP BY dive_id) gas '
+            'ON gas.dive_id = d.id '
+            '$whereClause '
+            'ORDER BY ${_buildSortOrderBy(sort)}';
+
+        final rows = await _db
+            .customSelect(
+              sql,
+              variables: args,
+              readsFrom: {
+                _db.dives,
+                _db.diveSites,
+                _db.trips,
+                _db.diveTanks,
+                ...tablesNamed(compiled.tablesTouched),
+              },
+            )
+            .get();
+
+        return [
+          for (final row in rows)
+            DiveScrubberEntry(
+              id: row.read<String>('id'),
+              tripId: row.readNullable<String>('trip_id'),
+              tripName: row.readNullable<String>('trip_name'),
+              sortTimestamp: row.read<int>('sort_timestamp'),
+              diveNumber: row.readNullable<int>('dive_number'),
+              siteName: row.readNullable<String>('site_name'),
+              maxDepth: row.readNullable<double>('max_depth'),
+              bottomTime: switch (row.readNullable<int>('bottom_time')) {
+                final s? => Duration(seconds: s),
+                null => null,
+              },
+              rating: row.readNullable<int>('rating'),
+              isFavorite: row.read<int>('is_favorite') == 1,
+              gas: DiveScrubberGas.of(
+                maxO2: row.readNullable<double>('max_o2'),
+                maxHe: row.readNullable<double>('max_he'),
+              ),
+            ),
+        ];
+      });
+    } catch (e, stackTrace) {
+      _log.error(
+        'Failed to get dive scrubber index',
         error: e,
         stackTrace: stackTrace,
       );
