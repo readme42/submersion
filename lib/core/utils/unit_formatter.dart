@@ -695,6 +695,18 @@ class UnitFormatter {
     return DateFormat(monthYearPattern(settings.dateFormat)).format(dateTime);
   }
 
+  /// Format the month alone, in the form the diver's date preference uses:
+  /// "03" for the numeric preferences, "Mar" for the spelled-out ones.
+  String formatMonthOnly(DateTime? dateTime) {
+    if (dateTime == null) return '--';
+    final pattern = monthOnlyPattern(monthYearPattern(settings.dateFormat));
+    return DateFormat(pattern).format(dateTime);
+  }
+
+  /// The month token of [monthYearPattern], or 'MMM' if it has none.
+  static String monthOnlyPattern(String monthYearPattern) =>
+      RegExp(r'M+').firstMatch(monthYearPattern)?.group(0) ?? 'MMM';
+
   /// Format month and day only (respects day-first vs month-first preference)
   /// Example: "Jan 15" or "15 Jan"
   String formatMonthDay(DateTime? dateTime) {
