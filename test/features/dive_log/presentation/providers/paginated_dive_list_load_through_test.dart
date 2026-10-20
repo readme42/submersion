@@ -309,6 +309,42 @@ void main() {
       },
     );
 
+    test('a silent reload after it skips the rows it jumped over', () async {
+      final diver = await setUpCurrentDiver();
+      final dives = await seedDives(diver.id, 400);
+      final repo = _CountingRepository(diveRepo);
+      final container = makeContainer(repository: repo);
+      addTearDown(container.dispose);
+      final sub = container.listen(paginatedDiveListProvider, (_, _) {});
+      addTearDown(sub.close);
+      await loadPages(container, 1);
+      final notifier = container.read(paginatedDiveListProvider.notifier);
+      await notifier.loadThrough(dives[380].id, targetIndex: 380);
+      final loaded = container.read(paginatedDiveListProvider).value!.dives;
+      final jumpedOver = loaded
+          .skip(50)
+          .take(loaded.length - 50 - 100)
+          .map((d) => d.id)
+          .toSet();
+      expect(jumpedOver, isNotEmpty);
+      await until(() => repo.profileCalls.isNotEmpty);
+      for (var i = 0; i < 20; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+      }
+      repo.profileCalls.clear();
+
+      await notifier.reloadLoadedPages();
+      await until(() => repo.profileCalls.isNotEmpty);
+      for (var i = 0; i < 20; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+      }
+
+      final requested = {for (final call in repo.profileCalls) ...call};
+      expect(requested.intersection(jumpedOver), isEmpty);
+      expect(requested, contains(dives[380].id));
+      expect(requested, contains(dives.first.id));
+    });
+
     test('a page load queued during it keeps its spinner', () async {
       final diver = await setUpCurrentDiver();
       final dives = await seedDives(diver.id, 200);

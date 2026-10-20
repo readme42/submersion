@@ -80,7 +80,7 @@ class ListScrubber extends StatefulWidget {
 }
 
 class _ListScrubberState extends State<ListScrubber> {
-  static const _thumbHeight = 48.0;
+  static const _thumbHeight = ListScrubberHandle.height;
   static const _strip = 48.0;
 
   bool _scrolling = false;
@@ -236,10 +236,14 @@ class _ListScrubberState extends State<ListScrubber> {
         final panelWidth = ListScrubberPanel.widthFor(
           density: widget.density.isNotEmpty,
         );
-        final bandWidth = value == null
+        // Laid out once here; the panel takes the height from it.
+        final valueSize = value == null
+            ? null
+            : ListScrubberPanel.labelSize(context, value);
+        final bandWidth = valueSize == null
             ? ListScrubberPanel.width
             : ListScrubberPanel.bandWidthFor(
-                ListScrubberPanel.labelWidth(context, value),
+                valueSize.width,
                 constraints.maxWidth,
               );
 
@@ -272,6 +276,7 @@ class _ListScrubberState extends State<ListScrubber> {
                                   thumbHeight: _thumbHeight,
                                   thumbTop: thumbTop,
                                   currentLabel: value,
+                                  currentLabelHeight: valueSize?.height,
                                   currentWidth: bandWidth,
                                   ticks: widget.highlightTicks,
                                   tickColor: widget.highlightTickColor,

@@ -769,6 +769,12 @@ class PaginatedDiveListNotifier
   int _revision = 0;
   static const _pageSize = 50;
 
+  /// Rows a [loadThrough] jumped over without preloading their profiles. A
+  /// silent reload leaves them out too, so the next table tick does not
+  /// fetch what the jump deliberately skipped; their cards fetch their own.
+  /// Cleared when the rows reload from the top.
+  Set<String> _jumpedOverIds = const {};
+
   /// Serializes every operation that rewrites the loaded rows.
   ///
   /// A reload and a page load each snapshot the list before awaiting their
@@ -935,6 +941,7 @@ class PaginatedDiveListNotifier
       _currentOffset = dives.length;
 
       if (!mounted) return;
+      _jumpedOverIds = const {};
       state = AsyncValue.data(
         PaginatedDiveListState(
           dives: dives,
@@ -1038,11 +1045,13 @@ class PaginatedDiveListNotifier
         ),
       );
       final ids = added.map((d) => d.id).toList();
-      _loadBatchProfiles(
-        jump && ids.length > _jumpProfileWindow
-            ? ids.sublist(ids.length - _jumpProfileWindow)
-            : ids,
-      );
+      if (jump && ids.length > _jumpProfileWindow) {
+        final cut = ids.length - _jumpProfileWindow;
+        _jumpedOverIds = {..._jumpedOverIds, ...ids.take(cut)};
+        _loadBatchProfiles(ids.sublist(cut));
+      } else {
+        _loadBatchProfiles(ids);
+      }
     } catch (_) {
       // Record the failure rather than silently going idle: the trailing row
       // must be able to offer a retry instead of spinning on nothing (#1610).
@@ -1158,8 +1167,12 @@ class PaginatedDiveListNotifier
           revision: ++_revision,
         ),
       );
-      // Pre-load downsampled profiles for mini charts (fire and forget)
-      _loadBatchProfiles(dives.map((d) => d.id).toList());
+      // Pre-load downsampled profiles for mini charts (fire and forget),
+      // except the rows a jump skipped.
+      _loadBatchProfiles([
+        for (final d in dives)
+          if (!_jumpedOverIds.contains(d.id)) d.id,
+      ]);
     } catch (e, st) {
       if (mounted) state = AsyncValue.error(e, st);
     }

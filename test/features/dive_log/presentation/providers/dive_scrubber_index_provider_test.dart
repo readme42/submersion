@@ -135,6 +135,38 @@ void main() {
     fail('index never settled; last ids: ${ids.length}');
   }
 
+  group('DiveScrubberIndex.builtFor', () {
+    test('accepts an equal filter that is a different instance', () {
+      const sort = SortState(
+        field: DiveSortField.date,
+        direction: SortDirection.descending,
+      );
+      // Built by copyWith, so each is its own instance: identity and
+      // equality tell different stories.
+      DiveFilterState deep() =>
+          const DiveFilterState().copyWith(minDepth: 20, tagIds: ['t']);
+      final built = deep();
+      final again = deep();
+      expect(identical(built, again), isFalse);
+      final index = DiveScrubberIndex(
+        entries: const [],
+        diverId: 'd',
+        filter: built,
+        sort: sort,
+      );
+
+      expect(index.builtFor(diverId: 'd', filter: again, sort: sort), isTrue);
+      expect(
+        index.builtFor(
+          diverId: 'd',
+          filter: const DiveFilterState(minDepth: 30),
+          sort: sort,
+        ),
+        isFalse,
+      );
+    });
+  });
+
   group('diveScrubberIndexProvider', () {
     Future<_CountingRepository> gated(int totalCount) async {
       final repo = _CountingRepository();

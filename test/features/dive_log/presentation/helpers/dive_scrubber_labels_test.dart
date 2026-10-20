@@ -260,6 +260,19 @@ void main() {
       ]);
     });
 
+    test('a name with leading whitespace gets no letter', () {
+      // NOCASE orders the stored name, so ' Blue Hole' sorts before 'A'.
+      final entries = [
+        dive(site: ' Blue Hole'),
+        dive(site: 'Anemone'),
+        dive(site: 'Blue Hole'),
+      ];
+      expect(markers(entries, DiveSortField.site, asc), const [
+        ScrubberMarker(slot: 1, label: 'A'),
+        ScrubberMarker(slot: 2, label: 'B'),
+      ]);
+    });
+
     test('accented initials follow the NOCASE order without repeats', () {
       final entries = [
         dive(site: 'Éden'),

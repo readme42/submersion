@@ -2776,13 +2776,17 @@ class DiveRepository {
             'd.dive_number, d.max_depth, '
             'd.bottom_time, d.rating, d.is_favorite, '
             'COALESCE(d.entry_time, d.dive_date_time) AS sort_timestamp, '
-            's.name AS site_name, gas.max_o2, gas.max_he '
+            's.name AS site_name, '
+            // Correlated on d.id so SQLite reads only the kept dives' tanks
+            // through idx_dive_tanks_dive_id, rather than grouping the whole
+            // table for every diver.
+            '(SELECT MAX(dt.o2_percent) FROM dive_tanks dt '
+            'WHERE dt.dive_id = d.id) AS max_o2, '
+            '(SELECT MAX(dt.he_percent) FROM dive_tanks dt '
+            'WHERE dt.dive_id = d.id) AS max_he '
             'FROM dives d '
             'LEFT JOIN dive_sites s ON d.site_id = s.id '
             'LEFT JOIN trips t ON d.trip_id = t.id '
-            'LEFT JOIN (SELECT dive_id, MAX(o2_percent) AS max_o2, '
-            'MAX(he_percent) AS max_he FROM dive_tanks GROUP BY dive_id) gas '
-            'ON gas.dive_id = d.id '
             '$whereClause '
             'ORDER BY ${_buildSortOrderBy(sort)}';
 

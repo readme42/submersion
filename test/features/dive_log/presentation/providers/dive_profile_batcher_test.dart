@@ -110,4 +110,19 @@ void main() {
     expect(repo.calls, hasLength(1));
     expect(cache(), isEmpty);
   });
+
+  test('a dive whose batch failed can be requested again', () async {
+    repo.fail = true;
+    batcher().request('a');
+    await flush();
+    repo.fail = false;
+    batcher().request('a');
+    await flush();
+
+    expect(repo.calls, [
+      ['a'],
+      ['a'],
+    ]);
+    expect(cache().keys, ['a']);
+  });
 }

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:characters/characters.dart';
 import 'package:submersion/core/constants/sort_options.dart';
 import 'package:submersion/core/constants/units.dart';
@@ -8,20 +10,11 @@ import 'package:submersion/l10n/arb/app_localizations.dart';
 import 'package:submersion/shared/widgets/list_scrubber/scrubber_marker.dart';
 
 String diveScrubberValue(
-  DiveScrubberEntry entry,
+  DiveScrubberEntry e,
   DiveSortField field, {
   required UnitFormatter units,
   required AppLocalizations l10n,
 }) {
-  return _value(entry, field, units, l10n);
-}
-
-String _value(
-  DiveScrubberEntry e,
-  DiveSortField field,
-  UnitFormatter units,
-  AppLocalizations l10n,
-) {
   switch (field) {
     case DiveSortField.date:
       return units.formatMonthYear(e.dateTime);
@@ -98,7 +91,7 @@ _Bucket? Function(DiveScrubberEntry) _bucketer(
   switch (field) {
     case DiveSortField.date:
       final years = entries.map((e) => e.dateTime.year);
-      final span = years.reduce(_max) - years.reduce(_min);
+      final span = years.reduce(math.max) - years.reduce(math.min);
       if (span <= 1) {
         final earliestMonth = <int, int>{};
         for (final e in entries) {
@@ -106,15 +99,22 @@ _Bucket? Function(DiveScrubberEntry) _bucketer(
           final seen = earliestMonth[d.year];
           if (seen == null || d.month < seen) earliestMonth[d.year] = d.month;
         }
+        // Formatted once per month: every entry asks, but a month's labels
+        // are the same for all of its dives.
+        final byMonth = <int, _Bucket>{};
         return (e) {
-          final month = units.formatMonthOnly(e.dateTime);
-          return (
-            key: e.dateTime.year * 12 + e.dateTime.month,
-            label: earliestMonth[e.dateTime.year] == e.dateTime.month
-                ? units.formatMonthYear(e.dateTime)
-                : month,
-            repeat: month,
-          );
+          final d = e.dateTime;
+          final key = d.year * 12 + d.month;
+          return byMonth.putIfAbsent(key, () {
+            final month = units.formatMonthOnly(d);
+            return (
+              key: key,
+              label: earliestMonth[d.year] == d.month
+                  ? units.formatMonthYear(d)
+                  : month,
+              repeat: month,
+            );
+          });
         };
       }
       return (e) =>
@@ -155,7 +155,7 @@ int _stepFor(
 ) {
   final present = values.whereType<double>();
   if (present.isEmpty) return fallback;
-  final range = present.reduce(_maxD) - present.reduce(_minD);
+  final range = present.reduce(math.max) - present.reduce(math.min);
   for (final (limit, step) in rangeSteps) {
     if (range <= limit) return step;
   }
@@ -168,11 +168,6 @@ _Bucket? _stepBucket(double? value, int step, String Function(int) label) {
   return (key: bucket, label: label(bucket * step), repeat: null);
 }
 
-int _max(int a, int b) => a > b ? a : b;
-int _min(int a, int b) => a < b ? a : b;
-double _maxD(double a, double b) => a > b ? a : b;
-double _minD(double a, double b) => a < b ? a : b;
-
 int _diveNumberStep(List<DiveScrubberEntry> entries) => _stepFor(
   entries.map((e) => e.diveNumber?.toDouble()),
   const [(100, 10), (500, 50), (5000, 100)],
@@ -180,10 +175,13 @@ int _diveNumberStep(List<DiveScrubberEntry> entries) => _stepFor(
 );
 
 /// Folds ASCII letters only, the way the site sort's `COLLATE NOCASE` does.
+/// The sort orders the name as stored, so a name starting with whitespace
+/// gets no letter rather than one far from where it sorts.
 String? _siteLetter(DiveScrubberEntry e) {
-  final name = e.siteName?.trim();
+  final name = e.siteName;
   if (name == null || name.isEmpty) return null;
   final first = name.characters.first;
+  if (first.trim().isEmpty) return null;
   final unit = first.codeUnitAt(0);
   final asciiLower = first.length == 1 && unit >= 0x61 && unit <= 0x7A;
   return asciiLower ? first.toUpperCase() : first;

@@ -63,6 +63,8 @@ class DiveProfileBatcher {
         error: e,
         stackTrace: stackTrace,
       );
+      // Not fetched, so a card built again may ask again.
+      _requested.removeAll(ids);
     } finally {
       _inFlight.removeAll(ids);
     }

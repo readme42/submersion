@@ -254,8 +254,8 @@ class _DiveListScrubberState extends ConsumerState<DiveListScrubber> {
       labelFor: (slot) {
         final entry = slots[slot].entry;
         final value = diveScrubberValue(entry, field, units: units, l10n: l10n);
-        final trip = entry.tripName;
-        return field == DiveSortField.date && trip != null
+        final trip = entry.tripName?.trim();
+        return field == DiveSortField.date && trip != null && trip.isNotEmpty
             ? l10n.diveLog_scrubber_valueWithTrip(value, trip)
             : value;
       },

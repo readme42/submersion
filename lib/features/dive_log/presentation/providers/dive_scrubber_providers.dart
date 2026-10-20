@@ -26,14 +26,15 @@ class DiveScrubberIndex {
   /// Whether these entries are the list order for these inputs. A refetch
   /// for the same inputs leaves the order intact, so the old index stays
   /// usable until it lands.
+  ///
+  /// The filter compares by value, as the list's own reload listener does:
+  /// an equal filter set again reloads nothing, so nothing would refetch an
+  /// index dropped for it.
   bool builtFor({
     required String? diverId,
     required DiveFilterState filter,
     required SortState<DiveSortField> sort,
-  }) =>
-      diverId == this.diverId &&
-      identical(filter, this.filter) &&
-      sort == this.sort;
+  }) => diverId == this.diverId && filter == this.filter && sort == this.sort;
 }
 
 // no-tick: refetches on every list reload via the list's revision, which

@@ -22,6 +22,7 @@ class ListScrubberPanel extends StatefulWidget {
     required this.thumbHeight,
     required this.thumbTop,
     this.currentLabel,
+    this.currentLabelHeight,
     this.currentWidth = width,
     this.ticks = const [],
     this.tickColor,
@@ -75,10 +76,6 @@ class ListScrubberPanel extends StatefulWidget {
     return size;
   }
 
-  /// The width [label] takes in [currentStyle].
-  static double labelWidth(BuildContext context, String label) =>
-      labelSize(context, label).width;
-
   /// The current band width that fits a label [labelWidth] wide in a host
   /// [hostWidth] wide.
   static double bandWidthFor(double labelWidth, double hostWidth) {
@@ -95,6 +92,10 @@ class ListScrubberPanel extends StatefulWidget {
   final double thumbHeight;
   final double thumbTop;
   final String? currentLabel;
+
+  /// [currentLabel]'s height in [currentStyle], when the caller has laid it
+  /// out already; measured here when null.
+  final double? currentLabelHeight;
 
   /// The width of the current band; beyond [width] it sticks out past the
   /// panel's start edge.
@@ -225,7 +226,8 @@ class _ListScrubberPanelState extends State<ListScrubberPanel> {
     final current = widget.currentLabel;
     final bandHeight = current == null
         ? 0.0
-        : ListScrubberPanel.labelSize(context, current).height +
+        : (widget.currentLabelHeight ??
+                  ListScrubberPanel.labelSize(context, current).height) +
               ListScrubberPanel._bandPadding * 2;
     final bandTop = widget.thumbTop + centre - bandHeight / 2;
     final panelWidth = ListScrubberPanel.widthFor(
@@ -422,6 +424,10 @@ class _ListScrubberPanelState extends State<ListScrubberPanel> {
 class ListScrubberHandle extends StatelessWidget {
   const ListScrubberHandle({super.key, required this.style});
 
+  /// The thumb's length along the track, which the scrubber's hit box and
+  /// track maths use too.
+  static const height = 48.0;
+
   final ListScrubberThumbStyle style;
 
   @override
@@ -430,7 +436,7 @@ class ListScrubberHandle extends StatelessWidget {
       duration: const Duration(milliseconds: 150),
       curve: Curves.easeOut,
       width: style.thickness,
-      height: 48,
+      height: height,
       decoration: BoxDecoration(
         color: style.color,
         borderRadius: BorderRadius.all(style.radius),
